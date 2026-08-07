@@ -428,6 +428,16 @@ the back of the tab, where it is `bw·Ls/R − lift − tab·r/R` tall. See *the
 
 A colour legend above the drawings maps each fill to the stock you selected.
 
+## Navigating
+
+The **tab bar is pinned** under the header, so you can jump between Summary / Plan & elevation / Step
+schedule / Framing / Per-step sheets / Cut list / Warnings from anywhere in a long sheet without
+scrolling back up. Switching tabs lands you at the top of the new panel; clicking one while you are
+already at the top doesn't move anything. The input column is pinned the same way. Both offset by a
+`--hh` CSS variable that a `ResizeObserver` keeps equal to the real header height — the header wraps to
+two or three rows on a narrow window, and a hardcoded offset would let content slide under it. Printing
+hides the bar, as before.
+
 ### Known limitations
 
 Two label-placement issues survive, both pre-dating the current work and both confined to

@@ -6,6 +6,10 @@
 <title>Corner Deck Stair Calculator</title>
 <style>
 :root{
+  /* Height of the sticky header. Everything that parks under it — the input
+     column and the tab bar — offsets by this, and JS keeps it true when the
+     header wraps to two rows on a narrow window. */
+  --hh:57px;
   --bg:#f6f7f9; --card:#fff; --ink:#16202b; --muted:#6b7885; --line:#dde3ea;
   --accent:#0f6fbf; --accent2:#e8f2fb; --warn:#b45309; --warnbg:#fff7e6;
   --err:#b91c1c; --errbg:#fee; --ok:#166534; --okbg:#eaf7ee; --wood:#d9a86c;
@@ -31,7 +35,7 @@ main{display:grid;grid-template-columns:var(--sbw,340px) 8px 1fr;gap:10px;paddin
 #split:hover::before,#split.drag::before{background:var(--accent)}
 body.resizing{cursor:col-resize;user-select:none}
 .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
-#inputs{position:sticky;top:57px;max-height:calc(100vh - 74px);overflow:auto}
+#inputs{position:sticky;top:var(--hh);max-height:calc(100vh - var(--hh) - 17px);overflow:auto}
 #inputs h3:first-child{margin-top:0}
 /* input grows with the column instead of staying pinned at 108px */
 .f{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,42%);gap:6px 8px;align-items:center;margin-bottom:6px}
@@ -41,7 +45,13 @@ body.resizing{cursor:col-resize;user-select:none}
 input,select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:4px;width:100%;background:#fff}
 input[type=checkbox]{width:auto}
 input.bad{border-color:var(--err);background:#fff5f5}
-.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+/* The tab bar stays put under the header, so you can switch panels from
+   anywhere in a long sheet without scrolling back to the top. The negative
+   top margin cancels its own padding, so pinning it moves nothing. */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;
+  position:sticky;top:var(--hh);z-index:8;
+  background:var(--bg);border-bottom:1px solid var(--line);
+  margin:-8px 0 10px;padding:8px 0 7px}
 .tabs button.on{background:var(--accent2);border-color:var(--accent);color:var(--accent);font-weight:600}
 .panel{display:none}
 .panel.on{display:block}
@@ -2829,10 +2839,24 @@ function ensurePanels(){
 function renderTabs(){
   const tabs = TAB_DEFS.concat(isTestMode()?[["tests","Tests"]]:[]);
   document.getElementById("tabs").innerHTML = tabs.map(d=>'<button data-tab="'+d[0]+'" class="'+(d[0]===ACTIVE_TAB?"on":"")+'">'+t(d[1])+"</button>").join("");
-  document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click", ()=>{ ACTIVE_TAB=b.dataset.tab; renderTabs(); showPanel(); }));
+  document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click", ()=>{
+    ACTIVE_TAB=b.dataset.tab; renderTabs(); showPanel(); scrollToPanelTop();
+  }));
 }
 function showPanel(){
   document.querySelectorAll("#panels .panel").forEach(p=>p.classList.toggle("on", p.id==="panel-"+ACTIVE_TAB));
+}
+/* Switching tabs from deep inside a long sheet should land at the top of the
+   new panel, not wherever the old scroll position happens to fall in it. Only
+   scrolls UP — if the bar is already in view, nothing moves. */
+function scrollToPanelTop(){
+  const tabs=document.getElementById("tabs"), panels=document.getElementById("panels");
+  if(!tabs||!panels) return;
+  const hh=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh"))||57;
+  /* Measure from #panels, not from the bar: the bar is sticky, so its own
+     rect is pinned at the header and would always report "already there". */
+  const y=window.scrollY+panels.getBoundingClientRect().top-tabs.offsetHeight-hh;
+  if(window.scrollY>y+1) window.scrollTo({top:Math.max(0,y)});
 }
 function renderPrintHead(model){
   const el = document.getElementById("printhead");
@@ -3400,6 +3424,36 @@ function runTests(){
       S.method=savedM;
     }
 
+    /* ---- the tab bar has to stay reachable ------------------------------- */
+    {
+      const hdr=document.querySelector("header"), bar=document.getElementById("tabs");
+      const cs=bar?getComputedStyle(bar):null;
+      const hh=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh"));
+      assert("the tab bar is pinned, under the header, below it in the stack",
+        !!cs && cs.position==="sticky" && Math.abs(parseFloat(cs.top)-hh)<1.5 &&
+        parseInt(cs.zIndex,10) < parseInt(getComputedStyle(hdr).zIndex,10),
+        cs ? cs.position+" top:"+cs.top+" z:"+cs.zIndex+" vs --hh:"+hh : "no tab bar");
+      assert("--hh tracks the real header height, however many rows it wraps to",
+        Math.abs(hh-hdr.getBoundingClientRect().height)<=1,
+        hh+" vs "+hdr.getBoundingClientRect().height);
+      assert("the bar is opaque, so panels cannot show through it",
+        cs && cs.backgroundColor!=="rgba(0, 0, 0, 0)" && cs.backgroundColor!=="transparent",
+        cs && cs.backgroundColor);
+      /* switching tabs from deep in a long sheet must land at the new panel's top */
+      const savedTab=ACTIVE_TAB, savedY=window.scrollY;
+      ACTIVE_TAB="framing"; renderTabs(); showPanel();
+      window.scrollTo(0, document.body.scrollHeight);
+      const deep=window.scrollY;
+      ACTIVE_TAB="cutlist"; renderTabs(); showPanel(); scrollToPanelTop();
+      const gap=document.getElementById("panels").getBoundingClientRect().top - hh - bar.offsetHeight;
+      assert("switching tabs scrolls back to the top of the new panel",
+        deep>200 && window.scrollY<deep && Math.abs(gap)<4, "from "+Math.round(deep)+" to "+Math.round(window.scrollY)+", gap "+Math.round(gap));
+      /* and never pushes you further down when you are already up there */
+      window.scrollTo(0,0); scrollToPanelTop();
+      assert("clicking a tab from the top does not jump", window.scrollY===0, window.scrollY);
+      ACTIVE_TAB=savedTab; renderTabs(); showPanel(); window.scrollTo(0, savedY);
+    }
+
     /* ---- no drawing may render two labels on top of each other ----------- */
     {
       const savedM=S.method, savedP=S.platY, savedB=S.bottomBearing;
@@ -3609,6 +3663,17 @@ document.getElementById("btn-reset").addEventListener("click", ()=>{ if(confirm(
 document.getElementById("btn-print").addEventListener("click", ()=>window.print());
 document.getElementById("inputs").addEventListener("input", onFormInput);
 document.getElementById("inputs").addEventListener("change", onFormInput);
+
+/* The input column and the tab bar both park directly under the header, so they
+   need its real height — it wraps to two rows on a narrow window, and a stale
+   57px would let content slide under it. */
+function syncHeaderHeight(){
+  const h = document.querySelector("header");
+  if(h) document.documentElement.style.setProperty("--hh", Math.round(h.getBoundingClientRect().height)+"px");
+}
+syncHeaderHeight();
+if(window.ResizeObserver) new ResizeObserver(syncHeaderHeight).observe(document.querySelector("header"));
+else window.addEventListener("resize", syncHeaderHeight);
 
 applySidebar();
 initSplitter();
