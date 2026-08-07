@@ -47,6 +47,32 @@ build step and no network access, so it works straight off disk and offline.
 `index.html` redirects to the calculator so the bare URL works. Add `?test=1` to the URL to show the
 self-test tab.
 
+## The skirt
+
+The stair wraps two faces of the platform and the house closes a third. The fourth — the **X=0 face** —
+is the only exposed *end*, where you would otherwise see the cut ends of every box frame or stringer.
+The **skirt** is the finish board that closes it, cut to the step profile.
+
+Set `Far side face (X=0)` to `Against a wall` and the skirt disappears entirely — the field, the framing
+section and the cut-list pieces. Set it to `Open` and you get two pieces: the raking board down the
+stair (`hyp(total run, total rise)`) and one along the platform's rim. The tool also reports the
+**minimum board width** the rake needs — `notch depth + 2"` — and flags the chosen stock if it's too
+narrow to cover the profile.
+
+## Your inputs are remembered
+
+Every edit is written to `localStorage` immediately and read back when you reopen the page — including
+the stock library and the code-limit table. The header shows `Saved 14:32` after each change, or
+`Restored your last design` on open.
+
+If a browser blocks storage (private windows, some `file://` configurations), the header says so
+**instead of failing silently**, so you know to use `Export JSON`. Storage is also flushed on page hide
+and unload as a safety net.
+
+One caveat worth knowing: `localStorage` is **per origin**. The published copy at
+`justinccase29.github.io` and a local copy opened from disk keep *separate* saved designs — that is the
+usual reason a design looks "lost". Use `Export JSON` / `Import` to move one between them.
+
 ## Layout
 
 The input column is **resizable** — drag the divider between it and the drawings, double-click it to

@@ -19,6 +19,7 @@ h3{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;
 header{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--line);
   padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
 header .sub{color:var(--muted);font-size:12px}
+header .sub.bad{color:var(--warn);font-weight:600}
 header .spacer{flex:1}
 button{font:inherit;padding:5px 11px;border:1px solid var(--line);background:#fff;border-radius:5px;cursor:pointer}
 button:hover{border-color:var(--accent);color:var(--accent)}
@@ -100,6 +101,7 @@ h4{font-size:12.5px;margin:6px 0 4px;color:var(--ink)}
   <h1 id="app-title">Corner Deck Stair Calculator</h1>
   <span class="sub" id="app-sub">cascading pyramid stair &middot; 2 faces + mitered outside corner</span>
   <span class="spacer"></span>
+  <span class="sub" id="savestate"></span>
   <label class="sub"><span id="t-lang">Language</span>
     <select id="lang" style="width:auto;display:inline-block;margin-left:4px">
       <option value="en">English</option><option value="fr">Fran&ccedil;ais</option>
@@ -208,7 +210,16 @@ const FR = {
   "Tread boards":"Planches de marche", "Gap between tread boards":"Espacement entre les planches",
   "Riser boards":"Planches de contremarche", "Box frame / joists":"Caisson / solives",
   "Stringer stock":"Bois pour limons", "Min stringer throat":"Gorge minimale du limon",
-  "Skirt stock":"Bois pour la jupe",
+  "Skirt board stock":"Bois pour la jupe",
+  "The skirt is the finish board that closes the one exposed END of the stair — the X=0 face, where you would otherwise see the cut ends of every box frame or stringer. Cut to the step profile. Only needed because that face is set to \"open\" above.":
+    "La jupe est la planche de finition qui ferme le seul BOUT exposé de l'escalier — la face X=0, où l'on verrait autrement les bouts coupés de chaque caisson ou limon. Coupée selon le profil des marches. Requise seulement parce que cette face est réglée à « ouverte » ci-dessus.",
+  "The stair wraps two faces and the house closes a third; this is the fourth. Open means its stepped end is visible and gets a skirt board.":
+    "L'escalier enveloppe deux faces et la maison en ferme une troisième ; voici la quatrième. « Ouverte » signifie que son bout en escalier est visible et reçoit une jupe.",
+  /* save state */
+  "Saved {0}":"Enregistré à {0}",
+  "Restored your last design":"Dernier projet restauré",
+  "Not saving — this browser is blocking storage. Use Export JSON.":
+    "Aucun enregistrement — ce navigateur bloque le stockage. Utilisez Exporter JSON.",
   "Stock lengths you can buy (in)":"Longueurs vendues (po)",
   "Inches, comma separated. 96,120,144,192 = 8,10,12,16 ft. This is what the yard sells — not the same as the structural \"span\" in the stock library below.":
     "En pouces, séparées par des virgules. 96,120,144,192 = 8,10,12,16 pi. C'est ce que vend le marchand — à ne pas confondre avec la « portée » structurale ci-dessous.",
@@ -693,7 +704,8 @@ const FIELDS = [
   {h:"Platform"},
   {k:"platX", t:"len", l:"Platform width along the wall (X)"},
   {k:"platY", t:"len", l:"Platform depth out from wall (Y)", hint:"FRAME dimensions. Steps come off the front face (+Y) and the side face (+X); the wall is at Y=0. Its decking overhangs those two faces by the tread nosing, exactly like every other step."},
-  {k:"faceX0", t:"sel", l:"Far side face (X=0)", o:[["open","Open — needs a skirt"],["wall","Against a wall"]]},
+  {k:"faceX0", t:"sel", l:"Far side face (X=0)", o:[["open","Open — needs a skirt"],["wall","Against a wall"]],
+   hint:"The stair wraps two faces and the house closes a third; this is the fourth. Open means its stepped end is visible and gets a skirt board."},
   {k:"includePlatform", t:"chk", l:"Include platform framing"},
   {k:"platFrame", t:"stock", l:"Platform frame stock", when:s=>s.includePlatform},
   {k:"platSurface", t:"stock", l:"Platform decking", when:s=>s.includePlatform},
@@ -716,7 +728,8 @@ const FIELDS = [
    hint:"Decides whether the stringer HANGS on the platform face or BEARS on the platform frame — which is what tells you if you need a ledger."},
   {k:"stringerStock",t:"stock", l:"Stringer stock", when:s=>s.method==="stringers"},
   {k:"throatMin", t:"len", l:"Min stringer throat", when:s=>s.method==="stringers"},
-  {k:"skirtStock", t:"stock", l:"Skirt stock"},
+  {k:"skirtStock", t:"stock", l:"Skirt board stock", when:s=>s.faceX0==="open",
+   hint:"The skirt is the finish board that closes the one exposed END of the stair — the X=0 face, where you would otherwise see the cut ends of every box frame or stringer. Cut to the step profile. Only needed because that face is set to \"open\" above."},
   {h:"Buying / cut list"},
   {k:"stockLen", t:"text", l:"Stock lengths you can buy (in)", hint:'Inches, comma separated. 96,120,144,192 = 8,10,12,16 ft. This is what the yard sells — not the same as the structural "span" in the stock library below.'},
   {k:"kerf", t:"len", l:"Saw kerf"},
@@ -770,9 +783,39 @@ function onFormInput(e){
   else return;
   save(); run();
 }
-/* ---------- 7. persistence ---------------------------------------------- */
+/* ---------- 7. persistence ----------------------------------------------
+   Every edit is written to localStorage immediately and read back on open.
+   A silent failure here looks exactly like "it doesn't remember anything", so
+   the outcome is always reported in the header rather than swallowed. */
+let SAVE_STATE = {ok:null, at:null, restored:false};
+function showSaveState(){
+  const el = document.getElementById("savestate");
+  if(!el) return;
+  if(SAVE_STATE.ok===false){
+    el.textContent = "⚠ " + t("Not saving — this browser is blocking storage. Use Export JSON.");
+    el.className = "sub bad";
+    return;
+  }
+  el.className = "sub";
+  if(SAVE_STATE.at){
+    const time = SAVE_STATE.at.toLocaleTimeString(S.lang==="fr"?"fr-CA":"en-CA",{hour:"2-digit",minute:"2-digit"});
+    el.textContent = t("Saved {0}", time);
+  } else if(SAVE_STATE.restored){
+    el.textContent = t("Restored your last design");
+  } else el.textContent = "";
+}
 function save(){
-  try{ localStorage.setItem("stairs-calc-v1", JSON.stringify({S,CODE,STOCK})); }catch(e){ /* ignore quota/denied */ }
+  try{
+    localStorage.setItem("stairs-calc-v1", JSON.stringify({S,CODE,STOCK}));
+    /* verify it actually landed — some browsers accept the write and drop it */
+    SAVE_STATE.ok = !!localStorage.getItem("stairs-calc-v1");
+    SAVE_STATE.at = new Date();
+  }catch(e){
+    SAVE_STATE.ok = false;
+    console.warn("Could not save project:", e);
+  }
+  showSaveState();
+  return SAVE_STATE.ok;
 }
 function load(){
   try{
@@ -782,6 +825,7 @@ function load(){
     if(data.S) Object.assign(S, data.S);
     if(data.CODE) Object.assign(CODE, data.CODE);
     if(data.STOCK) STOCK = data.STOCK;
+    SAVE_STATE.restored = true;
     return true;
   }catch(e){ console.warn("Could not restore saved project:", e); return false; }
 }
@@ -2709,6 +2753,33 @@ function runTests(){
       S.method=savedM; S.stairConnection=savedC;
     }
 
+    /* ---- inputs must survive a reload ------------------------------------ */
+    {
+      const key="stairs-calc-selftest";
+      let storageWorks=false;
+      try{ localStorage.setItem(key,"1"); storageWorks=localStorage.getItem(key)==="1"; localStorage.removeItem(key); }catch(e){}
+      assert("localStorage is available for autosave", storageWorks);
+      /* round-trip the real save/load path without disturbing the saved project */
+      const keep=localStorage.getItem("stairs-calc-v1");
+      const before={run:S.run, method:S.method, platX:S.platX, lang:S.lang};
+      S.run=13.375; S.method="stringers"; S.platX=71.5;
+      const wrote=save();
+      const raw=JSON.parse(localStorage.getItem("stairs-calc-v1")||"{}");
+      assert("save() writes every edited field and reports success",
+        wrote===true && raw.S && raw.S.run===13.375 && raw.S.method==="stringers" && raw.S.platX===71.5,
+        raw.S ? raw.S.run+"/"+raw.S.method+"/"+raw.S.platX : "nothing written");
+      /* wipe state, then load() must bring it all back */
+      S.run=1; S.method="boxes"; S.platX=1;
+      load();
+      assert("load() restores the saved values on reopen",
+        S.run===13.375 && S.method==="stringers" && S.platX===71.5,
+        S.run+"/"+S.method+"/"+S.platX);
+      assert("save() also persists the stock and code tables",
+        raw.STOCK && raw.CODE && raw.STOCK["2x12"] && raw.CODE.riserMax>0);
+      Object.assign(S, before);
+      if(keep!==null) localStorage.setItem("stairs-calc-v1", keep); else localStorage.removeItem("stairs-calc-v1");
+    }
+
     /* ---- level tags must not be painted over -----------------------------
        They used to be drawn inside the level loop, so the NEXT ring's tread
        boards covered them — the nosing overhangs into the next ring. */
@@ -2967,6 +3038,10 @@ initSplitter();
 applyChrome();
 renderForm();
 run();
+showSaveState();
+/* last-ditch write, in case a change slipped through without an input event */
+window.addEventListener("beforeunload", save);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") save(); });
 </script>
 </body>
 </html>
