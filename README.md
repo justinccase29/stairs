@@ -193,8 +193,8 @@ To add or fix wording, edit the `FR` object near the top of the file: `"English 
 
 ## Pricing follows the length
 
-A 16' 2x12 is not four times a 4' one, and the long lengths carry a premium per foot, so price is keyed
-to **(stock, length)**, not to stock alone. Three forms in the `Prices` field, most specific wins:
+A 16' 2x12 is not four times a 4' one, so price is keyed to **(stock, length)**, not to stock alone.
+Three forms in the `Prices` field, most specific wins:
 
 | Form | Means |
 |---|---|
@@ -202,11 +202,39 @@ to **(stock, length)**, not to stock alone. Three forms in the `Prices` field, m
 | `2x12:2.10/ft` | by the **foot** — `length ÷ 12 × rate` |
 | `5/4x6 PT:11.25` | one **flat** price whatever the length |
 
-Lengths are read in the current unit, so `2x6@2438:29.00` works in mm. The buy table shows the unit
-price, the line total, and **where each price came from** — `your price`, `2.10/ft`, `flat, any length`,
-or `estimated from your 96" price` when a length you did not list is scaled from the nearest one you
-did. An unpriced stock reads `no price given` and contributes nothing, rather than silently costing
-zero and making the total look complete.
+A bare `@length` is **inches**, like the `Stock lengths` field it pairs with — write `@2438mm` if you
+mean metric. (Reading it in the *display* unit meant switching to mm silently made every price miss.)
+
+The buy table shows the unit price, the line total, and **where each price came from** — `your price`,
+`2.10/ft`, `flat, any length`, or `estimated from your 96" price` when a length you did not list is
+scaled from the nearest one you did. An unpriced stock reads `no price given` and contributes nothing,
+rather than silently costing zero and making the total look complete.
+
+### Seeded prices
+
+The field ships filled in from **Home Depot Canada, GREENFIELD PARK #7152** (500 Auguste, Greenfield
+Park QC), read once on **2026-08-07** and pasted in as plain text. **The tool never fetches anything** —
+it is a single offline file. Check them before you buy; lumber moves.
+
+| Stock | 8' (96") | 10' (120") | 12' (144") | 16' (192") |
+|---|---|---|---|---|
+| 5/4x6 PT | 7.09 | 8.89 | 10.69 | 12.49 |
+| 2x4 | 7.19 | 8.89 | 10.79 | — |
+| 2x6 | 10.29 | 12.89 | 15.49 | 20.69 |
+| 2x8 | 17.49 | 21.89 | 26.29 | 35.19 |
+| 2x10 | 23.79 | 29.79 | 34.79 | 46.49 |
+| 2x12 | 32.13 | — | 48.19 | — |
+| 4x4 | 15.69 | 20.29 | 23.59 | — |
+| 1x6 | 5.30 | — | — | — |
+| 1x8 | 10.37 | — | — | — |
+
+Blank cells are lengths that store does not stock. These numbers are also the argument for the
+per-length model: **5/4x6 PT runs 88.6¢/ft at 8' but only 78.1¢/ft at 16'**, while 2x6 goes the other
+way (1.286 → 1.293). Costing a 16-footer as two 8-footers is wrong in both directions.
+
+`5/4x6 composite` is deliberately unpriced — it is a different product line, not a lumber SKU. A save
+made before this existed picks the list up automatically **only if its price field was empty**; a price
+you typed yourself is never overwritten.
 
 **Total rise is measured finished surface → finished surface:** from the top of the platform's
 **decking** down to the top of the existing deck **boards**. Not to the framing, and not to the
@@ -439,6 +467,10 @@ All drawings are to scale, with a scale bar, and show real material sizes rather
   back. Each rim is therefore a board with a mitered end, not a rectangle butted at the corner: the
   front outer rim's long point is at `Xo` and its short point one thickness back. Every rim, the joist
   count/length/spacing and the rim height are called out, and the step above is shaded for context.
+  It uses the **same orientation as the plan** — house wall along `y = 0` at the top, steps descending
+  toward the bottom (+Y), side leg off to the right (+X), miter running top-left to bottom-right. A
+  drawing meant to explain the plan cannot be mirrored against it, so a test asserts both put the wall
+  in the top third and run the miter the same way.
 * **Terminology** — a labelled schematic of two steps at your actual rise and run, defining total rise,
   unit rise, unit run/going, tread depth, nosing, tread board, riser board, box rim/stringer, platform
   decking and frame, and the bearing point where each rim lands over the rim below.

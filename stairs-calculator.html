@@ -559,10 +559,12 @@ const FR = {
   "rim boards ({0})":"bordures ({0})", "joists ({0})":"solives ({0})",
   "bottom box — bears on {0}":"caisson du bas — repose sur {0}",
   "bears on the tread boards of {0}, over its inner rim":"repose sur les planches de marche de {0}, au-dessus de sa bordure intérieure",
+  "same orientation as the plan view — wall at the top, steps descend +Y, side leg +X":
+    "même orientation que la vue en plan — mur en haut, les marches descendent en +Y, aile latérale en +X",
   /* --- pricing by length --- */
   "Prices":"Prix",
-  "Optional, comma separated. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length.":
-    "Facultatif, séparé par des virgules. Le prix est par LONGUEUR, car une planche de 16 pi ne vaut pas quatre planches de 4 pi. Trois formes, la plus précise l'emporte : 2x6@96:12,50 pour ce bois à cette longueur · 2x12:2,10/ft au pied · 5/4x6 PT:11,25 pour un prix unique quelle que soit la longueur.",
+  "Seeded from Home Depot Canada, GREENFIELD PARK #7152, read once on 2026-08-07 — check them, they move. The tool never fetches anything. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length. A bare @length is INCHES, like the stock lengths above; write @2438mm for metric.":
+    "Prérempli d'après Home Depot Canada, GREENFIELD PARK #7152, relevé une seule fois le 2026-08-07 — vérifiez-les, ils bougent. L'outil ne va rien chercher en ligne. Le prix est par LONGUEUR, car une planche de 16 pi ne vaut pas quatre planches de 4 pi. Trois formes, la plus précise l'emporte : 2x6@96:12,50 pour ce bois à cette longueur · 2x12:2,10/ft au pied · 5/4x6 PT:11,25 pour un prix unique quelle que soit la longueur. Un @longueur sans unité est en POUCES, comme les longueurs ci-dessus ; écrivez @2438mm pour le métrique.",
   "Each":"Unitaire", "Price basis":"Base du prix",
   "your price":"votre prix", "{0}/ft":"{0}/pi", "flat, any length":"forfait, toute longueur",
   "estimated from your {0} price":"estimé d'après votre prix pour {0}",
@@ -815,6 +817,30 @@ let STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
 const stockNames = () => Object.keys(STOCK);
 const sk = n => STOCK[n] || {t:1.5,w:5.5,span:24};
 
+/* ---------- 2b. seed prices ---------------------------------------------
+   Read once from homedepot.ca with the store set to GREENFIELD PARK #7152
+   (500 Auguste, Greenfield Park QC) on 2026-08-07, and pasted in as plain
+   text. THE TOOL NEVER FETCHES ANYTHING — it is a single offline file, and
+   these are a starting point you overwrite with your own quote.
+
+   They are also the reason pricing is keyed to length. 5/4x6 PT runs 88.6
+   cents a foot at 8' but only 78.1 at 16'; 2x6 goes the other way, 1.286 up
+   to 1.293. Costing a 16' board as two 8-footers is wrong in both directions.
+
+   Lengths not listed are not stocked at that store: 2x12 comes in 8' and 12'
+   only, 2x4 and 4x4 stop at 12'. 5/4x6 composite is left out on purpose —
+   it is a different product line (Trex and friends), not a lumber SKU. */
+const HD_GREENFIELD_PARK = [
+  "5/4x6 PT@96:7.09","5/4x6 PT@120:8.89","5/4x6 PT@144:10.69","5/4x6 PT@192:12.49",
+  "2x4@96:7.19","2x4@120:8.89","2x4@144:10.79",
+  "2x6@96:10.29","2x6@120:12.89","2x6@144:15.49","2x6@192:20.69",
+  "2x8@96:17.49","2x8@120:21.89","2x8@144:26.29","2x8@192:35.19",
+  "2x10@96:23.79","2x10@120:29.79","2x10@144:34.79","2x10@192:46.49",
+  "2x12@96:32.13","2x12@144:48.19",
+  "4x4@96:15.69","4x4@120:20.29","4x4@144:23.59",
+  "1x6@96:5.30","1x8@96:10.37"
+].join(", ");
+
 /* ---------- 3. code limits (mm) ---------------------------------------- */
 /* Values below follow the CNB / Code de construction du Quebec limits for
    stairs serving a single dwelling unit. THEY ARE EDITABLE ON PURPOSE —
@@ -846,7 +872,7 @@ const DEFAULTS = {
   method:"boxes", cornerStyle:"miter", throughLeg:"front",
   treadStock:"2x6", treadGap:0.25, riserStock:"5/4x6 PT", riserFit:"captured",
   riserStyle:"closed", frameStock:"2x6", stringerStock:"2x12", skirtStock:"2x10",
-  throatMin:5, stockLen:"96,120,144,192", kerf:0.125, minOffcut:12, price:""
+  throatMin:5, stockLen:"96,120,144,192", kerf:0.125, minOffcut:12, price:HD_GREENFIELD_PARK
 };
 let S = Object.assign({}, DEFAULTS);
 
@@ -907,7 +933,7 @@ const FIELDS = [
   {k:"kerf", t:"len", l:"Saw kerf"},
   {k:"minOffcut", t:"len", l:"Ignore offcuts under"},
   {k:"price", t:"text", l:"Prices",
-   hint:"Optional, comma separated. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length."}
+   hint:"Seeded from Home Depot Canada, GREENFIELD PARK #7152, read once on 2026-08-07 — check them, they move. The tool never fetches anything. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length. A bare @length is INCHES, like the stock lengths above; write @2438mm for metric."}
 ];
 
 /* ---------- 6. form render / bind -------------------------------------- */
@@ -986,7 +1012,7 @@ function showSaveState(){
   const btn = document.getElementById("btn-undo");
   if(btn) btn.style.display = hasBackup() ? "" : "none";
 }
-const SAVE_KEY = "stairs-calc-v1", SAVE_BAK = "stairs-calc-v1-prev", SAVE_VER = 2;
+const SAVE_KEY = "stairs-calc-v1", SAVE_BAK = "stairs-calc-v1-prev", SAVE_VER = 3;
 /* Every payload carries its version, so a future rename can migrate instead of
    silently falling back to the default for that field. */
 const snapshot = () => JSON.stringify({v:SAVE_VER, S, CODE, STOCK});
@@ -1024,9 +1050,12 @@ function flushSave(){
   }catch(e){ return false; }
 }
 function migrate(data){
-  /* v1 had no version field and no legStock. Nothing to rewrite yet — this is
-     the hook so the next rename does not cost anyone their inputs. */
-  if(!data.v) data.v = 1;
+  if(!data.v) data.v = 1;                       // v1 had no version field
+  /* v3 ships the Home Depot Greenfield Park prices as the default. Anyone
+     saved before that has price:"" and would keep an empty field forever, so
+     drop the key and let the default fill in — but ONLY when it is empty, so a
+     price you typed yourself is never overwritten. */
+  if(data.v < 3 && data.S && !String(data.S.price||"").trim()) delete data.S.price;
   return data;
 }
 function load(){
@@ -1099,7 +1128,12 @@ function parsePrices(){
     if(!name || !isFinite(val)) continue;
     const at = name.lastIndexOf("@");
     if(at>0){
-      const len = parseLen(name.slice(at+1).trim());
+      /* A bare @length is INCHES, like the "Stock lengths you can buy (in)"
+         field it pairs with — otherwise switching the display to mm would
+         reinterpret @96 as 96 mm and every price would miss. Write @2438mm if
+         you really mean metric. */
+      const raw = name.slice(at+1).trim();
+      const len = /[a-z"'′″]/i.test(raw) ? parseLen(raw) : parseFloat(raw.replace(",", "."));
       name = name.slice(0,at).trim();
       if(isFinite(len) && len>0){ (out.exact[name] = out.exact[name] || {})[Math.round(len*16)] = val; continue; }
     }
@@ -2626,20 +2660,30 @@ function boxFramePlanSVG(model,k){
     block:t("corner block, 45°")
   };
   const title=t("{0} — rim {1} of {2}, mitered both corners", levelTag(model,k), LD(bx.rimH), S.frameStock);
-  const foot=bx.isBottom ? t("bottom box — bears on {0}", model.base>0?t("the deck joists"):t("the deck surface"))
-                         : t("bears on the tread boards of {0}, over its inner rim", levelTag(model,k+1));
-  const mL=54, mT=34, mB=54;
+  const foot=(bx.isBottom ? t("bottom box — bears on {0}", model.base>0?t("the deck joists"):t("the deck surface"))
+                          : t("bears on the tread boards of {0}, over its inner rim", levelTag(model,k+1)))
+    +" · "+t("same orientation as the plan view — wall at the top, steps descend +Y, side leg +X");
+  const mT=46, mB=58;
+  /* the depth dimension hangs off the LEFT edge, and "1168 mm" is twice as wide
+     as "46"" — size that gutter from the label too */
+  const mL=Math.max(54, estTextW(L(Yo),10)+30);
   const mR=Math.max(60, Math.max(...Object.keys(LBL).map(x=>estTextW(LBL[x],10)))+26);
   const sc=Math.min(6.5, 560/Math.max(Xo,1), 420/Math.max(Yo,1));
   const W=Math.max(mL+Xo*sc+mR,
                    mL+estTextW(title.replace(/<[^>]*>/g,""),10)+24,
                    mL+estTextW(foot,9)+24);
   const H=mT+Yo*sc+mB;
-  const X=x=>mL+x*sc, Y=y=>mT+(Yo-y)*sc;          // +y drawn upward, like the plan
+  /* SAME ORIENTATION AS THE PLAN VIEW: +x right, +y DOWN, house wall along
+     y = 0 at the top, steps descending toward the bottom of the sheet, side leg
+     off to the right. Drawing +y upward mirrored the box against the plan. */
+  const X=x=>mL+x*sc, Y=y=>mT+y*sc;
   const poly=(pts,st)=>svgPoly(pts.map(p=>[X(p[0]),Y(p[1])]),st);
   let s=svgOpen(W,H);
+  // house wall, so which way is up is never in doubt
+  s+=svgRect(X(0)-3,Y(0)-9,Xo*sc+3,9,MAT.wall);
+  s+=svgText(X(1),Y(0)-12,t("house wall"),'font-size="9" fill="#78838f"');
   // the step above, for context — this box lands on its tread boards
-  s+=svgRect(X(0),Y(Yi),Xi*sc,Yi*sc,'fill="#f2f5f8" stroke="#c3ced8" stroke-width=".8" stroke-dasharray="4 3"');
+  s+=svgRect(X(0),Y(0),Xi*sc,Yi*sc,'fill="#f2f5f8" stroke="#c3ced8" stroke-width=".8" stroke-dasharray="4 3"');
   s+=svgText(X(Xi/2),Y(Yi/2),t("step above"),'font-size="9" fill="#8b98a5" text-anchor="middle"');
   // joists first, so the rims read as continuous over them
   const joists=[];
@@ -2662,17 +2706,18 @@ function boxFramePlanSVG(model,k){
   // corner block on the miter
   s+=poly([[Xi+tk,Yi+tk],[Xi+tk+tk*2,Yi+tk],[Xi+tk,Yi+tk+tk*2]],MAT.block);
   s+=svgLine(X(Xi),Y(Yi),X(Xo),Y(Yo),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
-  // dimensions and callouts, all in the right gutter or below
+  /* Callouts down the right gutter, in reading order top to bottom — which is
+     also the order you meet the boards walking down the stair. */
   const gx=X(Xo)+10;
-  s+=svgText(mL,16,title,'font-size="10" fill="#333"');
-  s+=svgLead(X(Xo/2),Y(Yo-tk/2),gx,Y(Yo)+4,LBL.outer);
-  s+=svgLead(X(Xi/2),Y(Yi+tk/2),gx,Y(Yi)-6,LBL.inner);
-  s+=svgLead(X(Xo-tk/2),Y(Yo*0.3),gx,Y(Yo*0.35),LBL.sOuter);
-  s+=svgLead(X(Xi+tk/2),Y(Yo*0.12),gx,Y(Yo*0.14),LBL.sInner);
-  if(joists.length) s+=svgLead(X(Math.min(legF.joistSpacing,Xi)+tk/2),Y((Yi+Yo)/2),gx,Y(Yo*0.62),LBL.joist);
-  s+=svgLead(X(Xi+tk*1.4),Y(Yi+tk*1.4),gx,Y(Yo*0.8),LBL.block);
-  s+=dimLineH(X(0),X(Xo),Y(0)-14,L(Xo));
-  s+=dimLineV(X(0)-16,Y(0),Y(Yo),L(Yo),"left");
+  s+=svgText(mL,14,title,'font-size="10" fill="#333"');
+  s+=svgLead(X(Xi+tk/2),Y(Yo*0.10),gx,Y(Yo*0.10),LBL.sInner);
+  s+=svgLead(X(Xo-tk/2),Y(Yo*0.28),gx,Y(Yo*0.28),LBL.sOuter);
+  if(joists.length) s+=svgLead(X(Math.min(legF.joistSpacing,Xi)+tk/2),Y((Yi+Yo)/2),gx,Y(Yo*0.48),LBL.joist);
+  s+=svgLead(X(Xi/2),Y(Yi+tk/2),gx,Y(Yo*0.68),LBL.inner);
+  s+=svgLead(X(Xi+tk*1.4),Y(Yi+tk*1.4),gx,Y(Yo*0.84),LBL.block);
+  s+=svgLead(X(Xo/2),Y(Yo-tk/2),gx,Y(Yo*0.98),LBL.outer);
+  s+=dimLineH(X(0),X(Xo),Y(Yo)+18,L(Xo));           // width along the wall, below
+  s+=dimLineV(X(0)-16,Y(0),Y(Yo),L(Yo),"left");     // depth out from the wall
   s+=svgText(mL,H-24,foot,'font-size="9" fill="#78838f"');
   s+=scaleBarSVG(mL,H-8,sc);
   s+="</svg>";
@@ -3794,6 +3839,18 @@ function runTests(){
         priceBoard(pr,"2x12",144).cost);
       assert("a bare price is still flat, whatever the length",
         priceBoard(pr,"5/4x6 PT",96).cost===11.25 && priceBoard(pr,"5/4x6 PT",192).cost===11.25);
+      /* A bare @length must mean INCHES whatever the display unit — otherwise
+         switching to mm reinterprets @96 as 96 mm and every price misses. */
+      S.units="mm";
+      const prMM=parsePrices();
+      assert("a bare @length is inches even when the display is metric",
+        priceBoard(prMM,"2x6",96).cost===12.50 && priceBoard(prMM,"2x6",96).basis==="exact",
+        JSON.stringify(priceBoard(prMM,"2x6",96)));
+      S.price="2x6@2438mm:29.00";
+      assert("an explicit mm length still works",
+        Math.abs(priceBoard(parsePrices(),"2x6",2438/25.4).cost-29.00)<1e-9);
+      S.price = "2x6@96:12.50, 2x6@192:29.00, 2x12:2.10/ft, 5/4x6 PT:11.25";
+      S.units="in";
       const est=priceBoard(pr,"2x6",120);
       assert("an unlisted length is estimated from the nearest one you gave, and says so",
         est.basis==="scaled" && est.cost>0 && Math.abs(est.from-96)<1e-9, JSON.stringify(est));
@@ -3807,6 +3864,31 @@ function runTests(){
         /Each|Unitaire/.test(txt) && /your price|votre prix|flat|forfait|no price|aucun prix/.test(txt),
         txt.slice(0,120));
       S.stockLen=savedLen; S.stringerStock=savedStock; S.price=savedP; S.units=savedU;
+
+      /* the seeded Home Depot list has to actually parse and cover the stock */
+      S.units="in"; S.price=HD_GREENFIELD_PARK;
+      const hd=parsePrices();
+      assert("the seeded Greenfield Park list parses every entry",
+        Object.keys(hd.exact).length===9 && Object.keys(hd.perFt).length===0 && Object.keys(hd.flat).length===0,
+        Object.keys(hd.exact).join(",")+" | flat:"+Object.keys(hd.flat).join(","));
+      assert("it prices the stocks this stair is actually built from",
+        ["5/4x6 PT","2x6","2x8","2x10","2x12","4x4"].every(n=>priceBoard(hd,n,96).basis==="exact"),
+        ["5/4x6 PT","2x6","2x8","2x10","2x12","4x4"].filter(n=>priceBoard(hd,n,96).basis!=="exact").join(","));
+      assert("lumber is NOT linear in length — which is the whole point",
+        Math.abs(priceBoard(hd,"5/4x6 PT",192).cost - 2*priceBoard(hd,"5/4x6 PT",96).cost) > 1,
+        priceBoard(hd,"5/4x6 PT",192).cost+" vs 2× "+priceBoard(hd,"5/4x6 PT",96).cost);
+      assert("a length that store does not stock falls back, flagged",
+        priceBoard(hd,"2x12",192).basis==="scaled", JSON.stringify(priceBoard(hd,"2x12",192)));
+      S.price=savedP; S.units=savedU;
+
+      /* an older save with an EMPTY price must pick the seed up; a price the
+         user typed must survive untouched */
+      const mEmpty=migrate({v:2, S:{price:"", run:11}});
+      assert("migration lets an empty price fall through to the seeded list",
+        mEmpty.S.price===undefined, JSON.stringify(mEmpty.S));
+      const mMine=migrate({v:2, S:{price:"2x6@96:9.99", run:11}});
+      assert("migration never overwrites a price you typed",
+        mMine.S.price==="2x6@96:9.99", mMine.S.price);
     }
 
     /* ---- box frames are drawn as boards ---------------------------------- */
@@ -3832,6 +3914,33 @@ function runTests(){
       assert("the drawing agrees with the rim lengths in the table",
         svgB.includes(L(bx1.legs[0].outer)) && svgB.includes(L(bx1.legs[0].inner)),
         L(bx1.legs[0].outer)+" / "+L(bx1.legs[0].inner));
+
+      /* SAME ORIENTATION AS THE PLAN. Both must map the house wall (y=0) to the
+         TOP and the outer corner to the bottom-right; drawing +y upward
+         mirrored the box against the plan it is meant to explain. */
+      const yOf=(svg,pred)=>{
+        const d=new DOMParser().parseFromString(svg,"image/svg+xml");
+        const n=[...d.querySelectorAll("text")].find(pred);
+        return n? +n.getAttribute("y") : null;
+      };
+      const planSVG=renderPlanSVG(mb,"miter");
+      const wallPlan=yOf(planSVG,n=>/house wall|mur de la maison/i.test(n.textContent));
+      const wallBox =yOf(svgB,   n=>/house wall|mur de la maison/i.test(n.textContent));
+      const hBox=+(svgB.match(/viewBox="0 0 [\d.]+ ([\d.]+)"/)||[])[1];
+      const hPlan=+(planSVG.match(/viewBox="0 0 [\d.]+ ([\d.]+)"/)||[])[1];
+      assert("the box drawing labels the house wall, like the plan",
+        wallPlan!=null && wallBox!=null, "plan "+wallPlan+" box "+wallBox);
+      assert("the wall is in the TOP third of both drawings — same orientation",
+        wallPlan/hPlan < 0.34 && wallBox/hBox < 0.34,
+        (wallPlan/hPlan).toFixed(3)+" / "+(wallBox/hBox).toFixed(3));
+      /* and the miter must run top-left to bottom-right in BOTH */
+      const miterDir=svg=>{
+        const d=new DOMParser().parseFromString(svg,"image/svg+xml");
+        const l=[...d.querySelectorAll("line")].find(n=>/8c3b3b/.test(n.getAttribute("stroke")||""));
+        return l? Math.sign((+l.getAttribute("y2")-+l.getAttribute("y1"))*(+l.getAttribute("x2")-+l.getAttribute("x1"))) : 0;
+      };
+      assert("the 45° miter runs the same way in the box drawing as in the plan",
+        miterDir(svgB)===1 && miterDir(planSVG)===1, miterDir(svgB)+" / "+miterDir(planSVG));
       S.method=savedM;
     }
 
