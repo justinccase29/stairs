@@ -1,0 +1,4 @@
+# Store text with LF in the repo regardless of the checkout platform.
+* text=auto eol=lf
+*.html text eol=lf
+*.md   text eol=lf

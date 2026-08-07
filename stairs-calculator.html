@@ -1,0 +1,2634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corner Deck Stair Calculator</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --ink:#16202b; --muted:#6b7885; --line:#dde3ea;
+  --accent:#0f6fbf; --accent2:#e8f2fb; --warn:#b45309; --warnbg:#fff7e6;
+  --err:#b91c1c; --errbg:#fee; --ok:#166534; --okbg:#eaf7ee; --wood:#d9a86c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1{font-size:17px;margin:0}
+h2{font-size:15px;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+h3{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+header{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--line);
+  padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header .sub{color:var(--muted);font-size:12px}
+header .spacer{flex:1}
+button{font:inherit;padding:5px 11px;border:1px solid var(--line);background:#fff;border-radius:5px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+main{display:grid;grid-template-columns:var(--sbw,340px) 8px 1fr;gap:10px;padding:16px;align-items:start}
+#split{align-self:stretch;min-height:60vh;cursor:col-resize;border-radius:4px;background:transparent;
+  position:relative;touch-action:none}
+#split::before{content:"";position:absolute;inset:0 3px;background:var(--line);border-radius:2px}
+#split:hover::before,#split.drag::before{background:var(--accent)}
+body.resizing{cursor:col-resize;user-select:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
+#inputs{position:sticky;top:57px;max-height:calc(100vh - 74px);overflow:auto}
+#inputs h3:first-child{margin-top:0}
+/* input grows with the column instead of staying pinned at 108px */
+.f{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,42%);gap:6px 8px;align-items:center;margin-bottom:6px}
+.f label{font-size:12.5px}
+.f input[type=text],.f input[type=number],.f select{font-variant-numeric:tabular-nums}
+.f .hint{grid-column:1/-1;font-size:11.5px;color:var(--muted);margin:-3px 0 4px}
+input,select{font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:4px;width:100%;background:#fff}
+input[type=checkbox]{width:auto}
+input.bad{border-color:var(--err);background:#fff5f5}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button.on{background:var(--accent2);border-color:var(--accent);color:var(--accent);font-weight:600}
+.panel{display:none}
+.panel.on{display:block}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:6px 0 14px}
+th,td{border:1px solid var(--line);padding:4px 7px;text-align:right;vertical-align:top}
+th{background:#f0f3f6;font-weight:600;text-align:right;white-space:nowrap}
+td:first-child,th:first-child,.tl{text-align:left}
+tbody tr:nth-child(even){background:#fafbfc}
+tfoot td{font-weight:600;background:#f0f3f6}
+.dec{color:var(--muted);font-size:11px;margin-left:4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.big{display:flex;gap:22px;flex-wrap:wrap;margin:8px 0 4px}
+.big div{background:var(--accent2);border:1px solid #cfe3f5;border-radius:6px;padding:8px 12px;min-width:120px}
+.big b{display:block;font-size:19px;font-weight:600}
+.big span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.msg{border-radius:6px;padding:8px 11px;margin:6px 0;font-size:12.5px;border:1px solid}
+.msg.e{background:var(--errbg);border-color:#f5c2c2;color:var(--err)}
+.msg.w{background:var(--warnbg);border-color:#f0d9a8;color:var(--warn)}
+.msg.i{background:var(--okbg);border-color:#c6e6d1;color:var(--ok)}
+.msg b{font-weight:600}
+svg{max-width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:6px}
+.note{font-size:12px;color:var(--muted);margin:4px 0 12px}
+.pill{display:inline-block;font-size:11px;padding:1px 6px;border-radius:9px;background:#eef1f4;color:var(--muted);margin-left:5px}
+.pill.rip{background:#fdf0dd;color:var(--warn)}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.sheet{page-break-inside:avoid;margin-bottom:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.svgwrap{overflow:auto;margin:6px 0}
+.svgwrap svg{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11.5px;color:var(--muted);margin:4px 0 8px}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:14px;height:10px;border:1px solid;border-radius:2px;display:inline-block;flex:none}
+h4{font-size:12.5px;margin:6px 0 4px;color:var(--ink)}
+#panel-tests table td:nth-child(2){text-align:center}
+.tests-summary{font-weight:600}
+@media print{
+  @page{size:letter portrait;margin:12mm}
+  header,#inputs,#split,.tabs,.noprint{display:none!important}
+  main{display:block;padding:0}
+  body{background:#fff;font-size:11px}
+  .card{border:0;padding:0}
+  .panel{display:block!important;page-break-before:always}
+  .panel:first-of-type{page-break-before:avoid}
+  h2{page-break-after:avoid}
+  table{font-size:10px}
+  .sheet{break-inside:avoid}
+  #printhead{display:block!important;margin-bottom:8px}
+}
+#printhead{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="app-title">Corner Deck Stair Calculator</h1>
+  <span class="sub" id="app-sub">cascading pyramid stair &middot; 2 faces + mitered outside corner</span>
+  <span class="spacer"></span>
+  <label class="sub"><span id="t-lang">Language</span>
+    <select id="lang" style="width:auto;display:inline-block;margin-left:4px">
+      <option value="en">English</option><option value="fr">Fran&ccedil;ais</option>
+    </select>
+  </label>
+  <label class="sub"><span id="t-units">Units</span>
+    <select id="units" style="width:auto;display:inline-block;margin-left:4px">
+      <option value="in">Imperial</option><option value="mm">Metric (mm)</option><option value="both">Both</option>
+    </select>
+  </label>
+  <button id="btn-save">Export JSON</button>
+  <button id="btn-load">Import</button>
+  <button id="btn-reset">Reset</button>
+  <button id="btn-print" class="primary">Print / PDF</button>
+  <input type="file" id="file" accept=".json" style="display:none">
+</header>
+<main>
+  <aside id="inputs" class="card"></aside>
+  <div id="split" title="Drag to resize · double-click to reset"></div>
+  <section>
+    <div id="printhead"></div>
+    <nav class="tabs" id="tabs"></nav>
+    <div id="panels"></div>
+  </section>
+</main>
+<script>
+"use strict";
+/* ============================================================================
+   Corner deck stair calculator — single file, no dependencies.
+   Geometry: platform sits ON the existing deck surface, against the house wall
+   (y=0). Steps cascade down from the FRONT face (+y) and one SIDE face (+x),
+   wrapping the outside corner on a 45 degree miter.
+   All internal lengths are INCHES (float). Code limits are stored in mm.
+   ========================================================================== */
+
+/* ---------- 0. language ------------------------------------------------- */
+/* Translations are keyed by the ENGLISH source string, so t() falls back to
+   English for anything not yet translated instead of showing a bare key.
+   Placeholders are {0}, {1}, ... — t("Riser {0} of {1}", a, b). Every call
+   happens at RENDER time, so switching language just re-runs run(). */
+const MISSING_T = new Set();                     // fed by t(), read by the tests
+const FR = {
+  /* --- chrome --- */
+  "Corner Deck Stair Calculator":"Calculateur d'escalier de coin pour terrasse",
+  "cascading pyramid stair · 2 faces + mitered outside corner":"escalier pyramidal en cascade · 2 faces + coin extérieur à onglet",
+  "Language":"Langue", "Units":"Unités",
+  "Imperial":"Impérial", "Metric (mm)":"Métrique (mm)", "Both":"Les deux",
+  "Export JSON":"Exporter JSON", "Import":"Importer", "Reset":"Réinitialiser", "Print / PDF":"Imprimer / PDF",
+  "Reset all inputs to defaults?":"Réinitialiser toutes les valeurs par défaut ?",
+  "Could not read that file: {0}":"Impossible de lire ce fichier : {0}",
+  /* --- tabs --- */
+  "Summary":"Sommaire", "Plan & elevation":"Plan et élévation", "Step schedule":"Tableau des marches",
+  "Framing":"Ossature", "Per-step sheets":"Fiches par marche", "Cut list":"Liste de coupes",
+  "Warnings":"Avertissements", "Tests":"Tests",
+  /* --- input form: sections --- */
+  "Project":"Projet", "Rise":"Hauteur", "Base — how it lands on the deck":"Appui — comment ça repose sur la terrasse",
+  "Run":"Giron", "Platform":"Plateforme", "Construction":"Construction", "Materials":"Matériaux",
+  "Buying / cut list":"Achat / liste de coupes",
+  /* --- input form: fields --- */
+  "Name":"Nom",
+  "Rise mode":"Mode de hauteur",
+  "Measured rise (locked)":"Hauteur mesurée (verrouillée)",
+  "Flexible platform height":"Hauteur de plateforme flexible",
+  "Fixed: you measured the platform surface to the deck. Flexible: the platform is not built yet, let the tool pick a height that divides evenly.":
+    "Verrouillée : vous avez mesuré de la surface de la plateforme à la terrasse. Flexible : la plateforme n'est pas construite, l'outil choisit une hauteur qui se divise également.",
+  "Total rise":"Hauteur totale",
+  "Finished surface to finished surface: top of the platform DECKING down to the top of the existing deck BOARDS — not the framing.":
+    "De surface finie à surface finie : du dessus du PLATELAGE de la plateforme au dessus des PLANCHES de la terrasse existante — pas de l'ossature.",
+  "Target height (door threshold)":"Hauteur visée (seuil de porte)",
+  "Allowed ± on that height":"Tolérance ± sur cette hauteur",
+  "Number of risers (N)":"Nombre de contremarches (N)",
+  "Treads = N − 1. The deck is the bottom landing, the platform is the top landing.":
+    "Marches = N − 1. La terrasse est le palier du bas, la plateforme celui du haut.",
+  "Structure bears on":"L'ossature repose sur",
+  "The deck surface — on top of the decking":"La surface de la terrasse — sur le platelage",
+  "The deck STRUCTURE — decking removed / notched":"La STRUCTURE de la terrasse — platelage retiré / entaillé",
+  "Total rise is ALWAYS measured finished surface to finished surface, so this does not change riser height at all. Bearing on the structure just drops the bottom of the framing one decking thickness lower, so the load goes into the joists: stringers get longer and the bottom box gets deeper.":
+    "La hauteur totale est TOUJOURS mesurée de surface finie à surface finie : ceci ne change donc pas du tout la hauteur des contremarches. Prendre appui sur la structure abaisse seulement le bas de l'ossature d'une épaisseur de platelage, pour que la charge aille dans les solives : les limons s'allongent et le caisson du bas s'approfondit.",
+  "Existing deck board thickness":"Épaisseur des planches de la terrasse",
+  "The deck you are landing on. Used to draw the deck, and — in structure mode — it is how much deeper the framing runs.":
+    "La terrasse sur laquelle vous atterrissez. Sert au dessin et, en mode structure, correspond à l'approfondissement de l'ossature.",
+  "Unit run per step (going)":"Giron par marche",
+  "Tread nosing / overhang":"Nez de marche / débordement",
+  "0 is normal for cascading box steps.":"0 est normal pour des marches en caisson en cascade.",
+  "Platform width along the wall (X)":"Largeur de la plateforme le long du mur (X)",
+  "Platform depth out from wall (Y)":"Profondeur de la plateforme depuis le mur (Y)",
+  "FRAME dimensions. Steps come off the front face (+Y) and the side face (+X); the wall is at Y=0. Its decking overhangs those two faces by the tread nosing, exactly like every other step.":
+    "Dimensions de l'OSSATURE. Les marches partent de la face avant (+Y) et de la face latérale (+X) ; le mur est à Y=0. Son platelage déborde ces deux faces du nez de marche, comme toutes les autres marches.",
+  "Far side face (X=0)":"Face latérale opposée (X=0)",
+  "Open — needs a skirt":"Ouverte — nécessite une jupe", "Against a wall":"Contre un mur",
+  "Include platform framing":"Inclure l'ossature de la plateforme",
+  "Platform frame stock":"Bois d'ossature de la plateforme",
+  "Platform decking":"Platelage de la plateforme",
+  "Platform joists run":"Solives de la plateforme dans le sens",
+  "Out from the wall (Y)":"Depuis le mur (Y)", "Along the wall (X)":"Le long du mur (X)",
+  "Step framing":"Ossature des marches",
+  "Stacked box frames":"Caissons empilés", "Cut stringers + hip stringer":"Limons découpés + limon d'arête",
+  "Corner tread joint":"Joint de marche au coin",
+  "45° mitered":"À onglet 45°", "One leg runs through":"Une volée traverse",
+  "Compare both (miter used for cut list)":"Comparer les deux (onglet utilisé pour la liste)",
+  "Through leg":"Volée traversante",
+  "Front boards run through":"Les planches avant traversent", "Side boards run through":"Les planches latérales traversent",
+  "Risers":"Contremarches", "Closed (riser boards)":"Fermées (planches de contremarche)", "Open":"Ouvertes",
+  "Riser board fit":"Ajustement des contremarches",
+  "Captured between treads":"Encastrée entre les marches", "Laps the tread edge":"Recouvre le bord de la marche",
+  "Tread boards":"Planches de marche", "Gap between tread boards":"Espacement entre les planches",
+  "Riser boards":"Planches de contremarche", "Box frame / joists":"Caisson / solives",
+  "Stringer stock":"Bois pour limons", "Min stringer throat":"Gorge minimale du limon",
+  "Skirt stock":"Bois pour la jupe",
+  "Stock lengths you can buy (in)":"Longueurs vendues (po)",
+  "Inches, comma separated. 96,120,144,192 = 8,10,12,16 ft. This is what the yard sells — not the same as the structural \"span\" in the stock library below.":
+    "En pouces, séparées par des virgules. 96,120,144,192 = 8,10,12,16 pi. C'est ce que vend le marchand — à ne pas confondre avec la « portée » structurale ci-dessous.",
+  "Saw kerf":"Trait de scie", "Ignore offcuts under":"Ignorer les retailles sous",
+  "Price per stock board":"Prix par planche",
+  "Optional, e.g. 2x6:14.50, 5/4x6 PT:11.25":"Facultatif, ex. 2x6:14.50, 5/4x6 PT:11.25",
+  /* --- input form: tables --- */
+  "Code limits (mm)":"Limites du code (mm)", "verify locally":"à vérifier localement",
+  "Quebec / CNB private-stair values. Edit any of them if your authority differs.":
+    "Valeurs du CNB / Code de construction du Québec pour escaliers privés. Modifiez-les si votre autorité diffère.",
+  "Stock library (actual size, in)":"Bibliothèque de bois (dimensions réelles, po)",
+  "Span":"Portée", "Stock":"Bois", "Thick":"Épais.", "Width":"Largeur",
+  "Riser min":"Contremarche min", "Riser max":"Contremarche max",
+  "Run min":"Giron min", "Run max":"Giron max",
+  "Tread depth min":"Profondeur de marche min", "Max riser variation":"Variation max des contremarches",
+  "Min stair width":"Largeur min de l'escalier", "Guard required above height":"Garde-corps requis au-delà de",
+  "Handrail required over N risers":"Main courante requise au-delà de N contremarches",
+  "<b>Span</b> is structural: the largest clear distance allowed between supports when that board is walked on. It sets how many joists or stringers you need — nothing to do with the stock lengths above, which are just the lengths the yard sells.":
+    "La <b>portée</b> est structurale : la plus grande distance libre permise entre appuis quand on marche sur cette planche. Elle détermine le nombre de solives ou de limons — rien à voir avec les longueurs vendues ci-dessus.",
+  /* --- drawings --- */
+  "scale: 1 ft":"échelle : 1 pi",
+  "house":"maison", "house wall":"mur de la maison",
+  "open side (skirt)":"côté ouvert (jupe)",
+  "platform":"plateforme",
+  "platform {0} × {1}":"plateforme {0} × {1}",
+  "platform {0} × {1} finished":"plateforme {0} × {1} fini",
+  "platform frame {0} × {1}":"ossature de plateforme {0} × {1}",
+  "platform {0} deep, shown cut":"plateforme de {0} de profond, coupée au dessin",
+  "platform continues to the wall":"la plateforme se prolonge jusqu'au mur",
+  "45° miter line":"ligne d'onglet 45°",
+  "hip stringer":"limon d'arête", "cut stringer":"limon découpé", "cut stringer behind":"limon découpé derrière",
+  "front leg — steps descend this way (+Y)":"volée avant — les marches descendent de ce côté (+Y)",
+  "side leg (+X)":"volée latérale (+X)",
+  "front":"avant", "side":"latérale",
+  "existing deck joists":"solives de la terrasse existante",
+  "existing deck surface":"surface de la terrasse existante",
+  "existing decking {0}":"platelage existant {0}",
+  "existing decking, z = 0 on top":"platelage existant, z = 0 au dessus",
+  "existing decking — cut away under the stair":"platelage existant — retiré sous l'escalier",
+  "decking cut away — framing bears on the joists":"platelage retiré — l'ossature repose sur les solives",
+  "level cut bears on the joist":"la coupe de niveau repose sur la solive",
+  "platform nosing {0}":"nez de la plateforme {0}",
+  "H = {0}":"H = {0}", "R = {0}":"R = {0}", "r = {0}":"r = {0}",
+  "framing only —":"ossature seulement —", "rise is unchanged":"la hauteur ne change pas",
+  "section through the front leg — the side leg is identical, using the platform's other dimension":
+    "coupe dans la volée avant — la volée latérale est identique, avec l'autre dimension de la plateforme",
+  "platform decking = the top tread":"platelage de la plateforme = la marche du haut",
+  "platform frame — sits on the decking":"ossature de la plateforme — repose sur le platelage",
+  "platform frame — down to the joists":"ossature de la plateforme — descend jusqu'aux solives",
+  "riser 1 = the platform's own face":"contremarche 1 = la face même de la plateforme",
+  "total rise H":"hauteur totale H",
+  "framing {0} deeper — rise unchanged":"ossature {0} plus profonde — hauteur inchangée",
+  "tread board ({0} × {1})":"planche de marche ({0} × {1})",
+  "riser board ({0})":"planche de contremarche ({0})",
+  "riser board (omitted — open riser)":"planche de contremarche (omise — contremarche ouverte)",
+  "box rim / frame":"bordure / caisson",
+  "bearing: rim above lands over the rim below":"appui : la bordure du dessus tombe sur celle du dessous",
+  "unit rise r":"hauteur de contremarche r", "unit run R (going)":"giron R",
+  "tread depth T = R + nosing":"profondeur de marche T = R + nez",
+  "nosing {0}":"nez de marche {0}",
+  "tread surface — level {0} height z":"surface de marche — niveau {0}, hauteur z",
+  "schematic — 2 steps of your actual rise/run shown":"schéma — 2 marches à votre hauteur et giron réels",
+  "No notches to draw.":"Aucune entaille à dessiner.",
+  "level cut — bears here, drop {0}":"coupe de niveau — appui ici, retombée {0}",
+  "plumb cut":"coupe d'aplomb",
+  "{0} leg · {1} notches (levels {2}–{3}) · ×{4} · run {5} rise {6} · marks every {7} · board ≥ {8}":
+    "volée {0} · {1} entailles (niveaux {2} à {3}) · ×{4} · giron {5} hauteur {6} · repère chaque {7} · planche ≥ {8}",
+  " — cut from {0}":" — coupé dans {0}", " — NEEDS A SPLICE":" — JOINT REQUIS",
+  "HIP stringer · run {0} (R×√2) · {1} notches · marks every {2} · board ≥ {3} · throat {4}":
+    "Limon d'ARÊTE · giron {0} (R×√2) · {1} entailles · repère chaque {2} · planche ≥ {3} · gorge {4}",
+  "tread boards ({0})":"planches de marche ({0})", "riser boards ({0})":"planches de contremarche ({0})",
+  "none — open":"aucune — ouvertes",
+  "box frame / joists ({0})":"caisson / solives ({0})", "stringers ({0})":"limons ({0})",
+  "platform frame":"ossature de la plateforme",
+  "existing deck / house wall":"terrasse existante / mur de la maison",
+  /* --- validation messages --- */
+  "Riser height {0} is outside the code range {1}–{2} mm.":"La hauteur de contremarche {0} est hors de la plage permise de {1} à {2} mm.",
+  "Run {0} is outside the code range {1}–{2} mm.":"Le giron {0} est hors de la plage permise de {1} à {2} mm.",
+  "Tread depth {0} is below the code minimum {1} mm.":"La profondeur de marche {0} est sous le minimum de {1} mm.",
+  "Front leg walking width {0} (narrowest point — back of the top tread) is below the minimum {1} mm.":
+    "La largeur de passage de la volée avant, {0} (au point le plus étroit — arrière de la marche du haut), est sous le minimum de {1} mm.",
+  "Side leg walking width {0} (narrowest point — back of the top tread) is below the minimum {1} mm.":
+    "La largeur de passage de la volée latérale, {0} (au point le plus étroit — arrière de la marche du haut), est sous le minimum de {1} mm.",
+  "Handrail required: {0} risers exceeds {1} (mention only — not sized here).":
+    "Main courante requise : {0} contremarches dépassent {1} (mention seulement — non calculée ici).",
+  "Guard likely required: the platform surface is {0} above the deck (mention only — not sized here).":
+    "Garde-corps probablement requis : la surface de la plateforme est à {0} au-dessus de la terrasse (mention seulement — non calculé ici).",
+  "Guard may be required: the tread at level {0} is {1} above the deck (mention only).":
+    "Garde-corps possiblement requis : la marche du niveau {0} est à {1} au-dessus de la terrasse (mention seulement).",
+  "Open riser gap {0} exceeds the {1} mm code maximum.":"L'ouverture de contremarche {0} dépasse le maximum de {1} mm.",
+  "Riser height {0}\" does not land on a 1/16\" increment — lay out every riser mark from one reference face, do not stack measured increments.":
+    "La hauteur de contremarche {0} po ne tombe pas sur un 1/16 po — tracez chaque repère depuis une même face de référence, n'accumulez pas les mesures.",
+  "Landing depth at the door is {0} (platform frame, wall to riser face); code wants at least {1} mm. The nosing overhang does not count as walking surface.":
+    "La profondeur du palier à la porte est de {0} (ossature de la plateforme, du mur à la contremarche) ; le code exige au moins {1} mm. Le débord du nez de marche ne compte pas comme surface de marche.",
+  "Leg stringers need a board at least {0} wide (notch {1} + throat {2}); a {3} is only {4}.":
+    "Les limons de volée exigent une planche d'au moins {0} de largeur (entaille {1} + gorge {2}) ; un {3} ne fait que {4}.",
+  "The hip stringer needs a board at least {0} wide — its run is R×√2 = {1}, so the notch is deeper. A {2} leaves only {3} of throat.":
+    "Le limon d'arête exige une planche d'au moins {0} de largeur — son giron est de R×√2 = {1}, donc l'entaille est plus profonde. Un {2} ne laisse que {3} de gorge.",
+  "Bearing on the deck structure makes the bottom box rim {0}, deeper than a {1} ({2}). Use deeper stock for that box.":
+    "L'appui sur la structure porte la bordure du caisson du bas à {0}, plus haut qu'un {1} ({2}). Utilisez du bois plus large pour ce caisson.",
+  "Platform frame is {0} tall but a {1} is only {2} — use deeper stock, posts, or a stud frame under it.":
+    "L'ossature de la plateforme fait {0} de haut mais un {1} ne fait que {2} — utilisez du bois plus large, des poteaux ou une ossature à montants.",
+  "The longest board needed on the front leg (bottom level, {0}) exceeds your longest stock length ({1}) — plan a splice over a stringer or joist.":
+    "La plus longue planche de la volée avant (niveau du bas, {0}) dépasse votre plus grande longueur vendue ({1}) — prévoyez un joint au-dessus d'un limon ou d'une solive.",
+  "The longest board needed on the side leg (bottom level, {0}) exceeds your longest stock length ({1}) — plan a splice over a stringer or joist.":
+    "La plus longue planche de la volée latérale (niveau du bas, {0}) dépasse votre plus grande longueur vendue ({1}) — prévoyez un joint au-dessus d'un limon ou d'une solive.",
+  /* --- panels: headings, tables, notes --- */
+  "Summary":"Sommaire", "Validation":"Validation", "Terminology":"Terminologie",
+  "Riser height":"Hauteur de contremarche", "Tread depth":"Profondeur de marche",
+  "Risers ({0} treads)":"Contremarches ({0} marches)", "Bottom footprint":"Emprise au sol",
+  "Total rise, finished to finished":"Hauteur totale, de fini à fini",
+  "{0} deeper":"{0} plus profond", "on the surface":"sur la surface",
+  "Framing bears on the deck structure":"L'ossature repose sur la structure",
+  "Framing bears on the decking":"L'ossature repose sur le platelage",
+  "Platform, finished (frame {0} × {1})":"Plateforme, fini (ossature {0} × {1})",
+  "Board fit — do I have to cut boards?":"Ajustement des planches — dois-je couper des planches ?",
+  "Tread depth ({0})":"Profondeur de marche ({0})", "Riser height ({0})":"Hauteur de contremarche ({0})",
+  "Riser 1 only — tucks under the platform decking ({0})":"Contremarche 1 seulement — se glisse sous le platelage de la plateforme ({0})",
+  "No code issues found against the table on the left.":"Aucun problème de conformité selon le tableau de gauche.",
+  "Error: ":"Erreur : ", "Warning: ":"Avertissement : ", "No warnings.":"Aucun avertissement.",
+  "exact fit":"ajustement exact", "gap adjusted":"jeu ajusté", "1 rip":"1 refente", "overshoot":"dépassement",
+  "{0} board(s), exact fit — no cutting needed.":"{0} planche(s), ajustement exact — aucune coupe nécessaire.",
+  "{0} boards, gap adjusted to {1} (no rip).":"{0} planches, jeu ajusté à {1} (aucune refente).",
+  "{0} full board(s) + 1 rip at {1}.":"{0} planche(s) pleine(s) + 1 refente à {1}.",
+  "{0} full boards, overshoots by {1} — absorb into the nosing/tread depth.":
+    "{0} planches pleines, dépasse de {1} — à absorber dans le nez / la profondeur de marche.",
+  "Or {0} boards with the gap tightened to {1}{2} for an exact fit with no rip.":
+    "Ou {0} planches avec le jeu réduit à {1}{2} pour un ajustement exact sans refente.",
+  " (butted tight — no drainage gap)":" (bout à bout — aucun jeu de drainage)",
+  "alt: gap={0}, tight gap={1}, rip={2}, overshoot={3}":"autres : jeu={0}, jeu réduit={1}, refente={2}, dépassement={3}",
+  "n/a":"s.o.", "yes":"oui", "no":"non", "ok":"ok", "use":"utiliser", "deck":"terrasse",
+  /* plan / elevation panel */
+  "Plan view — looking down":"Vue en plan — vue de dessus",
+  "Elevation — section through the front leg":"Élévation — coupe dans la volée avant",
+  "Every tread board is drawn at its real width with your {0} gap{1}. Dashed lines are the framing hidden below the treads{2}.":
+    "Chaque planche de marche est dessinée à sa largeur réelle avec votre jeu de {0}{1}. Les lignes pointillées représentent l'ossature cachée sous les marches{2}.",
+  " and its 45° mitered end":" et son bout coupé à onglet 45°",
+  ", square-cut where the legs meet":", coupé d'équerre à la jonction des volées",
+  ", including the hip stringer on the diagonal":", y compris le limon d'arête en diagonale",
+  "Two steps of your actual rise and run, drawn the way the calculator assumes they are built: each riser board sits on the tread below it and tucks under the tread above; the box rim above lands over the rim below.":
+    "Deux marches à votre hauteur et giron réels, dessinées comme le calculateur suppose qu'elles sont construites : chaque contremarche repose sur la marche du dessous et se glisse sous celle du dessus ; la bordure du caisson du dessus tombe sur celle du dessous.",
+  /* schedule panel */
+  "Step levels":"Niveaux des marches", "Level (k)":"Niveau (k)", "Level":"Niveau",
+  "Tread surface height (z)":"Hauteur de la surface de marche (z)", "Tread depth (T)":"Profondeur de marche (T)",
+  "Rise / riser-count picker":"Choix de la hauteur / du nombre de contremarches",
+  "Riser r":"Contremarche r", "In code?":"Conforme ?", 'On 1/16"?':"Sur 1/16 po ?",
+  "Total (N×r)":"Total (N×r)", "Grid":"Grille",
+  'Total rise is locked at {0}. Every option for N=1–12 is shown; click "use" to adopt one.':
+    "La hauteur totale est verrouillée à {0}. Toutes les options de N=1 à 12 sont affichées ; cliquez « utiliser » pour en adopter une.",
+  'Target {0} ± {1}. Ranked by roundness of r, then closeness of r to 7", then closeness of N×r to target. Click "use" to adopt a row.':
+    "Cible {0} ± {1}. Classé par arrondi de r, puis proximité de r à 7 po, puis proximité de N×r à la cible. Cliquez « utiliser » pour adopter une ligne.",
+  'No (N, r) pair on a 1/16" grid meets the target within tolerance and code limits — widen the tolerance or the code range.':
+    "Aucune paire (N, r) sur une grille de 1/16 po n'atteint la cible dans la tolérance et les limites du code — élargissez la tolérance ou la plage.",
+  /* framing panel — stringers */
+  "Does it come out of a standard {0}?":"Est-ce que ça sort d'un {0} standard ?",
+  "Board":"Planche", "{0} — {1} wide × {2} thick":"{0} — {1} de largeur × {2} d'épaisseur",
+  "Notch depth":"Profondeur d'entaille", "Throat left":"Gorge restante", "Throat":"Gorge",
+  "below your {0} minimum":"sous votre minimum de {0}",
+  "Minimum board width":"Largeur minimale de planche", "{0} = notch + throat":"{0} = entaille + gorge",
+  "a {0} is wide enough":"un {0} est assez large", "a {0} is TOO NARROW":"un {0} est TROP ÉTROIT",
+  "Longest stringer":"Limon le plus long",
+  "{0} — longest stock you buy is {1}":"{0} — votre plus grande longueur vendue est {1}",
+  "Spacing":"Espacement", "{0} o.c.":"{0} c/c",
+  "{0} o.c., limited to {1} by the {2} treads":"{0} c/c, limité à {1} par les marches en {2}",
+  "The hip will not come out of a {0}.":"Le limon d'arête ne sortira pas d'un {0}.",
+  "Its run is R×√2 = {0}, so the notch bites {1} deep and leaves only {2} of throat. It needs a board at least {3} wide. Options: double the hip, use an LVL or a wider board there, drop the throat minimum, or reduce the run.":
+    "Son giron est R×√2 = {0} : l'entaille mord {1} de profond et ne laisse que {2} de gorge. Il faut une planche d'au moins {3} de largeur. Options : doubler le limon d'arête, utiliser un LVL ou une planche plus large, réduire la gorge minimale, ou réduire le giron.",
+  "{0} leg stringers":"Limons de la volée {0}",
+  "Position":"Position", "Notches (levels)":"Entailles (niveaux)", "Notches":"Entailles",
+  "Required length":"Longueur requise", "Buy length":"Longueur à acheter", "needs splice":"joint requis",
+  "Hip stringer (corner)":"Limon d'arête (coin)",
+  "tight — below min {0}, usually the tightest of all the stringers":
+    "serrée — sous le minimum de {0}, habituellement la plus serrée de tous les limons",
+  'Layout: step the framing square at rise {0} / run {1}, which puts a mark every {2} along the board edge. The bottom is cut {3} below the last seat — that is the tread thickness{4} ("drop the stringer"). Stringers nearer the corner carry fewer notches; the triangle at the corner is carried by the hip.':
+    "Tracé : avancez l'équerre à hauteur {0} / giron {1}, ce qui donne un repère chaque {2} le long du bord. Le bas est coupé {3} sous le dernier siège — soit l'épaisseur de la marche{4} (« abaissement du limon »). Les limons près du coin portent moins d'entailles ; le triangle du coin est porté par le limon d'arête.",
+  " plus {0} to reach the deck joists":" plus {0} pour atteindre les solives",
+  "Stringer sheets — one per distinct board":"Fiches de limons — une par planche distincte",
+  /* framing panel — boxes */
+  "Box frames per level":"Caissons par niveau", "Rim height":"Hauteur de bordure", "Leg":"Volée",
+  "Outer rim":"Bordure extérieure", "Inner rim":"Bordure intérieure", "Joists":"Solives",
+  "Bottom box is {0} deeper":"Le caisson du bas est {0} plus profond",
+  "because the framing bears on the deck structure: its rim is {0} instead of {1}.":
+    "parce que l'ossature repose sur la structure : sa bordure fait {0} au lieu de {1}.",
+  "Your {0} ({1} wide) covers it — rip it to {2}.":"Votre {0} ({1} de largeur) suffit — refendez-le à {2}.",
+  "A {0} is only {1} wide, so the bottom box needs deeper stock.":
+    "Un {0} ne fait que {1} de largeur : le caisson du bas exige du bois plus large.",
+  "Riser heights are unchanged.":"Les hauteurs de contremarche ne changent pas.",
+  "Load path: box k's outer rim bears on box k+1's tread boards directly over box k+1's inner rim — keep that rim continuous or double it. Box k's inner rim needs blocking down to {0}, except level 1 (fastens to the platform frame) and the bottom level (bears directly).":
+    "Cheminement des charges : la bordure extérieure du caisson k repose sur les planches du caisson k+1, juste au-dessus de sa bordure intérieure — gardez cette bordure continue ou doublez-la. La bordure intérieure du caisson k exige un blocage jusqu'à {0}, sauf au niveau 1 (fixé à l'ossature de la plateforme) et au niveau du bas (appui direct).",
+  "the deck joists":"les solives de la terrasse", "the deck surface":"la surface de la terrasse",
+  "Inner-rim support blocks":"Blocs d'appui sous la bordure intérieure",
+  "Under level":"Sous le niveau", "Rim length":"Longueur de bordure", "Block height":"Hauteur du bloc", "Qty":"Qté",
+  /* framing panel — skirt & platform */
+  "Skirt (open X=0 face)":"Jupe (face X=0 ouverte)", "Raking length":"Longueur en rampant",
+  "Min board width":"Largeur min de planche", "{0} — {1} is {2}":"{0} — un {1} fait {2}",
+  "wide enough":"assez large", "too narrow":"trop étroite",
+  "Cut to the step profile. The other side (Y=0) is against the house and the remaining two faces are the stairs themselves, so this is the only exposed end.":
+    "Coupée selon le profil des marches. L'autre côté (Y=0) est contre la maison et les deux autres faces sont les marches elles-mêmes : c'est donc le seul bout exposé.",
+  "Platform framing":"Ossature de la plateforme",
+  "Frame size":"Dimensions de l'ossature", "Finished size":"Dimensions finies", "Frame height":"Hauteur de l'ossature",
+  " — decking overhangs the two step faces by the {0} nosing, same as every tread":
+    " — le platelage déborde du nez de {0} sur les deux faces avec marches, comme toutes les marches",
+  " — no nosing set, decking flush with the frame":" — aucun nez défini, platelage à égalité avec l'ossature",
+  " (includes {0} down to the deck joists)":" (inclut {0} jusqu'aux solives)",
+  "taller than a {0} — needs deeper stock, posts or a stud frame":
+    "plus haut qu'un {0} — exige du bois plus large, des poteaux ou une ossature à montants",
+  "{0} × {1} running {2}":"{0} × {1} orientées {2}",
+  "out from wall (Y)":"depuis le mur (Y)", "along wall (X)":"le long du mur (X)",
+  "Piece":"Pièce", "Length":"Longueur",
+  "Decking fit":"Ajustement du platelage", "across {0}":"sur {0}",
+  "Bearing must land over the existing deck's joists/beams, not mid-span on decking. If the frame height exceeds the rim board width, add posts or a stud frame. Check door swing/threshold clearance and slope the platform surface away from the house for drainage.":
+    "L'appui doit tomber sur les solives ou poutres de la terrasse existante, pas à mi-portée sur le platelage. Si la hauteur d'ossature dépasse la largeur de la bordure, ajoutez des poteaux ou une ossature à montants. Vérifiez le dégagement de la porte et donnez une pente à la plateforme pour éloigner l'eau de la maison.",
+  "Corner joint comparison":"Comparaison des joints de coin",
+  "Style":"Style", "Boards":"Planches", "Total length":"Longueur totale", "Waste %":"Perte %",
+  /* per-step sheets */
+  "Riser boards ({0})":"Planches de contremarche ({0})",
+  "Riser k":"Contremarche k", "Height":"Hauteur",
+  "Front long/short":"Avant long/court", "Side long/short":"Latérale long/court",
+  "Open risers selected — no riser boards.":"Contremarches ouvertes sélectionnées — aucune planche de contremarche.",
+  "Gap {0} exceeds the code max {1} mm.":"L'ouverture de {0} dépasse le maximum de {1} mm.",
+  "Level {0} — tread surface {1} above deck, depth {2}":
+    "Niveau {0} — surface de marche à {1} au-dessus de la terrasse, profondeur {2}",
+  "{0} leg — {1} bd, {2}":"volée {0} — {1} pl, {2}",
+  "Bd":"Pl", "Long pt":"Pt long", "Short pt":"Pt court",
+  /* cut list */
+  "Boards to buy":"Planches à acheter", "Cost":"Coût",
+  "Estimated material cost":"Coût estimé des matériaux",
+  "Cut list per board":"Liste de coupes par planche",
+  "Board #":"Planche n°", "Stock length":"Longueur de la planche", "Cuts":"Coupes", "Waste":"Perte",
+  "offcut usable":"retaille réutilisable", "Nothing to cut yet.":"Rien à couper pour l'instant.",
+  /* piece names */
+  "Tread L{0} {1} bd{2}":"Marche N{0} {1} pl{2}", "offset {0}":"décalage {0}",
+  "Riser {0} {1}":"Contremarche {0} {1}",
+  "{0} stringer ({1} notches)":"Limon {0} ({1} entailles)",
+  "Hip stringer ({0} notches)":"Limon d'arête ({0} entailles)",
+  "layout marks":"repères de tracé", "at {0}":"à {0}", " — needs splice":" — joint requis",
+  "45° plan bevel":"biseau 45° en plan",
+  "Box {0} {1} outer rim":"Caisson {0} {1} — bordure extérieure",
+  "Box {0} {1} inner rim":"Caisson {0} {1} — bordure intérieure",
+  "Box {0} {1} joist":"Caisson {0} {1} — solive",
+  "Box {0} corner block":"Caisson {0} — bloc de coin",
+  "rim height {0}":"hauteur de bordure {0}",
+  " (deeper — bears on the deck structure)":" (plus profond — repose sur la structure)",
+  "Support block (box {0} {1})":"Bloc d'appui (caisson {0} {1})",
+  "under level {0}'s {1} inner rim, down to the deck":"sous la bordure intérieure {1} du niveau {0}, jusqu'à la terrasse",
+  "platform rim (X, full length)":"bordure de plateforme (X, pleine longueur)",
+  "platform rim (Y, fit between)":"bordure de plateforme (Y, ajustée entre)",
+  "Platform joist":"Solive de plateforme", "Platform decking":"Platelage de la plateforme",
+  "Side skirt (open X=0 face)":"Jupe latérale (face X=0 ouverte)",
+  "Platform side skirt (X=0)":"Jupe latérale de la plateforme (X=0)",
+  "rake":"rampant", "clads the platform rim on the open side":"habille la bordure de la plateforme du côté ouvert",
+  "cut to the step profile; needs a board at least {0} wide ({1} is {2})":
+    "coupée selon le profil des marches ; exige une planche d'au moins {0} de largeur ({1} fait {2})",
+  /* print head */
+  "Deck corner stair":"Escalier de coin de terrasse", "Printed {0}":"Imprimé le {0}",
+  /* nosing measured from the riser face */
+  "Tread depth (walking)":"Profondeur de marche (utile)",
+  "Tread board depth":"Profondeur de la planche de marche",
+  "Tread board depth (incl. riser)":"Profondeur de la planche (contremarche incl.)",
+  "Tread board depth ({0})":"Profondeur de la planche de marche ({0})",
+  "The tread board is {0} deep, not {1}: the nosing is measured from the face of the captured riser board, so the tread laps the riser's {2} thickness and then overhangs it by the {3} nosing. Walking depth stays {1}.":
+    "La planche de marche fait {0} de profond, et non {1} : le nez est mesuré depuis la face de la contremarche encastrée, donc la marche recouvre l'épaisseur de {2} de la contremarche puis la dépasse du nez de {3}. La profondeur utile reste {1}.",
+  "Board depth":"Prof. planche", "Walking depth":"Prof. utile",
+  "plumb cut against the platform rim":"coupe d'aplomb contre la bordure de la plateforme",
+  /* run = nosing to nosing */
+  "R = {0} nosing to nosing":"R = {0} de nez à nez",
+  "unit run R — nosing to nosing":"giron R — de nez à nez",
+  /* tread boards anchored on the nosing */
+  "{0} full boards — the first flush with the nosing, the last flush with the back. No cutting.":
+    "{0} planches pleines — la première alignée sur le nez, la dernière sur l'arrière. Aucune coupe.",
+  "{0} full boards starting at the nosing, plus one ripped to {1} at the BACK, where the riser board covers it.":
+    "{0} planches pleines à partir du nez, plus une refendue à {1} à l'ARRIÈRE, là où la contremarche la cache.",
+  "{0} full boards starting at the nosing; the extra {1} falls in the gap at the back, out of sight.":
+    "{0} planches pleines à partir du nez ; le {1} restant tombe dans le jeu arrière, hors de vue.",
+  "board 1 = the nosing board":"planche 1 = celle du nez",
+  "alt: tight gap={0}, one-piece rip={1}":"autres : jeu réduit={0}, refente unique={1}",
+  "{0} leg — {1} bd, board 1 at the nosing":"volée {0} — {1} pl, planche 1 au nez",
+  /* floating platform */
+  "Total height to decking":"Hauteur totale sous platelage",
+  "Frame depth":"Hauteur de l'ossature",
+  "{0} — the {1} on edge":"{0} — le {1} sur chant",
+  "deeper than the whole platform — rip it to {0}":"plus haut que la plateforme entière — refendez-le à {0}",
+  "Legs":"Pattes",
+  "{0} legs at {1}, cut from the same {2}, on a {3} × {4} grid at {5} o.c.":
+    "{0} pattes de {1}, coupées dans le même {2}, sur une grille de {3} × {4} à {5} c/c",
+  "none — the frame alone reaches the height":"aucune — l'ossature seule atteint la hauteur",
+  "Free-standing (floating): everything is cut from the {0}, nothing is fastened to the house. The frame is that stock on edge; legs of the same stock make up the rest of the height.":
+    "Autoportante (flottante) : tout est coupé dans le {0}, rien n'est fixé à la maison. L'ossature est ce bois sur chant ; des pattes du même bois complètent la hauteur.",
+  "Legs are {0} tall — double them into an L at the corners and add diagonal bracing, or switch to 4x4 posts.":
+    "Les pattes font {0} — doublez-les en L aux coins et ajoutez un contreventement diagonal, ou passez à des poteaux 4x4.",
+  "Floating platform legs are {0} tall — double them into an L at the corners and brace them diagonally, or use 4x4 posts.":
+    "Les pattes de la plateforme flottante font {0} — doublez-les en L aux coins et contreventez-les, ou utilisez des poteaux 4x4.",
+  "A {0} is deeper than the whole platform ({1}) — rip the frame stock down, or pick a shallower stock.":
+    "Un {0} est plus haut que la plateforme entière ({1}) — refendez le bois d'ossature ou choisissez un bois moins large.",
+  "Platform leg (floating)":"Patte de plateforme (flottante)",
+  "{0} × {1} grid at {2} o.c.":"grille de {0} × {1} à {2} c/c",
+  "{0} legs @ {1}":"{0} pattes de {1}",
+  /* stringer stock layout */
+  "offcut {0}":"retaille {0}",
+  "marks along the top edge, every {0}":"repères sur le bord supérieur, chaque {0}",
+  "cut length {0}":"longueur coupée {0}", "buy {0}":"acheter {0}",
+  "On the board — {0} needed, {1} per board, {2} board(s)":"Sur la planche — {0} requis, {1} par planche, {2} planche(s)",
+  "Hip on the board — 1 × {0}":"Limon d'arête sur la planche — 1 × {0}",
+  "Finished profile":"Profil fini",
+  "buy {0} — {1} per board":"acheter {0} — {1} par planche"
+};
+function t(s){
+  let out = s;
+  if(S && S.lang==="fr"){
+    if(FR[s]!==undefined) out = FR[s];
+    else if(s && /[a-zA-Z]{3}/.test(s)) MISSING_T.add(s);
+  }
+  for(let i=1;i<arguments.length;i++) out = out.split("{"+(i-1)+"}").join(String(arguments[i]));
+  return out;
+}
+const isFR = () => S && S.lang==="fr";
+const dec = s => isFR() ? String(s).replace(".", ",") : String(s);   // 9.333 -> 9,333
+
+/* ---------- 1. units ---------------------------------------------------- */
+const MM = 25.4;
+function fmtIn(x){
+  const neg = x < 0; x = Math.abs(x);
+  const s16 = Math.round(x*16);
+  let whole = Math.floor(s16/16), num = s16%16, den = 16;
+  while(num && num%2===0){ num/=2; den/=2; }
+  let out = num ? (whole ? whole+"-"+num+"/"+den : num+"/"+den) : String(whole);
+  return (neg?"-":"")+out+'"';
+}
+function fmtMm(x){ const v = x*MM; return dec(Math.abs(v)<100 ? v.toFixed(1) : Math.round(v))+" mm"; }
+function L(x){                                   // headline length, current units
+  if(!isFinite(x)) return "—";
+  if(S.units==="mm")   return fmtMm(x);
+  if(S.units==="both") return fmtIn(x)+" / "+fmtMm(x);
+  return fmtIn(x);
+}
+function LD(x){                 // length, plus the exact decimal ONLY when the
+  if(!isFinite(x)) return "—";  // fraction is a rounding of it — otherwise noise
+  if(S.units==="mm") return fmtMm(x);
+  const off = Math.abs(x*16 - Math.round(x*16)) > 0.02;
+  return L(x)+(off ? '<span class="dec">= '+dec(x.toFixed(3))+'"</span>' : "");
+}
+function parseLen(str){
+  if(typeof str === "number") return str;
+  /* Accept a comma as the decimal mark, so a French keyboard entry works. */
+  let s = String(str).trim().toLowerCase().replace(/[“”″]/g,'"').replace(/′/g,"'").replace(/(\d),(\d)/g,"$1.$2");
+  if(!s) return NaN;
+  let unit = null;
+  if(/mm$/.test(s)){ unit="mm"; s=s.replace(/mm$/,""); }
+  else if(/cm$/.test(s)){ unit="cm"; s=s.replace(/cm$/,""); }
+  else if(/"$/.test(s)||/in$/.test(s)){ unit="in"; s=s.replace(/(in|")$/,""); }
+  s = s.trim();
+  let ft = 0;
+  const fm = s.match(/^(\d+(?:\.\d+)?)\s*'\s*(.*)$/);
+  if(fm){ ft = parseFloat(fm[1]); s = fm[2].trim(); unit = unit||"in"; }
+  let v = 0;
+  if(s){
+    const m = s.match(/^(\d+(?:\.\d+)?)?(?:[\s-]*(\d+)\s*\/\s*(\d+))?$/);
+    if(!m || (!m[1] && !m[2])) return NaN;
+    v = (m[1]?parseFloat(m[1]):0) + (m[2]?parseInt(m[2],10)/parseInt(m[3],10):0);
+  }
+  let inches = ft*12 + v;
+  if(unit==="mm" || (unit===null && S.units==="mm")) inches = inches/MM;
+  else if(unit==="cm") inches = inches/2.54;
+  return inches;
+}
+const r16 = x => Math.round(x*16)/16;            // nearest 1/16"
+const hyp  = (a,b) => Math.sqrt(a*a+b*b);
+
+/* ---------- 2. stock library ------------------------------------------- */
+/* t = actual thickness, w = actual width (face width), span = max clear span
+   between supports for that material used as a walking surface (practice, editable). */
+const STOCK_DEFAULT = {
+  "5/4x6 PT":      {t:1.00, w:5.50, span:16},
+  "5/4x6 composite":{t:1.00,w:5.50, span:12},
+  "2x4":           {t:1.50, w:3.50, span:24},
+  "2x6":           {t:1.50, w:5.50, span:24},
+  "2x8":           {t:1.50, w:7.25, span:24},
+  "2x10":          {t:1.50, w:9.25, span:24},
+  "2x12":          {t:1.50, w:11.25,span:24},
+  "1x6":           {t:0.75, w:5.50, span:12},
+  "1x8":           {t:0.75, w:7.25, span:12},
+  "4x4":           {t:3.50, w:3.50, span:0}
+};
+let STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
+const stockNames = () => Object.keys(STOCK);
+const sk = n => STOCK[n] || {t:1.5,w:5.5,span:24};
+
+/* ---------- 3. code limits (mm) ---------------------------------------- */
+/* Values below follow the CNB / Code de construction du Quebec limits for
+   stairs serving a single dwelling unit. THEY ARE EDITABLE ON PURPOSE —
+   verify against the current code text and your municipality before cutting. */
+const CODE_DEFAULT = {
+  riserMin:125, riserMax:200, runMin:255, runMax:355, treadDepthMin:235,
+  riserVarMax:5, runVarMax:5, widthMin:860,
+  handrailOverRisers:3, guardOverHeight:600, openRiserMaxGap:100,
+  landingMinDepth:900
+};
+let CODE = Object.assign({}, CODE_DEFAULT);
+const inMM = x => x*MM;
+/* Readable labels for the editable code table (the raw keys are cryptic). */
+const CODE_LABELS = {
+  riserMin:"Riser min", riserMax:"Riser max", runMin:"Run min", runMax:"Run max",
+  treadDepthMin:"Tread depth min", riserVarMax:"Max riser variation",
+  widthMin:"Min stair width", guardOverHeight:"Guard required above height",
+  handrailOverRisers:"Handrail required over N risers"
+};
+
+/* ---------- 4. state --------------------------------------------------- */
+const DEFAULTS = {
+  lang:"en", units:"in", sidebarW:340, project:"Deck corner stair",
+  riseMode:"fixed", totalRise:28, targetRise:28, riseTol:1.5,
+  risers:4, run:11, nosing:0,
+  bottomBearing:"surface", deckBoardT:1.0,
+  platX:60, platY:48, faceX0:"open", platSurface:"5/4x6 PT", platFrame:"2x6",
+  platJoistDir:"y", includePlatform:true,
+  method:"boxes", cornerStyle:"miter", throughLeg:"front",
+  treadStock:"2x6", treadGap:0.25, riserStock:"5/4x6 PT", riserFit:"captured",
+  riserStyle:"closed", frameStock:"2x6", stringerStock:"2x12", skirtStock:"2x10",
+  throatMin:5, stockLen:"96,120,144,192", kerf:0.125, minOffcut:12, price:""
+};
+let S = Object.assign({}, DEFAULTS);
+
+/* ---------- 5. input form spec ----------------------------------------- */
+const FIELDS = [
+  {h:"Project"},
+  {k:"project", t:"text", l:"Name"},
+  {h:"Rise"},
+  {k:"riseMode", t:"sel", l:"Rise mode", o:[["fixed","Measured rise (locked)"],["flexible","Flexible platform height"]],
+   hint:"Fixed: you measured the platform surface to the deck. Flexible: the platform is not built yet, let the tool pick a height that divides evenly."},
+  {k:"totalRise", t:"len", l:"Total rise", when:s=>s.riseMode==="fixed",
+   hint:"Finished surface to finished surface: top of the platform DECKING down to the top of the existing deck BOARDS — not the framing."},
+  {k:"targetRise", t:"len", l:"Target height (door threshold)", when:s=>s.riseMode==="flexible"},
+  {k:"riseTol", t:"len", l:"Allowed ± on that height", when:s=>s.riseMode==="flexible"},
+  {k:"risers", t:"int", l:"Number of risers (N)", hint:"Treads = N − 1. The deck is the bottom landing, the platform is the top landing."},
+  {h:"Base — how it lands on the deck"},
+  {k:"bottomBearing", t:"sel", l:"Structure bears on",
+   o:[["surface","The deck surface — on top of the decking"],["structure","The deck STRUCTURE — decking removed / notched"]],
+   hint:"Total rise is ALWAYS measured finished surface to finished surface, so this does not change riser height at all. Bearing on the structure just drops the bottom of the framing one decking thickness lower, so the load goes into the joists: stringers get longer and the bottom box gets deeper."},
+  {k:"deckBoardT", t:"len", l:"Existing deck board thickness",
+   hint:"The deck you are landing on. Used to draw the deck, and — in structure mode — it is how much deeper the framing runs."},
+  {h:"Run"},
+  {k:"run", t:"len", l:"Unit run per step (going)"},
+  {k:"nosing", t:"len", l:"Tread nosing / overhang", hint:"0 is normal for cascading box steps."},
+  {h:"Platform"},
+  {k:"platX", t:"len", l:"Platform width along the wall (X)"},
+  {k:"platY", t:"len", l:"Platform depth out from wall (Y)", hint:"FRAME dimensions. Steps come off the front face (+Y) and the side face (+X); the wall is at Y=0. Its decking overhangs those two faces by the tread nosing, exactly like every other step."},
+  {k:"faceX0", t:"sel", l:"Far side face (X=0)", o:[["open","Open — needs a skirt"],["wall","Against a wall"]]},
+  {k:"includePlatform", t:"chk", l:"Include platform framing"},
+  {k:"platFrame", t:"stock", l:"Platform frame stock", when:s=>s.includePlatform},
+  {k:"platSurface", t:"stock", l:"Platform decking", when:s=>s.includePlatform},
+  {k:"platJoistDir", t:"sel", l:"Platform joists run", o:[["y","Out from the wall (Y)"],["x","Along the wall (X)"]], when:s=>s.includePlatform},
+  {h:"Construction"},
+  {k:"method", t:"sel", l:"Step framing", o:[["boxes","Stacked box frames"],["stringers","Cut stringers + hip stringer"]]},
+  {k:"cornerStyle", t:"sel", l:"Corner tread joint", o:[["miter","45° mitered"],["through","One leg runs through"],["compare","Compare both (miter used for cut list)"]]},
+  {k:"throughLeg", t:"sel", l:"Through leg", o:[["front","Front boards run through"],["side","Side boards run through"]], when:s=>s.cornerStyle!=="miter"},
+  {k:"riserStyle", t:"sel", l:"Risers", o:[["closed","Closed (riser boards)"],["open","Open"]]},
+  {k:"riserFit", t:"sel", l:"Riser board fit", o:[["captured","Captured between treads"],["full","Laps the tread edge"]], when:s=>s.riserStyle==="closed"},
+  {h:"Materials"},
+  {k:"treadStock", t:"stock", l:"Tread boards"},
+  {k:"treadGap", t:"len", l:"Gap between tread boards"},
+  {k:"riserStock", t:"stock", l:"Riser boards", when:s=>s.riserStyle==="closed"},
+  {k:"frameStock", t:"stock", l:"Box frame / joists", when:s=>s.method==="boxes"},
+  {k:"stringerStock",t:"stock", l:"Stringer stock", when:s=>s.method==="stringers"},
+  {k:"throatMin", t:"len", l:"Min stringer throat", when:s=>s.method==="stringers"},
+  {k:"skirtStock", t:"stock", l:"Skirt stock"},
+  {h:"Buying / cut list"},
+  {k:"stockLen", t:"text", l:"Stock lengths you can buy (in)", hint:'Inches, comma separated. 96,120,144,192 = 8,10,12,16 ft. This is what the yard sells — not the same as the structural "span" in the stock library below.'},
+  {k:"kerf", t:"len", l:"Saw kerf"},
+  {k:"minOffcut", t:"len", l:"Ignore offcuts under"},
+  {k:"price", t:"text", l:"Price per stock board", hint:'Optional, e.g. 2x6:14.50, 5/4x6 PT:11.25'}
+];
+
+/* ---------- 6. form render / bind -------------------------------------- */
+function renderForm(){
+  let h = "";
+  for(const f of FIELDS){
+    if(f.h){ h += "<h3>"+t(f.h)+"</h3>"; continue; }
+    if(f.when && !f.when(S)) continue;
+    const id = "f-"+f.k, v = S[f.k];
+    h += '<div class="f"><label for="'+id+'">'+t(f.l)+"</label>";
+    if(f.t==="sel")      h += '<select id="'+id+'" data-k="'+f.k+'">'+f.o.map(o=>'<option value="'+o[0]+'"'+(o[0]===v?" selected":"")+">"+t(o[1])+"</option>").join("")+"</select>";
+    else if(f.t==="stock")h += '<select id="'+id+'" data-k="'+f.k+'">'+stockNames().map(n=>'<option value="'+n+'"'+(n===v?" selected":"")+">"+n+"</option>").join("")+"</select>";
+    else if(f.t==="chk") h += '<input type="checkbox" id="'+id+'" data-k="'+f.k+'" data-t="chk"'+(v?" checked":"")+">";
+    else if(f.t==="len") h += '<input type="text" id="'+id+'" data-k="'+f.k+'" data-t="len" value="'+(S.units==="mm"?fmtMm(v).replace(" mm",""):fmtIn(v).replace('"',""))+'">';
+    else if(f.t==="int") h += '<input type="number" min="1" max="30" step="1" id="'+id+'" data-k="'+f.k+'" data-t="int" value="'+v+'">';
+    else                 h += '<input type="text" id="'+id+'" data-k="'+f.k+'" data-t="text" value="'+String(v).replace(/"/g,"&quot;")+'">';
+    h += "</div>";
+    if(f.hint) h += '<div class="f"><div class="hint">'+t(f.hint)+"</div></div>";
+  }
+  h += '<h3>'+t("Code limits (mm)")+' <span class="pill">'+t("verify locally")+'</span></h3>';
+  h += '<div class="note">'+t("Quebec / CNB private-stair values. Edit any of them if your authority differs.")+'</div>';
+  for(const k of ["riserMin","riserMax","runMin","runMax","treadDepthMin","riserVarMax","widthMin","guardOverHeight","handrailOverRisers"]){
+    h += '<div class="f"><label>'+t(CODE_LABELS[k]||k)+'</label><input type="number" step="1" data-code="'+k+'" value="'+CODE[k]+'"></div>';
+  }
+  h += '<h3>'+t("Stock library (actual size, in)")+'</h3>';
+  h += '<div class="note">'+t("<b>Span</b> is structural: the largest clear distance allowed between supports when that board is walked on. It sets how many joists or stringers you need — nothing to do with the stock lengths above, which are just the lengths the yard sells.")+'</div>';
+  h += '<table><thead><tr><th>'+t("Stock")+'</th><th>'+t("Thick")+'</th><th>'+t("Width")+'</th><th>'+t("Span")+'</th></tr></thead><tbody>';
+  for(const n of stockNames()) h += "<tr><td>"+n+'</td><td><input type="number" step="0.0625" data-stock="'+n+'" data-p="t" value="'+sk(n).t+'"></td>'
+    +'<td><input type="number" step="0.0625" data-stock="'+n+'" data-p="w" value="'+sk(n).w+'"></td>'
+    +'<td><input type="number" step="1" data-stock="'+n+'" data-p="span" value="'+sk(n).span+'"></td></tr>';
+  h += "</tbody></table>";
+  document.getElementById("inputs").innerHTML = h;
+}
+function onFormInput(e){
+  const t = e.target;
+  if(t.dataset.k){
+    const k = t.dataset.k, ty = t.dataset.t;
+    if(ty==="chk") S[k] = t.checked;
+    else if(ty==="len"){ const v = parseLen(t.value); if(isNaN(v)){ t.classList.add("bad"); return; } t.classList.remove("bad"); S[k]=v; }
+    else if(ty==="int"){ const v = parseInt(t.value,10); if(!(v>0)) return; S[k]=v; }
+    else S[k] = t.value;
+    const f = FIELDS.find(f=>f.k===k);
+    if(f && (f.t==="sel"||f.t==="chk")) { save(); renderForm(); return run(); }
+  } else if(t.dataset.code){ CODE[t.dataset.code] = parseFloat(t.value)||0; }
+  else if(t.dataset.stock){ STOCK[t.dataset.stock][t.dataset.p] = parseFloat(t.value)||0; }
+  else return;
+  save(); run();
+}
+/* ---------- 7. persistence ---------------------------------------------- */
+function save(){
+  try{ localStorage.setItem("stairs-calc-v1", JSON.stringify({S,CODE,STOCK})); }catch(e){ /* ignore quota/denied */ }
+}
+function load(){
+  try{
+    const raw = localStorage.getItem("stairs-calc-v1");
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(data.S) Object.assign(S, data.S);
+    if(data.CODE) Object.assign(CODE, data.CODE);
+    if(data.STOCK) STOCK = data.STOCK;
+    return true;
+  }catch(e){ console.warn("Could not restore saved project:", e); return false; }
+}
+
+/* ---------- 8. small parsing helpers ------------------------------------ */
+function parseStockLens(){
+  return String(S.stockLen||"").split(",").map(s=>parseFloat(s.trim()))
+    .filter(x=>isFinite(x) && x>0).sort((a,b)=>a-b);
+}
+function pickStockLen(need, lens){
+  lens = lens || parseStockLens();
+  for(const Ln of lens) if(Ln >= need-1e-6) return Ln;
+  return null;                                   // nothing long enough — needs a splice
+}
+function parsePrices(){
+  const map = {};
+  if(!S.price) return map;
+  for(const part of String(S.price).split(",")){
+    const idx = part.lastIndexOf(":");
+    if(idx<0) continue;
+    const name = part.slice(0,idx).trim(), val = parseFloat(part.slice(idx+1));
+    if(name && isFinite(val)) map[name] = val;
+  }
+  return map;
+}
+
+/* ---------- 9. board fitting — "do I have to cut boards?" --------------- */
+/* depth must be filled by boards of width w with a normal gap between them.
+   n = number of full boards you get if you also leave a trailing gap-width
+   of space after the last one (so a rip or another board could follow). */
+function fitBoards(depth, w, gap){
+  gap = gap || 0;
+  const n = Math.max(1, Math.floor((depth+gap)/(w+gap)));
+  const spanN = n*w + (n-1)*gap;                 // n boards, n-1 internal gaps
+  const remainder = depth - spanN;                // >= 0 by construction of n
+  const exact = Math.abs(remainder) < 0.0625;      // within 1/16" — no rip needed
+  const rip = remainder - gap;                     // depth - n*w - n*gap
+  const overshootN = n+1;
+  const overshootSpan = overshootN*w + n*gap;      // n+1 full boards, n gaps
+  const overshoot = overshootSpan - depth;
+  let altGap = null;
+  if(n>1){
+    const g = (depth - n*w)/(n-1);
+    if(g>=0.125 && g<=0.375) altGap = g;           // only "sane" if 1/8"–3/8"
+  }
+  /* n+1 boards with the gap TIGHTENED fills the depth exactly with no rip.
+     gT = 0 means the boards butt tight — fine for composite or an indoor
+     tread, but it gives up drainage on PT. Offered as an alternative, never
+     forced, because "2 boards butted = exactly 11" is often what you want. */
+  let altGapTight = null;
+  const gT = (depth - overshootN*w)/n;
+  if(gT >= -1e-9 && gT <= gap + 1e-9) altGapTight = Math.max(0, gT);
+  let recommend;
+  if(exact) recommend = "exact";
+  else if(altGap!=null) recommend = "altgap";
+  else if(rip>0.01 && rip<w*0.92) recommend = "rip";
+  else recommend = "overshoot";
+  return {depth,w,gap,n,spanN,exact,remainder,rip,overshootN,overshootSpan,overshoot,altGap,altGapTight,recommend};
+}
+
+/* ---------- 10. rise-mode solvers --------------------------------------- */
+function fixedTable(){
+  const H = S.totalRise, rows = [];
+  for(let N=1;N<=12;N++){
+    const r = H/N, mm = inMM(r);
+    rows.push({N, r, mm, inCode: mm>=CODE.riserMin && mm<=CODE.riserMax,
+      onGrid: Math.abs(r*16-Math.round(r*16))<0.01});
+  }
+  return rows;
+}
+function flexibleSearch(){
+  const target = S.targetRise, tol = S.riseTol;
+  const rMinIn = CODE.riserMin/MM, rMaxIn = CODE.riserMax/MM;
+  const lo = Math.ceil(rMinIn*16), hi = Math.floor(rMaxIn*16);
+  const results = [];
+  for(let N=1;N<=12;N++){
+    for(let s16=lo; s16<=hi; s16++){
+      const r = s16/16, total = N*r;
+      if(Math.abs(total-target) <= tol){
+        const round = (s16%4===0) ? 3 : (s16%2===0) ? 2 : 1;   // 1/4 > 1/8 > 1/16
+        results.push({N, r, total, round, d7:Math.abs(r-7), dTarget:Math.abs(total-target)});
+      }
+    }
+  }
+  results.sort((a,b)=> b.round-a.round || a.d7-b.d7 || a.dTarget-b.dTarget);
+  return results;
+}
+
+/* ---------- 11. validation ----------------------------------------------- */
+function validate(model){
+  const warnings = [];
+  const rmm=inMM(model.r), Rmm=inMM(model.R), Tmm=inMM(model.R+model.nose);
+  if(rmm<CODE.riserMin || rmm>CODE.riserMax)
+    warnings.push({level:"error", msg:t("Riser height {0} is outside the code range {1}–{2} mm.", LD(model.r), CODE.riserMin, CODE.riserMax)});
+  if(Rmm<CODE.runMin || Rmm>CODE.runMax)
+    warnings.push({level:"error", msg:t("Run {0} is outside the code range {1}–{2} mm.", LD(model.R), CODE.runMin, CODE.runMax)});
+  if(Tmm<CODE.treadDepthMin)
+    warnings.push({level:"error", msg:t("Tread depth {0} is below the code minimum {1} mm.", LD(model.R+model.nose), CODE.treadDepthMin)});
+  /* Narrowest walking width on a leg is the INNER edge of its top tread —
+     Wb + (k-1)R with k=1, i.e. Wb itself. (Measuring at the outer edge would
+     add a full run and let an undersized stair pass the check.) */
+  const widthFront=model.Wx, widthSide=model.Wy;
+  if(inMM(widthFront)<CODE.widthMin)
+    warnings.push({level:"error", msg:t("Front leg walking width {0} (narrowest point — back of the top tread) is below the minimum {1} mm.", LD(widthFront), CODE.widthMin)});
+  if(inMM(widthSide)<CODE.widthMin)
+    warnings.push({level:"error", msg:t("Side leg walking width {0} (narrowest point — back of the top tread) is below the minimum {1} mm.", LD(widthSide), CODE.widthMin)});
+  if(model.N>CODE.handrailOverRisers)
+    warnings.push({level:"warn", msg:t("Handrail required: {0} risers exceeds {1} (mention only — not sized here).", model.N, CODE.handrailOverRisers)});
+  let guardFlagged = false;
+  if(inMM(model.H)>CODE.guardOverHeight){
+    warnings.push({level:"warn", msg:t("Guard likely required: the platform surface is {0} above the deck (mention only — not sized here).", LD(model.H))});
+    guardFlagged = true;
+  }
+  if(!guardFlagged){
+    for(const lvl of model.levels){
+      if(inMM(lvl.z)>CODE.guardOverHeight){
+        warnings.push({level:"warn", msg:t("Guard may be required: the tread at level {0} is {1} above the deck (mention only).", lvl.k, LD(lvl.z))});
+        break;
+      }
+    }
+  }
+  if(S.riserStyle==="open" && inMM(model.r)>CODE.openRiserMaxGap)
+    warnings.push({level:"warn", msg:t("Open riser gap {0} exceeds the {1} mm code maximum.", LD(model.r), CODE.openRiserMaxGap)});
+  if(Math.abs(model.r*16-Math.round(model.r*16))>0.02)
+    warnings.push({level:"warn", msg:t("Riser height {0}\" does not land on a 1/16\" increment — lay out every riser mark from one reference face, do not stack measured increments.", dec(model.r.toFixed(3)))});
+  if(inMM(model.Wy)<CODE.landingMinDepth)
+    warnings.push({level:"warn", msg:t("Landing depth at the door is {0} (platform frame, wall to riser face); code wants at least {1} mm. The nosing overhang does not count as walking surface.", LD(model.Wy), CODE.landingMinDepth)});
+  if(S.method==="stringers"){
+    const stv = stringersForLeg("front", model), hipv = hipStringer(model);
+    if(!stv.fitsStock)
+      warnings.push({level:"error", msg:t("Leg stringers need a board at least {0} wide (notch {1} + throat {2}); a {3} is only {4}.", fmtIn(stv.minWidth), fmtIn(stv.notchDepth), fmtIn(S.throatMin), S.stringerStock, fmtIn(stv.stock.w))});
+    if(!hipv.fitsStock)
+      warnings.push({level:"error", msg:t("The hip stringer needs a board at least {0} wide — its run is R×√2 = {1}, so the notch is deeper. A {2} leaves only {3} of throat.", fmtIn(hipv.minWidth), L(hipv.run), S.stringerStock, fmtIn(hipv.throat))});
+  } else if(model.base>0){
+    const bb = boxesForLevel(model, model.N-1);
+    if(!bb.rimStockOK)
+      warnings.push({level:"error", msg:t("Bearing on the deck structure makes the bottom box rim {0}, deeper than a {1} ({2}). Use deeper stock for that box.", LD(bb.rimH), S.frameStock, fmtIn(sk(S.frameStock).w))});
+  }
+  if(S.includePlatform){
+    const pfv = platformModel(model);
+    if(pfv.braceNeeded)
+      warnings.push({level:"warn", msg:t("Floating platform legs are {0} tall — double them into an L at the corners and brace them diagonally, or use 4x4 posts.", LD(pfv.legH))});
+    if(pfv.ripFrame)
+      warnings.push({level:"warn", msg:t("A {0} is deeper than the whole platform ({1}) — rip the frame stock down, or pick a shallower stock.", S.platFrame, LD(pfv.height))});
+  }
+  const stockLens = parseStockLens();
+  const maxStock = stockLens.length ? Math.max(...stockLens) : 0;
+  if(maxStock){
+    const bottomFront = model.footX, bottomSide = model.footY;
+    if(bottomFront>maxStock)
+      warnings.push({level:"warn", msg:t("The longest board needed on the front leg (bottom level, {0}) exceeds your longest stock length ({1}) — plan a splice over a stringer or joist.", L(bottomFront), L(maxStock))});
+    if(bottomSide>maxStock)
+      warnings.push({level:"warn", msg:t("The longest board needed on the side leg (bottom level, {0}) exceeds your longest stock length ({1}) — plan a splice over a stringer or joist.", L(bottomSide), L(maxStock))});
+  }
+  return warnings;
+}
+/* ---------- 12. geometry -------------------------------------------------
+   House wall at y=0. Platform footprint platX (along wall, X) by platY (out
+   from wall, Y). Steps cascade in +y (front face) and +x (side face),
+   wrapping the outside corner at (platX,platY) on a 45 degree miter.
+   Level k = 1 (top) .. N-1 (bottom). z_k = H - k*r, always from exact r. */
+function computeModel(){
+  const R=S.run, nose=S.nosing, N=S.risers, H=S.totalRise;
+  const r = H/N;
+  const Wx=S.platX, Wy=S.platY;
+  /* A captured riser board sits ON the tread below and tucks UNDER the tread
+     above, so ITS face — not the frame — is the last vertical surface, and the
+     nosing is measured from there. That makes the tread board one riser
+     thickness deeper than the going. Without this the tread stops at the
+     frame and the riser's top edge is left exposed. */
+  const riserT = (S.riserStyle==="closed" && S.riserFit==="captured") ? sk(S.riserStock).t : 0;
+  const Tb = R + riserT + nose;      // board depth — what you cut
+  const Twalk = R + nose;            // riser face to nosing tip — what code measures
+  const levels = [];
+  for(let k=1;k<=N-1;k++) levels.push({k, z:H-k*r, T:Tb, Twalk});
+  const footX = Wx+(N-1)*R+riserT+nose, footY = Wy+(N-1)*R+riserT+nose;
+  /* base = how far BELOW the finished deck surface the framing bears. Landing
+     on the deck structure means cutting through the decking, so the bottom of
+     the framing sits one deck-board thickness low. This deliberately does NOT
+     touch r, H or any tread height: the rise stays finished-to-finished, and
+     only the framing that reaches down to bearing gets longer. */
+  const base = S.bottomBearing==="structure" ? Math.max(0, S.deckBoardT) : 0;
+  return {R,nose,N,H,r,Wx,Wy,levels,footX,footY,base,deckT:Math.max(0,S.deckBoardT),
+          riserT, Tb, Twalk, platFinX:Wx+riserT+nose, platFinY:Wy+riserT+nose};
+}
+
+/* One tread leg, one level. style: "miter" (mitered outside corner, boards
+   run parallel to the face, offset o_j accumulates width+gap) or "through"
+   (S.throughLeg runs full length square-cut, the other leg butts short). */
+function treadLegBoards(legName, k, model, style){
+  const R=model.R, nose=model.nose;
+  const Wb = legName==="front" ? model.Wx : model.Wy;
+  const T = model.Tb;
+  const {fit} = treadBoardWidths(model);
+  const offs = treadBoardOffsets(model);          // [0] = the nosing board
+  const boards = [];
+  if(style==="miter"){
+    offs.forEach((b,i)=>boards.push({j:i+1, o:b.o, w:b.w,
+      long:Wb+(k-1)*R+b.o+b.w, short:Wb+(k-1)*R+b.o}));
+  } else {                                        // through-leg / butt style
+    const isThrough = S.throughLeg===legName;
+    const len = isThrough ? (Wb+k*R+model.riserT+nose) : (Wb+(k-1)*R);
+    offs.forEach((b,i)=>boards.push({j:i+1, o:b.o, w:b.w, long:len, short:len}));
+  }
+  return {fit, boards, T, style, Wb, legName, k};
+}
+
+/* Pure geometric leg trapezoid area (no board/gap rounding) — used by the
+   plan drawing and the self-test that miter vs through cover equal area. */
+function ringLegAreaMiter(Wb,k,R,Tb){
+  const short = Wb+(k-1)*R;
+  return Tb*short + Tb*Tb/2;
+}
+function ringLegAreaThrough(Wb,k,R,Tb,isThrough){
+  const short = Wb+(k-1)*R;
+  return isThrough ? Tb*(short+Tb) : Tb*short;
+}
+
+/* Risers. N risers total (riser 1 = platform's own face .. riser N = the
+   outermost, at the deck). Outside corner mitered on the board THICKNESS
+   (a 45 degree cut across thickness t shortens the back point by exactly t). */
+function riserBoards(model){
+  if(S.riserStyle==="open") return null;
+  const t = sk(S.riserStock).t;
+  const rh = S.riserFit==="captured" ? (model.r - sk(S.treadStock).t) : model.r;
+  /* Riser 1 tucks under the PLATFORM decking, not under a tread board, so if
+     those two are different thicknesses it is a different height to the rest. */
+  const rh1 = S.riserFit==="captured"
+    ? (model.r - (S.includePlatform ? sk(S.platSurface).t : sk(S.treadStock).t)) : model.r;
+  const rows = [];
+  for(let k=1;k<=model.N;k++){
+    const frontLong = model.Wx+(k-1)*model.R, sideLong = model.Wy+(k-1)*model.R;
+    rows.push({
+      k, height: k===1 ? rh1 : rh,
+      front:{long:frontLong, short:frontLong-t},
+      side:{long:sideLong, short:sideLong-t}
+    });
+  }
+  return {rows, height:rh, height1:rh1, t};
+}
+
+/* Corner-style comparison: total board count / length / area per level,
+   used by the "compare" corner-joint option in the Framing panel. */
+function compareCornerStyles(model){
+  const out = {miter:{count:0,total:0}, through:{count:0,total:0}};
+  for(const lvl of model.levels){
+    for(const legName of ["front","side"]){
+      for(const style of ["miter","through"]){
+        const tb = treadLegBoards(legName, lvl.k, model, style);
+        out[style].count += tb.boards.length;
+        out[style].total += tb.boards.reduce((s,b)=>s+b.long,0);
+      }
+    }
+  }
+  return out;
+}
+/* ---------- 13. cut stringers -------------------------------------------- */
+function stringerPositions(total, span){
+  const count = Math.max(2, Math.ceil(total/span)+1);
+  const step = total/(count-1);
+  const pos = [];
+  for(let i=0;i<count;i++) pos.push(i*step);
+  return pos;
+}
+/* Minimum board length: build the sawtooth (nosing-line) profile for c
+   notches and project every vertex onto the slope direction — the spread
+   of those projections is the exact minimum length, no rule-of-thumb. */
+function projectStringerLength(c, r, R, Ls, drop){
+  if(c<=0) return 0;
+  const verts = [[0,0]];
+  for(let i=0;i<c;i++){ verts.push([(i+1)*R, i*r]); verts.push([(i+1)*R, (i+1)*r]); }
+  /* The bottom of the stringer is NOT the bottom notch corner (0,0): material
+     continues down the bottom plumb face to the level cut that bears on the
+     deck, i.e. `drop` = r - tread thickness below it. That vertex projects
+     NEGATIVE along the slope, so it lengthens the board by drop*r/Ls. Leaving
+     it out understates the board — about 3" on a 7/11 stair, enough to buy a
+     board one stock length too short. The top plumb cut needs no allowance:
+     it leans back from the top notch corner, which stays the far extreme. */
+  verts.push([0, -(drop||0)]);
+  const ux = R/Ls, uy = r/Ls;
+  let min=Infinity, max=-Infinity;
+  for(const [x,y] of verts){ const p = x*ux+y*uy; if(p<min) min=p; if(p>max) max=p; }
+  return max-min;
+}
+function stringersForLeg(legName, model){
+  const Wb = legName==="front" ? model.Wx : model.Wy;
+  const R=model.R, N=model.N, r=model.r;
+  const stock = sk(S.stringerStock);
+  const total = Wb+(N-1)*R;
+  /* Spacing is governed by what the TREADS can span between supports, not by
+     the stringer's own span — 5/4x6 treads need 16" o.c. even though the 2x12
+     carrying them is good for 24". */
+  const spanLimit = sk(S.treadStock).span || 24;
+  const positions = stringerPositions(total, spanLimit);
+  const Ls = hyp(r,R);
+  const notchDepth = r*R/Ls;
+  const throat = stock.w - notchDepth;
+  const minWidth = notchDepth + S.throatMin;          // narrowest board that can carry this pitch
+  const drop = Math.max(0, r - sk(S.treadStock).t) + model.base;   // bottom plumb face, down to bearing
+  const stockLens = parseStockLens();
+  const list = positions.map(p=>{
+    let kmin = Math.max(1, Math.ceil((p-Wb)/R)+1);
+    if(kmin>N) kmin = N;
+    const c = Math.max(0, N-kmin);
+    const reqLen = c>0 ? projectStringerLength(c,r,R,Ls,drop) : 0;
+    const boardLen = c>0 ? pickStockLen(reqLen, stockLens) : null;
+    return {pos:p, kmin, c, reqLen, boardLen};
+  }).filter(s=>s.c>0);
+  const groups = {};
+  for(const s of list) (groups[s.c] = groups[s.c] || []).push(s);
+  return {legName, Wb, R, N, r, Ls, notchDepth, throat, positions, list, groups, stock,
+          minWidth, spanLimit, drop, fitsStock: stock.w >= minWidth - 1e-9,
+          spacing: positions.length>1 ? positions[1]-positions[0] : 0};
+}
+/* Hip stringer at the outside corner: same rise r, run R*sqrt2, carries all
+   N-1 notches, 45 degree plan bevels, and its own (usually tighter) throat. */
+function hipStringer(model){
+  const R=model.R, r=model.r, N=model.N;
+  const Rh = R*Math.SQRT2;
+  const c = N-1;
+  const Ls = hyp(r,Rh);
+  const notchDepth = r*Rh/Ls;
+  const stock = sk(S.stringerStock);
+  const throat = stock.w-notchDepth;
+  const minWidth = notchDepth + S.throatMin;
+  const drop = Math.max(0, r - sk(S.treadStock).t) + model.base;
+  const reqLen = projectStringerLength(c,r,Rh,Ls,drop);
+  const boardLen = pickStockLen(reqLen, parseStockLens());
+  return {run:Rh, rise:r, c, Ls, notchDepth, throat, reqLen, boardLen, stock, drop,
+          minWidth, fitsStock: stock.w >= minWidth - 1e-9};
+}
+
+/* ---------- 14. box frames ------------------------------------------------
+   One L-shaped box per level k, rim height = r - tread thickness. Load path:
+   box k's outer rim bears on box k+1's tread boards directly over box k+1's
+   inner rim; box k's inner rim needs blocking down to the deck except k=1
+   (fastens to the platform frame) and k=N-1 (sits on the deck). */
+function boxesForLevel(model,k){
+  const R=model.R, r=model.r;
+  /* Every box is r - tread thickness tall, EXCEPT the bottom one when the
+     framing bears on the deck structure: it reaches a decking thickness lower,
+     so it is that much deeper and may need wider stock. */
+  const isBottom = k===model.N-1;
+  const rimH = r - sk(S.treadStock).t + (isBottom ? model.base : 0);
+  const rimStock = sk(S.frameStock);
+  const spacing = sk(S.treadStock).span || 24;
+  const legs = ["front","side"].map(legName=>{
+    const Wb = legName==="front" ? model.Wx : model.Wy;
+    const outer = Wb+k*R, inner = Wb+(k-1)*R;
+    const joistLen = Math.max(0, R-2*rimStock.t);
+    /* ceil, not floor: floor(71/24)+1 = 3 joists leaves 35" clear on a 24"
+       span. ceil(71/24)+1 = 5 gives 17-3/4" clear. */
+    const joistCount = Math.max(2, Math.ceil(outer/spacing)+1);
+    return {legName, outer, inner, joistLen, joistCount, joistSpacing: outer/Math.max(1,joistCount-1)};
+  });
+  return {k, rimH, isBottom, legs, rimFit: fitBoards(rimH, rimStock.w, 0),
+          rimStockOK: rimStock.w >= rimH - 1e-9};
+}
+/* The inner rim runs the whole length of BOTH legs, so it needs a block at
+   every joist position — not one per level. Level 1 fastens to the platform
+   frame and the bottom level sits on the deck, so neither needs blocks. */
+function boxSupportBlocks(model){
+  const blocks = [];
+  const spacing = sk(S.treadStock).span || 24;
+  for(let k=2;k<=model.N-2;k++){
+    const height = model.H-(k+1)*model.r + model.base;   // z_(k+1) down to the bearing plane
+    for(const legName of ["front","side"]){
+      const Wb = legName==="front" ? model.Wx : model.Wy;
+      const inner = Wb+(k-1)*model.R;
+      blocks.push({k, legName, inner, height,
+        qty: Math.max(2, Math.ceil(inner/spacing)+1),
+        note:"under level "+k+"'s "+legName+" inner rim, down to the deck"});
+    }
+  }
+  return blocks;
+}
+
+/* ---------- 15. platform framing ----------------------------------------- */
+function platformModel(model){
+  const surf = sk(S.platSurface), frame = sk(S.platFrame);
+  /* Frame height reaches from the underside of its decking down to bearing. */
+  const height = model.H - surf.t + model.base;
+  const dir = S.platJoistDir;                     // 'y' = out from wall, 'x' = along wall
+  const alongJoist = dir==="y" ? model.Wy : model.Wx;
+  const acrossJoist = dir==="y" ? model.Wx : model.Wy;
+  const joistLen = Math.max(0, alongJoist-2*frame.t);
+  const joistCount = Math.max(2, Math.ceil(acrossJoist/(surf.span||16))+1);   // ceil: see boxesForLevel
+  const rimPieces = [
+    {len:model.Wx, qty:2, role:"platform rim (X, full length)"},
+    {len:Math.max(0,model.Wy-2*frame.t), qty:2, role:"platform rim (Y, fit between)"}
+  ];
+  /* The platform IS the top tread, so its decking overhangs the two faces that
+     have steps below them by the nosing — same detail as every other tread.
+     The frame stays Wx × Wy; only the decking is bigger. */
+  /* Overhang past the frame = riser thickness (the platform's own riser board
+     is captured under this decking) + the nosing. */
+  const nose = model.nose, over = model.riserT + nose;
+  const deckBoardLen = (dir==="y" ? model.Wx : model.Wy) + over;   // boards run across the overhung face
+  const deckFillDim  = (dir==="y" ? model.Wy : model.Wx) + over;
+  const deckFit = fitBoards(deckFillDim, surf.w, S.treadGap);
+  /* FLOATING platform, built entirely from the platform frame stock: a box
+     frame whose depth is that stock's width, standing on legs cut from the
+     same stock. Nothing is attached to the house. */
+  const frameDepth = frame.w;
+  const legH = height - frameDepth;                       // what the legs have to make up
+  const legSpan = frame.span || 24;
+  const legCols = Math.max(2, Math.ceil(model.Wx/legSpan)+1);
+  const legRows = Math.max(2, Math.ceil(model.Wy/legSpan)+1);
+  const needsLegs = legH > 0.25;
+  const legCount = needsLegs ? legCols*legRows : 0;
+  const ripFrame = height < frameDepth - 0.0626;          // stock deeper than the whole platform
+  return {height, dir, joistLen, joistCount, rimPieces, deckFit, deckBoardLen, deckFillDim,
+          surf, frame, nose, finX:model.platFinX, finY:model.platFinY,
+          frameDepth, legH, legSpan, legCols, legRows, legCount, needsLegs, ripFrame,
+          braceNeeded: needsLegs && legH > 3*frame.t*2};
+}
+/* ---------- 15b. skirts on the open side face (X=0) ---------------------- */
+/* The exposed end runs from the platform face (y=Wy, z=H) down to the deck
+   (y=footY, z=0), so a single raking skirt board covers it. Minimum board
+   width has to reach from the nosing line past the step corners. */
+function skirtPieces(model){
+  const runTotal = (model.N-1)*model.R + model.nose;
+  const rake = hyp(runTotal, model.H);
+  const minW = model.r*model.R/hyp(model.r,model.R) + 2;
+  const out = [{role:t("Side skirt (open X=0 face)"), stock:S.skirtStock, len:rake, qty:1, angle:t("rake"),
+    note:t("cut to the step profile; needs a board at least {0} wide ({1} is {2})", fmtIn(minW), S.skirtStock, fmtIn(sk(S.skirtStock).w))}];
+  if(S.includePlatform)
+    out.push({role:t("Platform side skirt (X=0)"), stock:S.skirtStock, len:model.Wy, qty:1,
+      note:t("clads the platform rim on the open side")});
+  return out;
+}
+function skirtInfo(model){
+  const minW = model.r*model.R/hyp(model.r,model.R) + 2;
+  return {rake: hyp((model.N-1)*model.R+model.nose, model.H), minW, wide: sk(S.skirtStock).w >= minW};
+}
+
+/* ---------- 16. piece collection ----------------------------------------- */
+function collectPieces(model){
+  const pieces = [];
+  const style = S.cornerStyle==="through" ? "through" : "miter";  // compare uses miter for the cut list
+  for(const lvl of model.levels){
+    for(const legName of ["front","side"]){
+      const tb = treadLegBoards(legName, lvl.k, model, style);
+      for(const b of tb.boards){
+        pieces.push({role:t("Tread L{0} {1} bd{2}", lvl.k, t(legName), b.j), stock:S.treadStock, len:b.long, qty:1,
+          angle: style==="miter" ? "45°/90°" : "90°/90°", note:t("offset {0}", fmtIn(b.o))});
+      }
+    }
+  }
+  if(S.riserStyle==="closed"){
+    const rb = riserBoards(model);
+    for(const row of rb.rows){
+      pieces.push({role:t("Riser {0} {1}", row.k, t("front")), stock:S.riserStock, len:row.front.long, qty:1, angle:"45°/90°"});
+      pieces.push({role:t("Riser {0} {1}", row.k, t("side")), stock:S.riserStock, len:row.side.long, qty:1, angle:"45°/90°"});
+    }
+  }
+  if(S.method==="stringers"){
+    for(const legName of ["front","side"]){
+      const st = stringersForLeg(legName, model);
+      for(const s of st.list){
+        /* The PIECE is the stringer's cut length, not the stock it comes from —
+           feeding the stock length in here made the packer buy a whole board per
+           stringer instead of nesting two or three on one. */
+        pieces.push({role:t("{0} stringer ({1} notches)", t(legName), s.c), stock:S.stringerStock, len:s.reqLen, qty:1,
+          angle:t("layout marks"), note:t("at {0}", fmtIn(s.pos))+(s.boardLen?"":t(" — needs splice"))});
+      }
+    }
+    const hip = hipStringer(model);
+    pieces.push({role:t("Hip stringer ({0} notches)", hip.c), stock:S.stringerStock, len:hip.reqLen, qty:1,
+      angle:t("45° plan bevel"), note: hip.boardLen?"":t("needs splice")});
+  } else {
+    for(const lvl of model.levels){
+      const bx = boxesForLevel(model, lvl.k);
+      const rimNote = t("rim height {0}", fmtIn(bx.rimH))+(bx.isBottom&&model.base>0?t(" (deeper — bears on the deck structure)"):"");
+      for(const leg of bx.legs){
+        pieces.push({role:t("Box {0} {1} outer rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.outer, qty:1, angle:"45°", note:rimNote});
+        pieces.push({role:t("Box {0} {1} inner rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.inner, qty:1, angle:"45°", note:rimNote});
+        pieces.push({role:t("Box {0} {1} joist", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.joistLen, qty:leg.joistCount, angle:"90°"});
+      }
+      pieces.push({role:t("Box {0} corner block", lvl.k), stock:S.frameStock, len:hyp(sk(S.frameStock).w,sk(S.frameStock).w), qty:1, angle:"45°"});
+    }
+    for(const blk of boxSupportBlocks(model)){
+      pieces.push({role:t("Support block (box {0} {1})", blk.k, t(blk.legName)), stock:S.frameStock,
+        len:Math.max(blk.height,0.25), qty:blk.qty,
+        note:t("under level {0}'s {1} inner rim, down to the deck", blk.k, t(blk.legName))});
+    }
+  }
+  /* Skirts. Only the X=0 side face is ever exposed — the wall closes Y=0, and
+     the other two faces are the stairs themselves. */
+  if(S.faceX0==="open"){
+    const sk1 = skirtPieces(model);
+    for(const p of sk1) pieces.push(p);
+  }
+  if(S.includePlatform){
+    const pf = platformModel(model);
+    for(const rp of pf.rimPieces) pieces.push({role:t(rp.role), stock:S.platFrame, len:rp.len, qty:rp.qty});
+    pieces.push({role:t("Platform joist"), stock:S.platFrame, len:pf.joistLen, qty:pf.joistCount});
+    if(pf.needsLegs)
+      pieces.push({role:t("Platform leg (floating)"), stock:S.platFrame, len:pf.legH, qty:pf.legCount,
+        note:t("{0} × {1} grid at {2} o.c.", pf.legCols, pf.legRows, fmtIn(pf.legSpan))});
+    pieces.push({role:t("Platform decking"), stock:S.platSurface, len:pf.deckBoardLen, qty:pf.deckFit.n + (pf.deckFit.recommend==="rip"?1:pf.deckFit.recommend==="overshoot"?1:0)});
+  }
+  return pieces.filter(p=>p.len>0 && p.qty>0);
+}
+
+/* ---------- 17. bin packing (first-fit-decreasing) ----------------------- */
+/* When a new bin is needed, try every stock length long enough for the
+   current (largest remaining) piece, simulate packing the rest into it,
+   and keep whichever length gives the best fill. */
+function binPack(pieces){
+  const kerf = S.kerf, minOff = S.minOffcut;
+  const stockLens = parseStockLens();
+  const byStock = {};
+  for(const p of pieces) (byStock[p.stock] = byStock[p.stock] || []).push(p);
+  const out = {};
+  for(const stockName in byStock){
+    let items = [];
+    for(const p of byStock[stockName]) for(let i=0;i<p.qty;i++) items.push({len:p.len, role:p.role});
+    items.sort((a,b)=>b.len-a.len);
+    const bins = [];
+    while(items.length){
+      const first = items[0];
+      const candidates = stockLens.filter(L=>L>=first.len);
+      const tryLens = candidates.length ? candidates : [Math.max(first.len, stockLens.length?Math.max(...stockLens):first.len)];
+      let best = null;
+      for(const L of tryLens){
+        let remaining = L, taken = [], used = 0;
+        for(let idx=0; idx<items.length; idx++){
+          const it = items[idx];
+          const need = it.len + (used>0 ? kerf : 0);
+          if(need <= remaining){ remaining -= need; used++; taken.push(idx); }
+        }
+        const fill = (L-remaining)/L;
+        if(!best || fill>best.fill || (fill===best.fill && L<best.L)) best = {L, taken, fill, remaining};
+      }
+      const cuts = best.taken.map(i=>items[i]);
+      bins.push({stockLen:best.L, cuts, waste:best.remaining});
+      best.taken.sort((a,b)=>b-a).forEach(i=>items.splice(i,1));
+    }
+    out[stockName] = bins.map(b=>({...b, wastePct: b.stockLen?(b.waste/b.stockLen*100):0, offcutUsable: b.waste>=minOff}));
+  }
+  return out;
+}
+
+/* ---------- 18. SVG drawing helpers -------------------------------------- */
+function svgOpen(w,h){ return '<svg viewBox="0 0 '+w.toFixed(0)+' '+h.toFixed(0)+'" xmlns="http://www.w3.org/2000/svg">'; }
+function svgLine(x1,y1,x2,y2,extra){ return '<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" '+(extra||'stroke="#334" stroke-width="1"')+'/>'; }
+function svgText(x,y,s,extra){ return '<text x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" '+(extra||'font-size="10" fill="#334"')+'>'+s+'</text>'; }
+function svgRect(x,y,w,h,extra){ return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" '+(extra||'fill="none" stroke="#334"')+'/>'; }
+/* Rough advance width of an SVG label. Used to size gutters and canvases from
+   the ACTUAL text, so a longer translation cannot run off the drawing. */
+function estTextW(s,fs){ return String(s).length*(fs||10)*0.55; }
+function svgPoly(pts,extra){ return '<polygon points="'+pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")+'" '+(extra||'fill="none" stroke="#334"')+'/>'; }
+function dimLineH(x1,x2,y,label){
+  const t=4;
+  return svgLine(x1,y,x2,y,'stroke="#333" stroke-width=".75"')
+    +svgLine(x1,y-t,x1,y+t,'stroke="#333" stroke-width=".75"')
+    +svgLine(x2,y-t,x2,y+t,'stroke="#333" stroke-width=".75"')
+    +'<text x="'+((x1+x2)/2).toFixed(1)+'" y="'+(y-5).toFixed(1)+'" font-size="10" fill="#333" text-anchor="middle">'+label+'</text>';
+}
+function dimLineV(x,y1,y2,label,side){
+  const t=4, left = side==="left";
+  return svgLine(x,y1,x,y2,'stroke="#333" stroke-width=".75"')
+    +svgLine(x-t,y1,x+t,y1,'stroke="#333" stroke-width=".75"')
+    +svgLine(x-t,y2,x+t,y2,'stroke="#333" stroke-width=".75"')
+    +'<text x="'+(left?x-6:x+6).toFixed(1)+'" y="'+((y1+y2)/2).toFixed(1)+'" font-size="10" fill="#333" text-anchor="'+(left?"end":"start")+'">'+label+'</text>';
+}
+function scaleBarSVG(x,y,scale){ const oneFoot=12*scale; return svgLine(x,y,x+oneFoot,y,'stroke="#000" stroke-width="2"')+svgText(x,y-4,t("scale: 1 ft"),'font-size="9" fill="#000"'); }
+/* leader line from a point on the drawing out to a label in the gutter */
+function svgLead(px,py,tx,ty,txt,anchor){
+  return svgLine(px,py,tx+(anchor==="end"?6:-6),ty-3,'stroke="#7a8794" stroke-width=".7"')
+    +'<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="1.7" fill="#7a8794"/>'
+    +'<text x="'+tx.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="10" fill="#223" text-anchor="'+(anchor||"start")+'">'+txt+'</text>';
+}
+/* ---------- 18b. materials palette & section geometry -------------------- */
+const MAT = {
+  tread:'fill="#e6bd8c" stroke="#a97b45" stroke-width=".8"',
+  riser:'fill="#d3a06a" stroke="#a97b45" stroke-width=".8"',
+  frame:'fill="#c2a884" stroke="#8a6a45" stroke-width=".8"',
+  string:'fill="#cdb693" stroke="#8a6a45" stroke-width="1"',
+  block:'fill="#b39875" stroke="#8a6a45" stroke-width=".8"',
+  plat:'fill="#cfe0ef" stroke="#5b87ad" stroke-width=".9"',
+  platDeck:'fill="#e6bd8c" stroke="#5b87ad" stroke-width=".8"',
+  exist:'fill="#d3d9df" stroke="#9aa6b2" stroke-width=".8"',
+  wall:'fill="#e7e9ec" stroke="#9aa6b2" stroke-width=".8"'
+};
+function legendHTML(items){
+  return '<div class="legend">'+items.map(i=>'<span><i style="background:'+i[0]+';border-color:'+i[1]+'"></i>'+i[2]+"</span>").join("")+"</div>";
+}
+function materialsLegend(){
+  return legendHTML([["#e6bd8c","#a97b45",t("tread boards ({0})", S.treadStock)],
+    ["#d3a06a","#a97b45",t("riser boards ({0})", S.riserStyle==="closed"?S.riserStock:t("none — open"))],
+    [S.method==="boxes"?"#c2a884":"#cdb693", "#8a6a45",
+      S.method==="boxes"?t("box frame / joists ({0})", S.frameStock):t("stringers ({0})", S.stringerStock)],
+    ["#cfe0ef","#5b87ad",t("platform frame")],
+    ["#d3d9df","#9aa6b2",t("existing deck / house wall")]]);
+}
+/* The front-leg section: every piece of material, in stair coordinates
+   (u = distance out from the house wall, z = height above the deck surface). */
+/* Laid out from the NOSING inwards: board 1 is a full board with its front
+   edge ON the nosing tip, and any odd piece is ripped at the BACK, where the
+   riser board covers it. Overshooting backwards is not an option — behind the
+   tread's back edge sits the frame of the level above. */
+function treadBoardWidths(model){
+  const stock=sk(S.treadStock), gap=S.treadGap, T=model.Tb, w=stock.w;
+  const fit=fitBoards(T, w, gap);                    // kept for the alternatives readout
+  const nFull=Math.max(1, Math.floor((T+gap)/(w+gap)));
+  const covered=nFull*w+(nFull-1)*gap, rem=T-covered;
+  let widths=Array(nFull).fill(w), backRip=0, exact=false, slack=0;
+  if(rem<0.0626) exact=true;                         // back edge lands on the frame
+  else if(rem<=gap+0.0626) slack=rem;                // absorbed by a wider gap at the back
+  else { backRip=rem-gap; widths.push(backRip); }    // filler strip at the back
+  return {widths, effGap:gap, fit, nFull, backRip, exact, slack, T};
+}
+/* Front-anchored offsets, measured from the tread's back edge datum.
+   Index 0 is the nosing board. */
+function treadBoardOffsets(model){
+  const {widths, effGap}=treadBoardWidths(model);
+  const out=[]; let front=model.Tb;
+  for(const w of widths){ const back=front-w; out.push({o:back, w}); front=back-effGap; }
+  return out;
+}
+function sectionPieces(model){
+  const tt=sk(S.treadStock).t, rt=sk(S.riserStock).t;
+  const st=S.includePlatform ? sk(S.platSurface).t : tt;
+  const {widths, effGap} = treadBoardWidths(model);
+  const {Wy,R,nose,r,N,H} = model;
+  const treads=[], risers=[], frames=[];
+  const offs = treadBoardOffsets(model);
+  for(let k=1;k<=N-1;k++){
+    const z=H-k*r, u0=Wy+(k-1)*R;
+    const bds = offs.map(b=>({u:u0+b.o, w:b.w}));      // front-anchored on the nosing
+    treads.push({k, z, u0, u1:u0+R, bds, depth:model.Tb});
+    // zBot = z_(k+1); the bottom step reaches the bearing plane, which is -base
+    frames.push({k, u0, u1:u0+R, zTop:z-tt, zBot:(k===N-1 ? -model.base : H-(k+1)*r)});
+  }
+  for(let k=1;k<=N;k++){                                        // riser 1 = platform face
+    risers.push({k, u:Wy+(k-1)*R, zTop:(k===1? H-st : H-(k-1)*r-tt), zBot:H-k*r});
+  }
+  return {treads, risers, frames, tt, rt, st, widths, effGap};
+}
+/* ---------- 18c. terminology diagram ------------------------------------- */
+function renderTerminologySVG(model){
+  const r=model.r, R=model.R, n=model.nose;
+  const tt=sk(S.treadStock).t, rt=sk(S.riserStock).t, st=S.includePlatform?sk(S.platSurface).t:tt;
+  const sc=Math.min(12, 190/Math.max(R,1), 150/Math.max(r,1));
+  const pd=Math.min(model.Wy,15);                                // platform shown, truncated
+  const base=model.base, dT=model.deckT, jD=5.5;
+  const closed0 = S.riserStyle==="closed";
+  /* Gutters are sized from the real label text so a longer translation cannot
+     push a leader line off the canvas. */
+  const LBL_L=[t("platform decking = the top tread"),
+    base>0?t("platform frame — down to the joists"):t("platform frame — sits on the decking"),
+    t("existing deck joists"),
+    base>0?t("existing decking — cut away under the stair"):t("existing decking, z = 0 on top"),
+    closed0?t("riser 1 = the platform's own face"):"", t("total rise H"),
+    base>0?t("framing {0} deeper — rise unchanged", fmtIn(base)):""];
+  const LBL_R=[t("tread board ({0} × {1})", S.treadStock, treadBoardWidths(model).widths.length),
+    S.riserStyle==="open"?t("riser board (omitted — open riser)"):t("riser board ({0})", S.riserStock),
+    S.method==="boxes"?t("box rim / frame"):t("cut stringer behind"),
+    t("bearing: rim above lands over the rim below"), t("unit rise r"),
+    t("tread surface — level {0} height z", model.N-1), n>0.01?t("nosing {0}", fmtIn(n)):""];
+  const FOOT=t("schematic — 2 steps of your actual rise/run shown");
+  const gl=Math.max(...LBL_L.map(s=>estTextW(s,10)))+24;
+  const gr=Math.max(...LBL_R.map(s=>estTextW(s,10)))+26;
+  const mT=18, mB=34;
+  const rt0=model.riserT;
+  const uMin=-5, uMax=pd+2*R+rt0+n+6, zMax=3*r+2.5, zMin=-(dT+jD)-1;
+  const W=Math.max(gl+(uMax-uMin)*sc+gr, gl+estTextW(FOOT,9)+24), H=(zMax-zMin)*sc+mT+mB;
+  const X=u=>gl+(u-uMin)*sc, Y=z=>mT+(zMax-z)*sc;
+  const box=(u0,u1,z0,z1,style)=>svgRect(X(u0),Y(z1),(u1-u0)*sc,(z1-z0)*sc,style);
+  let s=svgOpen(W,H);
+  s+=box(-5,0,zMin,3*r,MAT.wall)+svgText(X(-4.6),Y(3*r)-5,t("house"),'font-size="9" fill="#78838f"');
+  s+=box(uMin,uMax,-dT-jD,-dT,MAT.exist);                        // existing joists
+  if(base>0) s+=box(pd+2*R+n,uMax,-dT,0,MAT.exist);              // decking, cut away under the stair
+  else s+=box(uMin,uMax,-dT,0,MAT.exist);
+  s+=box(0,pd,-base,3*r-st,MAT.plat);
+  s+=svgLine(X(pd*0.5),Y(0),X(pd*0.5),Y(3*r),'stroke="#5b87ad" stroke-width=".7" stroke-dasharray="3 3"');
+  s+=svgText(X(1),Y(3*r-st)+13,t("platform continues to the wall"),'font-size="8.5" fill="#5b87ad"');
+  // two steps, exactly as the calculator builds them
+  const lv=[{z:2*r,u0:pd},{z:r,u0:pd+R}];
+  const structStyle = S.method==="boxes" ? MAT.frame : MAT.string;
+  const closed = S.riserStyle==="closed";
+  for(const l of lv){
+    const bot = (l.z===r) ? -base : l.z-r;                       // bottom step reaches bearing
+    s+=box(l.u0,l.u0+R,bot,l.z-tt,structStyle);                  // box rim / stringer
+    s+=box(l.u0,l.u0+R+rt0+n,l.z-tt,l.z,MAT.tread);              // tread — laps the riser, then the nosing
+    s+=svgLine(X(l.u0+R/2),Y(l.z),X(l.u0+R/2),Y(l.z-tt),'stroke="#a97b45" stroke-width=".6"');
+    if(closed) s+=box(l.u0+R,l.u0+R+rt,bot,l.z-tt,MAT.riser);    // riser below/in front
+  }
+  s+=box(0,pd+rt0+n,3*r-st,3*r,MAT.platDeck);                    // platform decking, overhanging the riser face
+  if(closed) s+=box(pd,pd+rt,2*r,3*r-st,MAT.riser);              // riser 1 clads the platform face, on its outside
+  // ---- labels, left gutter
+  const Lx=gl-14;
+  s+=svgLead(X(pd*0.6),Y(3*r-st/2),Lx,Y(3*r)-4,LBL_L[0],"end");
+  s+=svgLead(X(pd*0.75),Y(1.9*r),Lx,Y(3*r)+12,LBL_L[1],"end");
+  s+=svgLead(X(-2.5),Y(-dT-jD/2),Lx,Y(0)+18,LBL_L[2],"end");
+  s+=svgLead(X(uMax-3),Y(-dT/2),Lx,Y(0)+30,LBL_L[3],"end");
+  if(closed) s+=svgLead(X(pd+rt/2),Y(2.5*r),Lx,Y(2.6*r),LBL_L[4],"end");
+  s+=dimLineV(X(-3.2),Y(3*r),Y(0),LBL_L[5],"left");
+  if(base>0) s+=dimLineV(X(-3.2),Y(0),Y(-base),LBL_L[6],"left");
+  // ---- labels, right gutter
+  const Rx=X(uMax)+16;
+  const t1=lv[0], t2=lv[1];
+  s+=svgLead(X(t1.u0+R*0.55),Y(t1.z-tt/2),Rx,Y(3*r)-2,LBL_R[0]);
+  s+=svgLead(X(t1.u0+R+rt/2),Y(t1.z-r/2),Rx,Y(3*r)+14,LBL_R[1]);
+  s+=svgLead(X(t1.u0+R*0.3),Y(t1.z-tt-(r-tt)/2),Rx,Y(3*r)+30,LBL_R[2]);
+  s+=svgLead(X(t2.u0+2),Y(t2.z+0.4),Rx,Y(3*r)+46,LBL_R[3]);
+  s+=dimLineV(X(uMax-2.5),Y(2*r),Y(r),LBL_R[4]);
+  /* run = nosing tip to nosing tip */
+  const tip1=t1.u0+R+rt0+n, tip2=t2.u0+R+rt0+n;
+  s+=svgLine(X(tip1),Y(t1.z),X(tip1),Y(0)+20,'stroke="#999" stroke-width=".6" stroke-dasharray="2 2"');
+  s+=svgLine(X(tip2),Y(t2.z),X(tip2),Y(0)+20,'stroke="#999" stroke-width=".6" stroke-dasharray="2 2"');
+  s+=dimLineH(X(tip1),X(tip2),Y(0)+16,t("unit run R — nosing to nosing"));
+  // walking depth: riser face behind, to the nosing tip in front
+  s+=dimLineH(X(t2.u0+rt0),X(t2.u0+R+rt0+n),Y(0)+32,t("tread depth T = R + nosing"));
+  if(n>0.01) s+=svgLead(X(t2.u0+R+rt0+n/2),Y(t2.z-tt/2),Rx,Y(0)+8,LBL_R[6]);
+  s+=svgLead(X(t2.u0+R*0.5),Y(t2.z),Rx,Y(r)+2,LBL_R[5]);
+  s+=scaleBarSVG(gl,H-10,sc);
+  s+=svgText(gl,H-22,FOOT,'font-size="9" fill="#78838f"');
+  s+="</svg>";
+  return s;
+}
+
+/* Realistic plan: every board drawn at its true width with its real gap and
+   mitered end, framing below shown as hidden (dashed) lines. */
+function renderPlanSVG(model){
+  const {Wx,Wy,R,nose,N,footX,footY}=model;
+  const style = S.cornerStyle==="through" ? "through" : "miter";
+  const capBottom=t("front leg — steps descend this way (+Y)");
+  const rightLabels=[t("side leg (+X)"), t("45° miter line"), t("hip stringer")];
+  const mL=52, mT=40, mB=52;
+  const mR=Math.max(76, Math.max(...rightLabels.map(s=>estTextW(s,9)))+24);
+  const scale=Math.min(7.5, 690/Math.max(footX+5,1));
+  const W=Math.max(mL+(footX+5)*scale+mR, mL+estTextW(capBottom,9)+24), H=mT+(footY+5)*scale+mB;
+  const X=x=>mL+x*scale, Y=y=>mT+y*scale;
+  let s=svgOpen(W,H);
+  // house wall along y=0, and the open/walled far side face at x=0
+  s+=svgRect(X(0)-4,Y(-4),(footX+4)*scale+4,4*scale,MAT.wall);
+  s+=svgText(X(1),Y(-4)+12,t("house wall"),'font-size="10" fill="#78838f"');
+  if(S.faceX0==="wall") s+=svgRect(X(-4),Y(-4),4*scale,(footY+4)*scale,MAT.wall);
+  else s+=svgText(X(0)-8,Y(footY/2),t("open side (skirt)"),'font-size="9" fill="#a06a2c" transform="rotate(-90 '+(X(0)-8).toFixed(1)+' '+Y(footY/2).toFixed(1)+')" text-anchor="middle"');
+  // platform frame (its decking is drawn later, so the nosing overhangs the treads)
+  s+=svgRect(X(0),Y(0),Wx*scale,Wy*scale,MAT.plat);
+  // tread boards, level by level
+  for(const lvl of model.levels){
+    const k=lvl.k;
+    for(const legName of ["front","side"]){
+      const tb=treadLegBoards(legName,k,model,style);
+      const base=(legName==="front"?Wy:Wx)+(k-1)*R;      // depth coordinate of the tread's inner edge
+      for(const b of tb.boards){
+        const a=base+b.o, c2=a+b.w;                       // this board's near/far edge in the depth direction
+        if(legName==="front"){
+          s+=(style==="miter")
+            ? svgPoly([[X(0),Y(a)],[X(b.short),Y(a)],[X(b.long),Y(c2)],[X(0),Y(c2)]],MAT.tread)
+            : svgRect(X(0),Y(a),b.long*scale,b.w*scale,MAT.tread);
+        } else {
+          s+=(style==="miter")
+            ? svgPoly([[X(a),Y(0)],[X(a),Y(b.short)],[X(c2),Y(b.long)],[X(c2),Y(0)]],MAT.tread)
+            : svgRect(X(a),Y(0),b.w*scale,b.long*scale,MAT.tread);
+        }
+      }
+    }
+    // miter line and level tag
+    const ix=Wx+(k-1)*R, iy=Wy+(k-1)*R, ox=Wx+k*R+model.riserT+nose, oy=Wy+k*R+model.riserT+nose;
+    if(style==="miter") s+=svgLine(X(ix),Y(iy),X(ox),Y(oy),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
+    s+=svgText(X(ox)-5,Y(oy)-5,"L"+k,'font-size="9.5" fill="#6b4a2a" text-anchor="end"');
+  }
+  /* Platform decking last, so its nosing overhangs level 1's tread the same way
+     every tread overhangs the one below it. Frame is Wx × Wy; decking is +nosing
+     on the two faces that have steps. */
+  const fX=model.platFinX, fY=model.platFinY;
+  if(S.includePlatform){
+    const ps=sk(S.platSurface), pg=S.treadGap;
+    if(S.platJoistDir==="y"){ for(let o=0;o<fY-0.01;o+=ps.w+pg) s+=svgRect(X(0),Y(o),fX*scale,Math.min(ps.w,fY-o)*scale,MAT.platDeck); }
+    else { for(let o=0;o<fX-0.01;o+=ps.w+pg) s+=svgRect(X(o),Y(0),Math.min(ps.w,fX-o)*scale,fY*scale,MAT.platDeck); }
+  } else s+=svgRect(X(0),Y(0),fX*scale,fY*scale,MAT.platDeck);
+  if(model.nose>0.01){
+    s+=svgLine(X(0),Y(Wy),X(Wx),Y(Wy),'stroke="#5b87ad" stroke-width=".8" stroke-dasharray="3 2"');
+    s+=svgLine(X(Wx),Y(0),X(Wx),Y(Wy),'stroke="#5b87ad" stroke-width=".8" stroke-dasharray="3 2"');
+    s+=svgText(X(Wx)+3,Y(Wy)+11,t("platform frame {0} × {1}", L(Wx), L(Wy)),'font-size="8.5" fill="#5b87ad"');
+  }
+  s+=svgText(X(Math.min(Wx,fX)/2),Y(Wy/2),
+    model.nose>0.01 ? t("platform {0} × {1} finished", L(fX), L(fY)) : t("platform {0} × {1}", L(fX), L(fY)),
+    'font-size="10" fill="#33556e" text-anchor="middle"');
+  if(style==="miter") s+=svgText(X(footX)+6,Y(footY)-2,t("45° miter line"),'font-size="9" fill="#8c3b3b"');
+  // framing below, hidden-line dashed
+  const dash='stroke="#4c6076" stroke-width=".8" stroke-dasharray="3 2.5"';
+  if(S.method==="boxes"){
+    for(const lvl of model.levels){
+      const bx=boxesForLevel(model,lvl.k);
+      for(const leg of bx.legs){
+        const inner=(leg.legName==="front"?Wy:Wx)+(lvl.k-1)*R, outer=inner+R;
+        if(leg.legName==="front"){
+          s+=svgLine(X(0),Y(inner),X(Wx+(lvl.k-1)*R),Y(inner),dash);
+          s+=svgLine(X(0),Y(outer),X(leg.outer),Y(outer),dash);
+          for(let i=0;i<leg.joistCount;i++){ const x=Math.min(i*leg.joistSpacing,leg.outer); s+=svgLine(X(x),Y(inner),X(x),Y(outer),dash); }
+        } else {
+          s+=svgLine(X(inner),Y(0),X(inner),Y(Wy+(lvl.k-1)*R),dash);
+          s+=svgLine(X(outer),Y(0),X(outer),Y(leg.outer),dash);
+          for(let i=0;i<leg.joistCount;i++){ const y=Math.min(i*leg.joistSpacing,leg.outer); s+=svgLine(X(inner),Y(y),X(outer),Y(y),dash); }
+        }
+      }
+    }
+  } else {
+    for(const legName of ["front","side"]){
+      const st=stringersForLeg(legName,model);
+      for(const g of st.list){
+        const start=(legName==="front"?Wy:Wx)+(g.kmin-1)*R;
+        if(legName==="front") s+=svgLine(X(g.pos),Y(start),X(g.pos),Y(footY),dash);
+        else s+=svgLine(X(start),Y(g.pos),X(footX),Y(g.pos),dash);
+      }
+    }
+    s+=svgLine(X(Wx),Y(Wy),X(footX),Y(footY),'stroke="#4c6076" stroke-width="1.6" stroke-dasharray="6 3"');
+    s+=svgText(X(footX)+6,Y(footY)+12,t("hip stringer"),'font-size="9" fill="#4c6076"');
+  }
+  s+=svgText(mL,Y(footY)+34,capBottom,'font-size="9" fill="#667"');
+  s+=svgText(X(footX)+16,Y(footY/2),t("side leg (+X)"),'font-size="9" fill="#667"');
+  s+=dimLineH(X(0),X(footX),Y(footY)+18,L(footX));
+  s+=dimLineV(X(footX)+46,Y(0),Y(footY),L(footY));
+  s+=scaleBarSVG(mL,H-12,scale);
+  s+="</svg>";
+  return s;
+}
+
+function renderElevationSVG(model){
+  /* Realistic section through the FRONT leg: u = distance out from the house
+     wall, z = height above the existing deck surface. The platform is drawn
+     cut short (break line) so the steps stay large and legible. */
+  const P=sectionPieces(model);
+  const {r,R,N,H,nose,Wy,base,deckT}=model;
+  const joistD=7.25;                                    // existing deck joist, drawn only
+  const pd=Math.min(Wy,18), shift=Wy-pd;
+  const uMin=-5, uMax=pd+(N-1)*R+model.riserT+nose+P.rt+8;
+  /* A stringer's plumb cut at the platform reaches bw·Ls/R below the first
+     seat, which on a steep pitch dips below the deck framing. */
+  const plumbLow = S.method==="stringers" ? (H-P.tt)-sk(S.stringerStock).w*hyp(r,R)/R : 0;
+  const zMin=Math.min(-(deckT+joistD)-1, plumbLow-1), zMax=H+3;
+  const scale=Math.min(7.5, 620/(uMax-uMin));
+  /* Left margin has to hold the rise dimension and the bearing note, which are
+     anchored to its right edge — size it from the actual text. */
+  const dimLbl=t("H = {0}", L(H)), note1=t("framing only —"), note2=t("rise is unchanged");
+  const footer=t("section through the front leg — the side leg is identical, using the platform's other dimension");
+  const mL=Math.max(96, estTextW(dimLbl,10)+22, estTextW(note1,8.5)+18, estTextW(note2,8.5)+18);
+  const mR=44, mT=22, mB=64;
+  const W=Math.max(mL+(uMax-uMin)*scale+mR, mL+estTextW(footer,9)+24), Ht=mT+(zMax-zMin)*scale+mB;
+  const D=u=>u-shift, X=d=>mL+(d-uMin)*scale, Y=z=>mT+(zMax-z)*scale;
+  const box=(u0,u1,z0,z1,st)=>svgRect(X(D(u0)),Y(z1),(u1-u0)*scale,(z1-z0)*scale,st);
+  const boxD=(d0,d1,z0,z1,st)=>svgRect(X(d0),Y(z1),(d1-d0)*scale,(z1-z0)*scale,st);
+  let s=svgOpen(W,Ht);
+  s+=svgRect(X(uMin),Y(H+1),(0-uMin)*scale,(H+1-zMin)*scale,MAT.wall);
+  s+=svgText(X(uMin)+3,Y(H+1)+12,t("house"),'font-size="9" fill="#78838f"');
+  /* Existing deck: joists always, decking either full width or cut away where
+     the new framing bears on the structure. */
+  s+=boxD(uMin,uMax,-deckT-joistD,-deckT,MAT.exist);
+  s+=svgText(X(uMax)-4,Y(-deckT-joistD)+12,t("existing deck joists"),'font-size="9" fill="#78838f" text-anchor="end"');
+  const outerEdge=D(Wy+(N-1)*R+nose);
+  if(base>0){
+    s+=boxD(outerEdge,uMax,-deckT,0,MAT.exist);
+    s+=svgLine(X(uMin),Y(0),X(outerEdge),Y(0),'stroke="#9aa6b2" stroke-width=".8" stroke-dasharray="4 3"');
+    s+=svgText(X(uMin)+4,Y(0)-4,t("decking cut away — framing bears on the joists"),'font-size="8.5" fill="#8a6a45"');
+    s+=svgText(X(uMax)-4,Y(-deckT)+11,t("existing decking {0}", fmtIn(deckT)),'font-size="8.5" fill="#78838f" text-anchor="end"');
+  } else {
+    s+=boxD(uMin,uMax,-deckT,0,MAT.exist);
+    s+=svgText(X(uMax)-4,Y(0)+12,t("existing deck surface"),'font-size="9" fill="#78838f" text-anchor="end"');
+  }
+  /* Floating platform: frame stock on edge at the top, legs of the same stock
+     below — drawn as it is actually built, not as a solid block. */
+  if(S.includePlatform){
+    const pf=platformModel(model);
+    const frameTop=H-P.st, frameBot=Math.max(-base, frameTop-pf.frameDepth);
+    s+=box(Wy-pd,Wy,frameBot,frameTop,MAT.plat);
+    if(pf.needsLegs){
+      const legT=Math.max(pf.frame.t,1);
+      for(const lu of [Wy-pd+0.5, Wy-legT-0.5]) s+=box(lu,lu+legT,-base,frameBot,MAT.plat);
+      const midU=Wy-pd/2;
+      if(pd>legT*6) s+=box(midU,midU+legT,-base,frameBot,MAT.plat);
+      s+=svgLead(X(D(Wy-legT-0.5))-2,Y((frameBot-base)/2),X(D(Wy-pd))+4,Y(-base)-6,
+        t("{0} legs @ {1}", pf.legCount, fmtIn(pf.legH)));
+    }
+  } else s+=box(Wy-pd,Wy,-base,H-P.st,MAT.plat);
+  s+=svgLine(X(2),Y(-base),X(2),Y(H),'stroke="#5b87ad" stroke-width=".9" stroke-dasharray="5 3"');
+  s+=svgText(X(3.5),Y(H)-5,(shift>0.5?t("platform {0} deep, shown cut", L(Wy)):t("platform")),'font-size="8.5" fill="#33556e"');
+  if(S.method==="stringers"){
+    const Ls=hyp(r,R), bw=sk(S.stringerStock).w;
+    /* PROPORTIONS. The board's top edge is the nosing line — the line through
+       the FRONT corner of every seat, i.e. (Wy+kR, H−kr−tt). Extrapolated back
+       to the platform face that is H − tt, one riser ABOVE the first seat's
+       back corner. Offsetting the lower edge from that back corner (the notch
+       apex) instead is what drew a 2x12 as a plank: the apex line sits
+       r·cosθ below the true edge, so the board came out bw + notch deep.
+       Lower edge = bw perpendicular below the nosing line, which on a vertical
+       cut is bw·Ls/R down. */
+    const edgeAtFace = H - P.tt;                           // nosing line at u = Wy
+    const lowAtFace  = edgeAtFace - bw*Ls/R;               // lower edge at u = Wy
+    const seatTop    = H - r - P.tt;                       // first seat = top of the plumb face
+    const pts=[];
+    for(let k=1;k<=N-1;k++){ pts.push([Wy+(k-1)*R, H-k*r-P.tt]); pts.push([Wy+k*R, H-k*r-P.tt]); }
+    pts.push([Wy+(N-1)*R, -base]);                         // bottom plumb face, down to bearing
+    /* Level cut runs along the bearing plane to wherever the lower edge meets
+       it; on a short flight the lower edge can reach bearing before the face. */
+    const cutU = Wy + Math.max(0, lowAtFace+base)*R/r;
+    pts.push([cutU, -base]);
+    if(lowAtFace > -base) pts.push([Wy, lowAtFace]);       // back up the lower edge to the face
+    s+=svgPoly(pts.map(p=>[X(D(p[0])),Y(p[1])]),MAT.string);
+    // the nosing line the notches are laid out from
+    s+=svgLine(X(D(Wy)),Y(edgeAtFace),X(D(Wy+(N-1)*R)),Y(edgeAtFace-(N-1)*r),
+      'stroke="#0f6fbf" stroke-width=".9" stroke-dasharray="4 3"');
+    const plumbBot=Math.max(lowAtFace,-base);
+    s+=svgLine(X(D(Wy)),Y(seatTop),X(D(Wy)),Y(plumbBot),'stroke="#6b5335" stroke-width="1.6"');
+    s+=svgLead(X(D(Wy)),Y((seatTop+plumbBot)/2),X(D(Wy))+22,Y(plumbBot)-6,t("plumb cut against the platform rim"));
+    s+=svgText(X(D(Wy+(N-1)*R))-6,Y(-base)-7,t("cut stringer"),'font-size="9" fill="#6b5335" text-anchor="end"');
+    if(base>0) s+=svgLead(X(D(Wy+(N-1)*R))-14,Y(-base/2),X(D(Wy+(N-1)*R))-20,Y(-deckT-joistD)+24,t("level cut bears on the joist"),"end");
+  } else {
+    for(const f of P.frames) s+=box(f.u0,f.u1,f.zBot,f.zTop,MAT.frame);
+    for(const b of boxSupportBlocks(model)) if(b.legName==="front")
+      s+=box(Wy+(b.k-1)*R, Wy+(b.k-1)*R+sk(S.frameStock).t*2, -base, b.height-base, MAT.block);
+  }
+  if(S.riserStyle==="closed") for(const ri of P.risers) s+=box(ri.u, ri.u+P.rt, ri.zBot, ri.zTop, MAT.riser);
+  for(const t of P.treads){
+    for(const b of t.bds) s+=box(b.u, b.u+b.w, t.z-P.tt, t.z, MAT.tread);
+    s+=svgText(X(D(t.u0))+3,Y(t.z)-4,"L"+t.k,'font-size="8.5" fill="#6b4a2a"');
+  }
+  /* Platform decking last: it is the top tread, so it overhangs by the nosing. */
+  s+=box(Wy-pd,Wy+model.riserT+nose,H-P.st,H,MAT.platDeck);
+  if(nose>0.01) s+=svgLead(X(D(Wy+model.riserT+nose/2)),Y(H-P.st/2),X(D(Wy))+16,Y(H)+14,t("platform nosing {0}", fmtIn(nose)));
+  s+=dimLineV(X(uMin)-14,Y(H),Y(0),dimLbl,"left");
+  if(base>0){
+    s+=dimLineV(X(uMin)-14,Y(0),Y(-base),fmtIn(base),"left");
+    s+=svgText(X(uMin)-14,Y(-base)+16,note1,'font-size="8.5" fill="#8a6a45" text-anchor="end"');
+    s+=svgText(X(uMin)-14,Y(-base)+26,note2,'font-size="8.5" fill="#8a6a45" text-anchor="end"');
+  }
+  const lastT=P.treads[P.treads.length-1];
+  if(lastT){
+    /* Run is nosing to nosing — dimension it between the two nosing tips, not
+       between frame faces (same length, but the frame reads as the wrong datum). */
+    const tip=lastT.u0+model.Tb;
+    s+=svgLine(X(D(tip)),Y(lastT.z-r*0.5),X(D(tip)),Y(0)+28,'stroke="#999" stroke-width=".6" stroke-dasharray="2 2"');
+    s+=svgLine(X(D(tip-R)),Y(lastT.z+r*0.5),X(D(tip-R)),Y(0)+28,'stroke="#999" stroke-width=".6" stroke-dasharray="2 2"');
+    s+=dimLineH(X(D(tip-R)),X(D(tip)),Y(0)+24,t("R = {0} nosing to nosing", L(R)));
+    s+=dimLineV(X(D(lastT.u0+model.Tb))+20,Y(lastT.z),Y(lastT.z-r),t("r = {0}", L(r)));
+    // nosing is measured from the riser FACE, not the frame
+    if(nose>0.01) s+=dimLineH(X(D(lastT.u0+R+model.riserT)),X(D(lastT.u0+model.Tb)),Y(lastT.z)-14,L(nose));
+  }
+  s+=svgText(mL,Ht-24,footer,'font-size="9" fill="#78838f"');
+  s+=scaleBarSVG(mL,Ht-8,scale);
+  s+="</svg>";
+  return s;
+}
+
+/* One stringer, drawn as the actual board it is cut from. +x runs UP the
+   stair. The bottom end is a plumb face down to `drop` below the bottom seat,
+   then a LEVEL cut that bears flat — it runs horizontally to the board's lower
+   edge, it is not a line to the corner of the board. */
+function stringerProfileSVG(c,r,R,drop,bw,title){
+  if(c<=0) return "<p>"+t("No notches to draw.")+"</p>";
+  const Ls=hyp(r,R);
+  const ux=R/Ls, uy=r/Ls, px=uy, py=-ux;             // px,py = perpendicular, below the nosing line
+  const notch=[[0,0]];
+  for(let i=0;i<c;i++){ notch.push([(i+1)*R, i*r]); notch.push([(i+1)*R,(i+1)*r]); }
+  /* Lower edge = nosing line offset perpendicular by the board width. The top
+     plumb cut trims it at x=c*R; the level cut trims it at z=-drop. */
+  const t1=(c*R-bw*px)/ux,   aLow=[c*R, bw*py+t1*uy];
+  const t0=(-drop-bw*py)/uy, bLow=[bw*px+t0*ux, -drop];
+  const outline=notch.concat([aLow, bLow, [0,-drop]]);
+  let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+  for(const [x,y] of outline){ x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y); }
+  const margin=36, scale=Math.min(8, 660/Math.max(1,x1-x0));
+  const W=Math.max((x1-x0)*scale+2*margin+40, margin+estTextW(title,10)+24), H=(y1-y0)*scale+2*margin+30;
+  const X=x=>margin+(x-x0)*scale, Y=y=>H-margin-(y-y0)*scale;
+  let s=svgOpen(W,H);
+  // board outline: lower edge, bottom plumb face + level cut, top plumb cut
+  s+=svgPoly(outline.map(p=>[X(p[0]),Y(p[1])]),MAT.string);
+  // notch profile drawn heavy — this is the cut line
+  let path="M"+X(0).toFixed(1)+" "+Y(0).toFixed(1);
+  for(let i=0;i<c;i++){ path+=" H"+X((i+1)*R).toFixed(1)+" V"+Y((i+1)*r).toFixed(1); }
+  s+='<path d="'+path+'" fill="none" stroke="#654" stroke-width="2"/>';
+  // nosing line + a layout tick at every notch corner (spacing = Ls along the edge)
+  s+=svgLine(X(0),Y(0),X(c*R),Y(c*r),'stroke="#0f6fbf" stroke-width="1" stroke-dasharray="3 3"');
+  for(let i=0;i<=c;i++){
+    const tx=i*R, ty=i*r;
+    s+=svgLine(X(tx),Y(ty),X(tx+2.2*px),Y(ty+2.2*py),'stroke="#0f6fbf" stroke-width="1.2"');
+    if(i<c) s+=svgText(X(tx+R/2),Y(ty+r/2)-2,String(i+1),'font-size="9" fill="#0f6fbf" text-anchor="middle"');
+  }
+  s+=svgText(X(0)-2,Y(-drop)+12,t("level cut — bears here, drop {0}", fmtIn(drop)),'font-size="8.5" fill="#a55"');
+  s+=svgText(X(c*R)+4,Y(c*r)+11,t("plumb cut"),'font-size="8.5" fill="#a55"');
+  s+=svgText(margin,H-24,title,'font-size="10" fill="#333"');
+  s+=scaleBarSVG(margin, H-8, scale);
+  s+="</svg>";
+  return s;
+}
+/* The same stringer seen ON THE BOARD you buy: the stock laid flat, the cut
+   nested inside it, and the offcut at the end. Profile coords are rotated into
+   board coords, where the nosing line IS the board's top edge:
+       x' = (u·R + z·r)/Ls        y' = (u·r − z·R)/Ls
+   so every notch is a triangle on the top edge, one Ls apart. */
+function stringerStockSVG(c,r,R,drop,bw,stockLen,title,copies){
+  if(c<=0) return "";
+  const Ls=hyp(r,R), ux=R/Ls, uy=r/Ls, pxx=uy, pyy=-ux;
+  const B = p => [(p[0]*R + p[1]*r)/Ls, (p[0]*r - p[1]*R)/Ls];
+  const notch=[[0,0]];
+  for(let i=0;i<c;i++){ notch.push([(i+1)*R, i*r]); notch.push([(i+1)*R,(i+1)*r]); }
+  const t1=(c*R-bw*pxx)/ux,   aLow=[c*R, bw*pyy+t1*uy];
+  const t0=(-drop-bw*pyy)/uy, bLow=[bw*pxx+t0*ux, -drop];
+  const raw=notch.concat([aLow,bLow,[0,-drop]]).map(B);
+  const x0=-Math.min(...raw.map(p=>p[0]));
+  const pts=raw.map(p=>[p[0]+x0, p[1]]);
+  const req=Math.max(...pts.map(p=>p[0]));
+  const total=Math.max(stockLen||0, req);
+  const kerf=S.kerf||0;
+  /* How many of THIS stringer come out of one board — otherwise the sheet
+     implies a whole board per stringer while the cut list packs several. */
+  const nFit=Math.max(1, Math.min(copies||1, Math.floor((total+kerf)/(req+kerf))));
+  const used=nFit*req+(nFit-1)*kerf;
+  const waste=total-used;
+  const sc=Math.min(6.5, 680/Math.max(total,1));
+  const mL=46, mR=30, mT=40, mB=52;
+  const W=Math.max(mL+total*sc+mR, mL+estTextW(title,10)+24), H=mT+bw*sc+mB;
+  const X=x=>mL+x*sc, Y=y=>mT+y*sc;
+  let s=svgOpen(W,H);
+  // the board you buy
+  s+=svgRect(X(0),Y(0),total*sc,bw*sc,'fill="#f2ede4" stroke="#9d8f7a" stroke-width="1"');
+  for(let n=0;n<nFit;n++){
+    const dx=n*(req+kerf);
+    s+=svgPoly(pts.map(p=>[X(p[0]+dx),Y(p[1])]),MAT.string);
+    if(n>0) s+=svgLine(X(dx-kerf/2),Y(0),X(dx-kerf/2),Y(bw),'stroke="#a55" stroke-width="1" stroke-dasharray="2 2"');
+    // layout marks along the top edge, every Ls
+    for(let i=0;i<=c;i++){
+      const xm=dx+x0+i*Ls;
+      s+=svgLine(X(xm),Y(0),X(xm),Y(0)-9,'stroke="#0f6fbf" stroke-width="1.2"');
+      if(n===0) s+=svgText(X(xm),Y(0)-12,L(i*Ls),'font-size="8" fill="#0f6fbf" text-anchor="middle"');
+      if(i<c) s+=svgText(X(xm+Ls/2),Y(r*R/Ls*0.6),String(i+1),'font-size="10" fill="#0f6fbf" text-anchor="middle"');
+    }
+  }
+  if(waste>0.5){
+    s+=svgRect(X(used),Y(0),waste*sc,bw*sc,'fill="#e8e2d6" stroke="#bfae95" stroke-dasharray="3 2"');
+    s+=svgText(X(used+waste/2),Y(bw/2)+3,t("offcut {0}", L(waste)),'font-size="9" fill="#8a7a5f" text-anchor="middle"');
+  }
+  s+=svgText(X(0),Y(0)-24,t("marks along the top edge, every {0}", L(Ls)),'font-size="8.5" fill="#0f6fbf"');
+  s+=dimLineH(X(0),X(req),Y(bw)+20,t("cut length {0}", L(req)));
+  s+=dimLineH(X(0),X(total),Y(bw)+38,
+    nFit>1 ? t("buy {0} — {1} per board", L(total), nFit) : t("buy {0}", L(total)));
+  s+=svgText(mL,H-8,title,'font-size="10" fill="#333"');
+  s+="</svg>";
+  return s;
+}
+/* One sheet per DISTINCT stringer in the job, plus the hip — they are not all
+   the same board: the ones nearer the corner carry fewer notches. */
+function renderStringerSheets(model){
+  const bw=sk(S.stringerStock).w, Ls=hyp(model.r,model.R);
+  let h="";
+  for(const legName of ["front","side"]){
+    const st=stringersForLeg(legName,model);
+    const seen=new Set();
+    for(const g of st.list){
+      if(seen.has(g.c)) continue;
+      seen.add(g.c);
+      const qty=st.list.filter(x=>x.c===g.c).length;
+      const title=t("{0} leg · {1} notches (levels {2}–{3}) · ×{4} · run {5} rise {6} · marks every {7} · board ≥ {8}",
+          t(legName), g.c, g.kmin, model.N, qty, L(model.R), L(model.r), L(Ls), L(g.reqLen))
+        +(g.boardLen ? t(" — cut from {0}", L(g.boardLen)) : t(" — NEEDS A SPLICE"));
+      const perBoard=g.boardLen ? Math.max(1, Math.floor((g.boardLen+S.kerf)/(g.reqLen+S.kerf))) : 1;
+      const boardsNeeded=Math.ceil(qty/perBoard);
+      h+='<div class="sheet"><h4>'+t("On the board — {0} needed, {1} per board, {2} board(s)", qty, Math.min(perBoard,qty), boardsNeeded)+"</h4>"
+        +'<div class="svgwrap">'+stringerStockSVG(g.c,model.r,model.R,st.drop,bw,g.boardLen,title,Math.min(perBoard,qty))+"</div>"
+        +'<h4>'+t("Finished profile")+"</h4>"
+        +'<div class="svgwrap">'+stringerProfileSVG(g.c,model.r,model.R,st.drop,bw,title)+"</div></div>";
+    }
+  }
+  const hip=hipStringer(model);
+  const hipTitle=t("HIP stringer · run {0} (R×√2) · {1} notches · marks every {2} · board ≥ {3} · throat {4}",
+    L(hip.run), hip.c, L(hip.Ls), L(hip.reqLen), fmtIn(hip.throat));
+  h+='<div class="sheet"><h4>'+t("Hip on the board — 1 × {0}", S.stringerStock)+"</h4>"
+    +'<div class="svgwrap">'+stringerStockSVG(hip.c,model.r,hip.run,hip.drop,bw,hip.boardLen,hipTitle)+"</div>"
+    +'<h4>'+t("Finished profile")+"</h4>"
+    +'<div class="svgwrap">'+stringerProfileSVG(hip.c,model.r,hip.run,hip.drop,bw,hipTitle)+"</div></div>";
+  return h;
+}
+/* ---------- 19. panel renderers ------------------------------------------ */
+function fitLabel(fit){
+  return fit.recommend==="exact" ? t("exact fit") : fit.recommend==="altgap" ? t("gap adjusted")
+       : fit.recommend==="rip" ? t("1 rip") : t("overshoot");
+}
+function fitSummaryHTML(label, fit){
+  let s = '<div class="msg '+(fit.exact?"i":"w")+'"><b>'+label+':</b> ';
+  if(fit.exact) s += t("{0} board(s), exact fit — no cutting needed.", fit.n);
+  else if(fit.recommend==="altgap") s += t("{0} boards, gap adjusted to {1} (no rip).", fit.n, fmtIn(fit.altGap));
+  else if(fit.recommend==="rip") s += t("{0} full board(s) + 1 rip at {1}.", fit.n, fmtIn(Math.max(fit.rip,0)));
+  else {
+    s += t("{0} full boards, overshoots by {1} — absorb into the nosing/tread depth.", fit.overshootN, fmtIn(fit.overshoot));
+    if(fit.altGapTight!=null) s += " "+t("Or {0} boards with the gap tightened to {1}{2} for an exact fit with no rip.",
+      fit.overshootN, fmtIn(fit.altGapTight), fit.altGapTight<0.01 ? t(" (butted tight — no drainage gap)") : "");
+  }
+  s += ' <span class="pill">'+t("alt: gap={0}, tight gap={1}, rip={2}, overshoot={3}",
+      fit.altGap!=null?fmtIn(fit.altGap):t("n/a"),
+      fit.altGapTight!=null?fmtIn(fit.altGapTight):t("n/a"),
+      fmtIn(Math.max(fit.rip,0)), fmtIn(fit.overshoot))+'</span></div>';
+  return s;
+}
+/* Describes the ACTUAL tread layout (nosing-anchored), then the alternatives. */
+function treadLayoutHTML(model, fit){
+  const lay = treadBoardWidths(model);
+  let msg;
+  if(lay.exact)
+    msg = t("{0} full boards — the first flush with the nosing, the last flush with the back. No cutting.", lay.nFull);
+  else if(lay.backRip)
+    msg = t("{0} full boards starting at the nosing, plus one ripped to {1} at the BACK, where the riser board covers it.", lay.nFull, fmtIn(lay.backRip));
+  else
+    msg = t("{0} full boards starting at the nosing; the extra {1} falls in the gap at the back, out of sight.", lay.nFull, fmtIn(lay.slack));
+  return '<div class="msg '+(lay.exact?"i":"w")+'"><b>'+t("Tread board depth ({0})", LD(model.Tb))+':</b> '+msg
+    +' <span class="pill">'+t("board 1 = the nosing board")+'</span>'
+    +' <span class="pill">'+t("alt: tight gap={0}, one-piece rip={1}", (fit.altGapTight!=null?fmtIn(fit.altGapTight):t("n/a")), fmtIn(Math.max(fit.rip,0)))+'</span></div>';
+}
+function renderSummaryPanel(model){
+  const T = model.Tb;                       // board depth (includes a captured riser)
+  const treadFit = fitBoards(T, sk(S.treadStock).w, S.treadGap);
+  const riserH = S.riserFit==="captured" ? model.r-sk(S.treadStock).t : model.r;
+  const riserFitCheck = S.riserStyle==="closed" ? fitBoards(riserH, sk(S.riserStock).w, 0) : null;
+  const warn = validate(model);
+  let h = '<div class="big">'
+    +'<div><b>'+LD(model.r)+'</b><span>'+t("Riser height")+'</span></div>'
+    +'<div><b>'+LD(model.R)+'</b><span>'+t("Run")+'</span></div>'
+    +'<div><b>'+LD(model.Twalk)+'</b><span>'+t("Tread depth (walking)")+'</span></div>'
+    +'<div><b>'+LD(T)+'</b><span>'+(model.riserT>0.001?t("Tread board depth (incl. riser)"):t("Tread board depth"))+'</span></div>'
+    +'<div><b>'+model.N+'</b><span>'+t("Risers ({0} treads)", model.N-1)+'</span></div>'
+    +'<div><b>'+L(model.footX)+' × '+L(model.footY)+'</b><span>'+t("Bottom footprint")+'</span></div>'
+    +'<div><b>'+LD(model.H)+'</b><span>'+t("Total rise, finished to finished")+'</span></div>'
+    +'<div><b>'+(model.base>0?t("{0} deeper", fmtIn(model.base)):t("on the surface"))+'</b><span>'
+      +(model.base>0?t("Framing bears on the deck structure"):t("Framing bears on the decking"))+'</span></div>'
+    +'<div><b>'+L(model.platFinX)+' × '+L(model.platFinY)+'</b><span>'
+      +t("Platform, finished (frame {0} × {1})", L(model.Wx), L(model.Wy))+'</span></div>'
+    +'</div>';
+  h += '<h3>'+t("Board fit — do I have to cut boards?")+'</h3>';
+  h += treadLayoutHTML(model, treadFit);
+  if(model.riserT>0.001)
+    h += '<div class="note">'+t("The tread board is {0} deep, not {1}: the nosing is measured from the face of the captured riser board, so the tread laps the riser's {2} thickness and then overhangs it by the {3} nosing. Walking depth stays {1}.",
+      LD(T), LD(model.Twalk), fmtIn(model.riserT), fmtIn(model.nose))+'</div>';
+  if(riserFitCheck){
+    h += fitSummaryHTML(t("Riser height ({0})", LD(riserH)), riserFitCheck);
+    const rb = riserBoards(model);
+    if(Math.abs(rb.height1-rb.height)>0.01)
+      h += fitSummaryHTML(t("Riser 1 only — tucks under the platform decking ({0})", LD(rb.height1)),
+        fitBoards(rb.height1, sk(S.riserStock).w, 0));
+  }
+  h += '<h3>'+t("Validation")+'</h3>';
+  if(!warn.length) h += '<div class="msg i">'+t("No code issues found against the table on the left.")+'</div>';
+  for(const w of warn) h += '<div class="msg '+(w.level==="error"?"e":"w")+'"><b>'+(w.level==="error"?t("Error: "):t("Warning: "))+'</b>'+w.msg+'</div>';
+  document.getElementById("panel-summary").innerHTML = h;
+}
+function renderPlanPanel(model){
+  let h = materialsLegend();
+  h += '<h3>'+t("Plan view — looking down")+'</h3><div class="sheet svgwrap">'+renderPlanSVG(model)+'</div>';
+  h += '<div class="note">'
+    +t("Every tread board is drawn at its real width with your {0} gap{1}. Dashed lines are the framing hidden below the treads{2}.",
+       fmtIn(S.treadGap),
+       S.cornerStyle==="through" ? t(", square-cut where the legs meet") : t(" and its 45° mitered end"),
+       S.method==="stringers" ? t(", including the hip stringer on the diagonal") : "")
+    +'</div>';
+  h += '<h3>'+t("Elevation — section through the front leg")+'</h3><div class="sheet svgwrap">'+renderElevationSVG(model)+'</div>';
+  h += '<h3>'+t("Terminology")+'</h3><div class="sheet svgwrap">'+renderTerminologySVG(model)+'</div>';
+  h += '<div class="note">'+t("Two steps of your actual rise and run, drawn the way the calculator assumes they are built: each riser board sits on the tread below it and tucks under the tread above; the box rim above lands over the rim below.")+'</div>';
+  document.getElementById("panel-plan").innerHTML = h;
+}
+function renderSchedulePanel(model){
+  let h = '<h3>'+t("Step levels")+'</h3><table><thead><tr><th>'+t("Level (k)")+'</th><th>'+t("Tread surface height (z)")+'</th><th>'+t("Board depth")+'</th><th>'+t("Walking depth")+'</th></tr></thead><tbody>';
+  for(const lvl of model.levels) h += "<tr><td>"+lvl.k+"</td><td>"+LD(lvl.z)+"</td><td>"+LD(lvl.T)+"</td><td>"+LD(lvl.Twalk)+"</td></tr>";
+  h += "<tr><td>"+t("deck")+"</td><td>"+LD(0)+"</td><td>—</td><td>—</td></tr></tbody></table>";
+  h += "<h3>"+t("Rise / riser-count picker")+"</h3>";
+  if(S.riseMode==="fixed"){
+    h += '<div class="note">'+t('Total rise is locked at {0}. Every option for N=1–12 is shown; click "use" to adopt one.', LD(S.totalRise))+'</div>';
+    h += '<table><thead><tr><th>N</th><th>'+t("Riser r")+'</th><th>'+t("In code?")+'</th><th>'+t('On 1/16"?')+'</th><th></th></tr></thead><tbody>';
+    for(const row of fixedTable()) h += "<tr><td>"+row.N+"</td><td>"+LD(row.r)+"</td><td>"+(row.inCode?'<span class="pill ok">'+t("yes")+'</span>':'<span class="pill rip">'+t("no")+'</span>')+"</td><td>"+(row.onGrid?t("yes"):t("no"))+"</td><td><button data-pickn=\""+row.N+"\">"+t("use")+"</button></td></tr>";
+    h += "</tbody></table>";
+  } else {
+    const res = flexibleSearch().slice(0,20);
+    h += '<div class="note">'+t('Target {0} ± {1}. Ranked by roundness of r, then closeness of r to 7", then closeness of N×r to target. Click "use" to adopt a row.', LD(S.targetRise), LD(S.riseTol))+'</div>';
+    h += '<table><thead><tr><th>N</th><th>'+t("Riser r")+'</th><th>'+t("Total (N×r)")+'</th><th>'+t("Grid")+'</th><th></th></tr></thead><tbody>';
+    for(const row of res) h += "<tr><td>"+row.N+"</td><td>"+LD(row.r)+"</td><td>"+LD(row.total)+"</td><td>1/"+[,16,8,4][row.round]+'"</td><td><button data-pickr="'+row.N+","+row.r+'">'+t("use")+'</button></td></tr>';
+    h += "</tbody></table>";
+    if(!res.length) h += '<div class="msg w">'+t('No (N, r) pair on a 1/16" grid meets the target within tolerance and code limits — widen the tolerance or the code range.')+'</div>';
+  }
+  document.getElementById("panel-schedule").innerHTML = h;
+  document.querySelectorAll("#panel-schedule [data-pickn]").forEach(b=>b.addEventListener("click", ()=>{ S.risers=parseInt(b.dataset.pickn,10); save(); renderForm(); run(); }));
+  document.querySelectorAll("#panel-schedule [data-pickr]").forEach(b=>b.addEventListener("click", ()=>{ const [N,r]=b.dataset.pickr.split(",").map(Number); S.risers=N; S.totalRise=N*r; save(); renderForm(); run(); }));
+}
+function renderCompareTable(model){
+  const totals = compareCornerStyles(model);
+  const packed = {};
+  for(const style of ["miter","through"]){
+    const pieces = [];
+    for(const lvl of model.levels) for(const legName of ["front","side"]){
+      const tb = treadLegBoards(legName, lvl.k, model, style);
+      for(const b of tb.boards) pieces.push({role:"t", stock:S.treadStock, len:b.long, qty:1});
+    }
+    const bins = binPack(pieces);
+    let waste=0, bought=0;
+    for(const stockName in bins) for(const bin of bins[stockName]){ waste+=bin.waste; bought+=bin.stockLen; }
+    packed[style] = bought ? (waste/bought*100) : 0;
+  }
+  let h = '<table><thead><tr><th>'+t("Style")+'</th><th>'+t("Boards")+'</th><th>'+t("Total length")+'</th><th>'+t("Waste %")+'</th></tr></thead><tbody>';
+  for(const style of ["miter","through"]) h += "<tr><td>"+t(style==="miter"?"45° mitered":"One leg runs through")+"</td><td>"+totals[style].count+"</td><td>"+L(totals[style].total)+"</td><td>"+dec(packed[style].toFixed(1))+"%</td></tr>";
+  h += "</tbody></table>";
+  return h;
+}
+function renderFramingPanel(model){
+  let h = "";
+  if(S.method==="stringers"){
+    const st0 = stringersForLeg("front", model);
+    h += "<h3>"+t("Does it come out of a standard {0}?", S.stringerStock)+"</h3>";
+    h += '<div class="kv">'
+      +'<dt>'+t("Board")+'</dt><dd>'+t("{0} — {1} wide × {2} thick", S.stringerStock, fmtIn(sk(S.stringerStock).w), fmtIn(sk(S.stringerStock).t))+'</dd>'
+      +'<dt>'+t("Notch depth")+'</dt><dd>'+fmtIn(st0.notchDepth)+' (r × cos θ)</dd>'
+      +'<dt>'+t("Throat left")+'</dt><dd>'+fmtIn(st0.throat)+(st0.throat<S.throatMin?' <span class="pill rip">'+t("below your {0} minimum", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+'</dd>'
+      +'<dt>'+t("Minimum board width")+'</dt><dd>'+t("{0} = notch + throat", fmtIn(st0.minWidth))
+        +(st0.fitsStock?' <span class="pill ok">'+t("a {0} is wide enough", S.stringerStock)+'</span>':' <span class="pill rip">'+t("a {0} is TOO NARROW", S.stringerStock)+'</span>')+'</dd>'
+      +'<dt>'+t("Longest stringer")+'</dt><dd>'+t("{0} — longest stock you buy is {1}", L(Math.max(...st0.list.map(x=>x.reqLen),0)), L(Math.max(...parseStockLens(),0)))+'</dd>'
+      +'<dt>'+t("Spacing")+'</dt><dd>'+t("{0} o.c., limited to {1} by the {2} treads", fmtIn(st0.spacing), fmtIn(st0.spanLimit), S.treadStock)+'</dd>'
+      +'</div>';
+    const hip0 = hipStringer(model);
+    if(!hip0.fitsStock)
+      h += '<div class="msg e"><b>'+t("The hip will not come out of a {0}.", S.stringerStock)+'</b> '
+        +t("Its run is R×√2 = {0}, so the notch bites {1} deep and leaves only {2} of throat. It needs a board at least {3} wide. Options: double the hip, use an LVL or a wider board there, drop the throat minimum, or reduce the run.",
+           L(hip0.run), fmtIn(hip0.notchDepth), fmtIn(hip0.throat), fmtIn(hip0.minWidth))+'</div>';
+    for(const legName of ["front","side"]){
+      const st = stringersForLeg(legName, model);
+      h += "<h3>"+t("{0} leg stringers", t(legName))+"</h3>";
+      h += '<table><thead><tr><th>'+t("Position")+'</th><th>'+t("Notches (levels)")+'</th><th>'+t("Required length")+'</th><th>'+t("Buy length")+'</th></tr></thead><tbody>';
+      for(const s2 of st.list) h += "<tr><td>"+LD(s2.pos)+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
+      h += "</tbody></table>";
+    }
+    const hip = hipStringer(model);
+    h += "<h3>"+t("Hip stringer (corner)")+"</h3><div class=\"kv\"><dt>"+t("Run")+"</dt><dd>"+LD(hip.run)+"</dd><dt>"+t("Rise")+"</dt><dd>"+LD(hip.rise)+"</dd><dt>"+t("Notches")+"</dt><dd>"+hip.c+"</dd>"
+      +"<dt>"+t("Throat")+"</dt><dd>"+fmtIn(hip.throat)+(hip.throat<S.throatMin?' <span class="pill rip">'+t("tight — below min {0}, usually the tightest of all the stringers", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+"</dd>"
+      +"<dt>"+t("Required length")+"</dt><dd>"+LD(hip.reqLen)+"</dd><dt>"+t("Buy length")+"</dt><dd>"+(hip.boardLen?L(hip.boardLen):t("needs splice"))+"</dd></div>";
+    h += '<div class="note">'
+      +t('Layout: step the framing square at rise {0} / run {1}, which puts a mark every {2} along the board edge. The bottom is cut {3} below the last seat — that is the tread thickness{4} ("drop the stringer"). Stringers nearer the corner carry fewer notches; the triangle at the corner is carried by the hip.',
+         LD(model.r), LD(model.R), LD(hyp(model.r,model.R)), fmtIn(st0.drop),
+         model.base>0 ? t(" plus {0} to reach the deck joists", fmtIn(model.base)) : "")
+      +'</div>';
+    h += '<h3>'+t("Stringer sheets — one per distinct board")+'</h3>'+renderStringerSheets(model);
+  } else {
+    h += "<h3>"+t("Box frames per level")+"</h3><table><thead><tr><th>"+t("Level")+"</th><th>"+t("Rim height")+"</th><th>"+t("Leg")+"</th><th>"+t("Outer rim")+"</th><th>"+t("Inner rim")+"</th><th>"+t("Joists")+"</th></tr></thead><tbody>";
+    for(const lvl of model.levels){ const bx = boxesForLevel(model, lvl.k);
+      for(const leg of bx.legs) h += "<tr><td>"+lvl.k+"</td><td>"+LD(bx.rimH)+"</td><td>"+t(leg.legName)+"</td><td>"+LD(leg.outer)+"</td><td>"+LD(leg.inner)+"</td><td>"+leg.joistCount+" × "+LD(leg.joistLen)+' <span class="pill">'+t("{0} o.c.", fmtIn(leg.joistSpacing))+"</span></td></tr>"; }
+    h += "</tbody></table>";
+    const bxBot = boxesForLevel(model, model.N-1);
+    if(model.base>0)
+      h += '<div class="msg '+(bxBot.rimStockOK?"w":"e")+'"><b>'+t("Bottom box is {0} deeper", fmtIn(model.base))+'</b> '
+        +t("because the framing bears on the deck structure: its rim is {0} instead of {1}.", LD(bxBot.rimH), LD(model.r-sk(S.treadStock).t))+' '
+        +(bxBot.rimStockOK
+          ? t("Your {0} ({1} wide) covers it — rip it to {2}.", S.frameStock, fmtIn(sk(S.frameStock).w), fmtIn(bxBot.rimH))
+          : t("A {0} is only {1} wide, so the bottom box needs deeper stock.", S.frameStock, fmtIn(sk(S.frameStock).w)))
+        +' '+t("Riser heights are unchanged.")+'</div>';
+    h += '<div class="note">'
+      +t("Load path: box k's outer rim bears on box k+1's tread boards directly over box k+1's inner rim — keep that rim continuous or double it. Box k's inner rim needs blocking down to {0}, except level 1 (fastens to the platform frame) and the bottom level (bears directly).",
+         model.base>0 ? t("the deck joists") : t("the deck surface"))
+      +'</div>';
+    const blocks = boxSupportBlocks(model);
+    if(blocks.length){
+      h += "<h3>"+t("Inner-rim support blocks")+"</h3><table><thead><tr><th>"+t("Under level")+"</th><th>"+t("Leg")+"</th><th>"+t("Rim length")+"</th><th>"+t("Block height")+"</th><th>"+t("Qty")+"</th></tr></thead><tbody>";
+      for(const b of blocks) h += "<tr><td>"+b.k+"</td><td>"+t(b.legName)+"</td><td>"+LD(b.inner)+"</td><td>"+LD(b.height)+"</td><td>"+b.qty+"</td></tr>";
+      h += "</tbody></table>";
+    }
+  }
+  if(S.faceX0==="open"){
+    const si = skirtInfo(model);
+    h += "<h3>"+t("Skirt (open X=0 face)")+"</h3><div class=\"kv\"><dt>"+t("Raking length")+"</dt><dd>"+LD(si.rake)+"</dd>"
+      +"<dt>"+t("Min board width")+"</dt><dd>"+t("{0} — {1} is {2}", fmtIn(si.minW), S.skirtStock, fmtIn(sk(S.skirtStock).w))
+      +(si.wide?' <span class="pill ok">'+t("wide enough")+'</span>':' <span class="pill rip">'+t("too narrow")+'</span>')+"</dd></div>";
+    h += '<div class="note">'+t("Cut to the step profile. The other side (Y=0) is against the house and the remaining two faces are the stairs themselves, so this is the only exposed end.")+'</div>';
+  }
+  if(S.includePlatform){
+    const pf = platformModel(model);
+    h += "<h3>"+t("Platform framing")+"</h3><div class=\"kv\""
+      +"><dt>"+t("Frame size")+"</dt><dd>"+L(model.Wx)+" × "+L(model.Wy)+"</dd>"
+      +"<dt>"+t("Finished size")+"</dt><dd>"+L(pf.finX)+" × "+L(pf.finY)
+        +(model.nose>0.01 ? t(" — decking overhangs the two step faces by the {0} nosing, same as every tread", fmtIn(model.nose))
+                          : t(" — no nosing set, decking flush with the frame"))+"</dd>"
+      +"<dt>"+t("Total height to decking")+"</dt><dd>"+LD(pf.height)
+        +(model.base>0?t(" (includes {0} down to the deck joists)", fmtIn(model.base)):"")+"</dd>"
+      +"<dt>"+t("Frame depth")+"</dt><dd>"+t("{0} — the {1} on edge", fmtIn(pf.frameDepth), S.platFrame)
+        +(pf.ripFrame?' <span class="pill rip">'+t("deeper than the whole platform — rip it to {0}", fmtIn(pf.height))+'</span>':'')+"</dd>"
+      +"<dt>"+t("Legs")+"</dt><dd>"+(pf.needsLegs
+          ? t("{0} legs at {1}, cut from the same {2}, on a {3} × {4} grid at {5} o.c.",
+              pf.legCount, LD(pf.legH), S.platFrame, pf.legCols, pf.legRows, fmtIn(pf.legSpan))
+          : t("none — the frame alone reaches the height"))+"</dd>"
+      +"<dt>"+t("Joists")+"</dt><dd>"+t("{0} × {1} running {2}", pf.joistCount, LD(pf.joistLen), pf.dir==="y"?t("out from wall (Y)"):t("along wall (X)"))+"</dd></div>";
+    h += '<div class="note">'+t("Free-standing (floating): everything is cut from the {0}, nothing is fastened to the house. The frame is that stock on edge; legs of the same stock make up the rest of the height.", S.platFrame)+'</div>';
+    if(pf.braceNeeded)
+      h += '<div class="msg w">'+t("Legs are {0} tall — double them into an L at the corners and add diagonal bracing, or switch to 4x4 posts.", LD(pf.legH))+'</div>';
+    h += '<table><thead><tr><th>'+t("Piece")+'</th><th>'+t("Length")+'</th><th>'+t("Qty")+'</th></tr></thead><tbody>';
+    for(const rp of pf.rimPieces) h += "<tr><td>"+t(rp.role)+"</td><td>"+LD(rp.len)+"</td><td>"+rp.qty+"</td></tr>";
+    h += "</tbody></table>";
+    h += "<div class='note'>"+t("Decking fit")+" "+fitSummaryHTML(t("across {0}", L(pf.deckFillDim)), pf.deckFit)+"</div>";
+    h += '<div class="msg w">'+t("Bearing must land over the existing deck's joists/beams, not mid-span on decking. If the frame height exceeds the rim board width, add posts or a stud frame. Check door swing/threshold clearance and slope the platform surface away from the house for drainage.")+'</div>';
+  }
+  if(S.cornerStyle==="compare") h += "<h3>"+t("Corner joint comparison")+"</h3>"+renderCompareTable(model);
+  document.getElementById("panel-framing").innerHTML = h;
+}
+function renderStepsPanel(model){
+  const style = S.cornerStyle==="through" ? "through" : "miter";
+  let h = "";
+  if(S.riserStyle==="closed"){
+    const rb = riserBoards(model);
+    h += "<h3>"+t("Riser boards ({0})", rb.rows.length)+"</h3><table><thead><tr><th>"+t("Riser k")+"</th><th>"+t("Height")+"</th><th>"+t("Front long/short")+"</th><th>"+t("Side long/short")+"</th></tr></thead><tbody>";
+    for(const row of rb.rows) h += "<tr><td>"+row.k+"</td><td>"+LD(row.height)+"</td><td>"+LD(row.front.long)+" / "+LD(row.front.short)+"</td><td>"+LD(row.side.long)+" / "+LD(row.side.short)+"</td></tr>";
+    h += "</tbody></table>";
+  } else {
+    h += '<div class="msg w">'+t("Open risers selected — no riser boards.")
+      +(inMM(model.r)>CODE.openRiserMaxGap ? " "+t("Gap {0} exceeds the code max {1} mm.", LD(model.r), CODE.openRiserMaxGap) : "")+'</div>';
+  }
+  for(const lvl of model.levels){
+    h += '<div class="sheet"><h3>'+t("Level {0} — tread surface {1} above deck, depth {2}", lvl.k, LD(lvl.z), LD(lvl.T))+'</h3><div class="grid2">';
+    for(const legName of ["front","side"]){
+      const tb = treadLegBoards(legName, lvl.k, model, style);
+      h += '<div><h4>'+t("{0} leg — {1} bd, board 1 at the nosing", t(legName), tb.boards.length)+'</h4><table><thead><tr><th>'+t("Bd")+'</th><th>'+t("Long pt")+'</th><th>'+t("Short pt")+'</th><th>'+t("Width")+'</th></tr></thead><tbody>';
+      for(const b of tb.boards) h += "<tr><td>"+b.j+"</td><td>"+LD(b.long)+"</td><td>"+LD(b.short)+"</td><td>"+fmtIn(b.w)+"</td></tr>";
+      h += "</tbody></table></div>";
+    }
+    h += "</div></div>";
+  }
+  document.getElementById("panel-steps").innerHTML = h;
+}
+function renderCutlistPanel(model){
+  const pieces = collectPieces(model);
+  const bins = binPack(pieces);
+  const prices = parsePrices();
+  let h = "<h3>"+t("Boards to buy")+"</h3><table><thead><tr><th>"+t("Stock")+"</th><th>"+t("Length")+"</th><th>"+t("Qty")+"</th><th>"+t("Cost")+"</th></tr></thead><tbody>";
+  let grandCost = 0, haveCost = false;
+  for(const stockName in bins){
+    const byLen = {};
+    for(const bin of bins[stockName]) byLen[bin.stockLen] = (byLen[bin.stockLen]||0)+1;
+    for(const len in byLen){
+      const qty = byLen[len], price = prices[stockName]||0, cost = price*qty;
+      if(price) haveCost = true;
+      grandCost += cost;
+      h += "<tr><td>"+stockName+"</td><td>"+L(parseFloat(len))+"</td><td>"+qty+"</td><td>"+(price?("$"+cost.toFixed(2)):"—")+"</td></tr>";
+    }
+  }
+  h += "</tbody></table>";
+  if(haveCost) h += '<div class="kv"><dt>'+t("Estimated material cost")+'</dt><dd>'+dec(grandCost.toFixed(2))+' $</dd></div>';
+  h += "<h3>"+t("Cut list per board")+"</h3>";
+  for(const stockName in bins){
+    h += "<h4>"+stockName+"</h4><table><thead><tr><th>"+t("Board #")+"</th><th>"+t("Stock length")+"</th><th>"+t("Cuts")+"</th><th>"+t("Waste")+"</th></tr></thead><tbody>";
+    bins[stockName].forEach((bin,i)=>{
+      h += "<tr><td>"+(i+1)+"</td><td>"+L(bin.stockLen)+"</td><td>"+bin.cuts.map(c=>LD(c.len)+" — "+c.role).join("<br>")+"</td><td>"+fmtIn(bin.waste)+" ("+bin.wastePct.toFixed(0)+"%)"+(bin.offcutUsable?' <span class="pill ok">'+t("offcut usable")+'</span>':'')+"</td></tr>";
+    });
+    h += "</tbody></table>";
+  }
+  document.getElementById("panel-cutlist").innerHTML = h || "<p>"+t("Nothing to cut yet.")+"</p>";
+}
+function renderWarningsPanel(model){
+  const warn = validate(model);
+  let h = "";
+  if(!warn.length) h += '<div class="msg i">'+t("No warnings.")+'</div>';
+  for(const w of warn) h += '<div class="msg '+(w.level==="error"?"e":"w")+'">'+w.msg+'</div>';
+  document.getElementById("panel-warnings").innerHTML = h;
+}
+
+/* ---------- 20. tabs / panel shell / print head -------------------------- */
+/* Static chrome lives in the HTML, so it needs re-labelling on a language
+   switch (everything else is rebuilt by run()). */
+function applyChrome(){
+  document.documentElement.lang = S.lang;
+  const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
+  set("app-title", t("Corner Deck Stair Calculator"));
+  set("app-sub",   t("cascading pyramid stair · 2 faces + mitered outside corner"));
+  set("t-lang",    t("Language"));
+  set("t-units",   t("Units"));
+  set("btn-save",  t("Export JSON"));
+  set("btn-load",  t("Import"));
+  set("btn-reset", t("Reset"));
+  set("btn-print", t("Print / PDF"));
+  document.title = t("Corner Deck Stair Calculator");
+  const u=document.getElementById("units");
+  if(u) for(const o of u.options) o.textContent = t({in:"Imperial",mm:"Metric (mm)",both:"Both"}[o.value]);
+}
+/* ---------- 20b. resizable input column ---------------------------------- */
+const SB_MIN=240, SB_MAX=900, SB_DEF=340;
+function clampSB(w){ return Math.max(SB_MIN, Math.min(SB_MAX, Math.round(w))); }
+function applySidebar(){
+  document.documentElement.style.setProperty("--sbw", clampSB(S.sidebarW||SB_DEF)+"px");
+}
+function initSplitter(){
+  const bar=document.getElementById("split"), main=document.querySelector("main");
+  if(!bar) return;
+  let dragging=false;
+  const widthFrom = clientX => clampSB(clientX - main.getBoundingClientRect().left - parseFloat(getComputedStyle(main).paddingLeft));
+  bar.addEventListener("pointerdown", e=>{
+    dragging=true; bar.classList.add("drag"); document.body.classList.add("resizing");
+    bar.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  bar.addEventListener("pointermove", e=>{ if(!dragging) return; S.sidebarW=widthFrom(e.clientX); applySidebar(); });
+  const end = e => {
+    if(!dragging) return;
+    dragging=false; bar.classList.remove("drag"); document.body.classList.remove("resizing");
+    try{ bar.releasePointerCapture(e.pointerId); }catch(_){}
+    save();                                        // only persist once the drag ends
+  };
+  bar.addEventListener("pointerup", end);
+  bar.addEventListener("pointercancel", end);
+  bar.addEventListener("dblclick", ()=>{ S.sidebarW=SB_DEF; applySidebar(); save(); });
+  /* keyboard: focusable and arrow-adjustable */
+  bar.tabIndex=0;
+  bar.addEventListener("keydown", e=>{
+    const step = e.shiftKey?40:10;
+    if(e.key==="ArrowLeft"){ S.sidebarW=clampSB((S.sidebarW||SB_DEF)-step); applySidebar(); save(); e.preventDefault(); }
+    if(e.key==="ArrowRight"){ S.sidebarW=clampSB((S.sidebarW||SB_DEF)+step); applySidebar(); save(); e.preventDefault(); }
+  });
+}
+const TAB_DEFS = [["summary","Summary"],["plan","Plan & elevation"],["schedule","Step schedule"],
+  ["framing","Framing"],["steps","Per-step sheets"],["cutlist","Cut list"],["warnings","Warnings"]];
+function isTestMode(){ return /(^|[?&])test=1(&|$)/.test(location.search); }
+let ACTIVE_TAB = "summary", PANELS_BUILT = false;
+function ensurePanels(){
+  if(PANELS_BUILT) return;
+  const ids = TAB_DEFS.map(t=>t[0]);
+  if(isTestMode()) ids.push("tests");
+  document.getElementById("panels").innerHTML = ids.map(id=>'<div class="panel" id="panel-'+id+'"></div>').join("");
+  PANELS_BUILT = true;
+}
+function renderTabs(){
+  const tabs = TAB_DEFS.concat(isTestMode()?[["tests","Tests"]]:[]);
+  document.getElementById("tabs").innerHTML = tabs.map(d=>'<button data-tab="'+d[0]+'" class="'+(d[0]===ACTIVE_TAB?"on":"")+'">'+t(d[1])+"</button>").join("");
+  document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click", ()=>{ ACTIVE_TAB=b.dataset.tab; renderTabs(); showPanel(); }));
+}
+function showPanel(){
+  document.querySelectorAll("#panels .panel").forEach(p=>p.classList.toggle("on", p.id==="panel-"+ACTIVE_TAB));
+}
+function renderPrintHead(model){
+  const el = document.getElementById("printhead");
+  const methodLbl = S.method==="boxes" ? t("Stacked box frames") : t("Cut stringers + hip stringer");
+  const cornerLbl = S.cornerStyle==="miter" ? t("45° mitered") : S.cornerStyle==="through" ? t("One leg runs through") : t("Compare both (miter used for cut list)");
+  el.innerHTML = "<h2>"+(S.project||t("Deck corner stair"))+"</h2><div class='note'>"
+    +t("Printed {0}", new Date().toLocaleDateString(S.lang==="fr"?"fr-CA":"en-CA"))+"</div>"
+    +"<div class='kv'><dt>"+t("Total rise")+"</dt><dd>"+LD(model.H)+"</dd><dt>"+t("Risers")+"</dt><dd>"+model.N+"</dd><dt>"+t("Run")+"</dt><dd>"+LD(model.R)+"</dd>"
+    +"<dt>"+t("Platform")+"</dt><dd>"+L(model.platFinX)+" × "+L(model.platFinY)+"</dd><dt>"+t("Step framing")+"</dt><dd>"+methodLbl
+    +"</dd><dt>"+t("Corner tread joint")+"</dt><dd>"+cornerLbl+"</dd></div>";
+}
+
+/* ---------- 21. self-test (?test=1) --------------------------------------- */
+function runTests(){
+  const results = [];
+  const backup = JSON.parse(JSON.stringify(S));
+  const backupCode = JSON.parse(JSON.stringify(CODE)), backupStock = JSON.parse(JSON.stringify(STOCK));
+  function assert(name, cond, extra){ results.push({name, pass:!!cond, extra: extra!=null?String(extra):""}); }
+  try{
+    /* Hermetic: pin EVERY input the assertions depend on, and reset the stock
+       and code tables. Inheriting the user's saved project made these results
+       depend on their tread stock, which is how a wrong 5.5 read as 6. */
+    Object.keys(S).forEach(k=>delete S[k]);
+    Object.assign(S, DEFAULTS, {
+      totalRise:28, risers:4, run:11, nosing:0, platX:60, platY:48,
+      treadStock:"2x6", treadGap:0.25, riserStock:"5/4x6 PT", riserFit:"captured",
+      riserStyle:"closed", platSurface:"5/4x6 PT", platFrame:"2x6", platJoistDir:"y",
+      includePlatform:true, method:"boxes", cornerStyle:"miter", throughLeg:"front",
+      frameStock:"2x6", stringerStock:"2x12", skirtStock:"2x10", faceX0:"open",
+      stockLen:"96,120,144,192", kerf:0.125, minOffcut:12, riseMode:"fixed",
+      bottomBearing:"surface", deckBoardT:1.0, throatMin:5
+    });
+    Object.assign(CODE, CODE_DEFAULT);
+    STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
+    const m1 = computeModel();
+    assert("H=28,N=4 -> r=7", Math.abs(m1.r-7)<1e-9, m1.r);
+    /* 60 + 3×11 + 1" captured riser + 0 nosing = 94; 48 + 33 + 1 = 82 */
+    assert("footprint 94 x 82 (includes the captured riser thickness)",
+      Math.abs(m1.footX-94)<1e-9 && Math.abs(m1.footY-82)<1e-9, m1.footX+" x "+m1.footY);
+    /* These call the real functions. Recomputing the expected value from the
+       same formula inside the test would pass even if the code were wrong. */
+    const rb1 = riserBoards(m1);
+    const frontLP = rb1.rows.map(x=>x.front.long), sideLP = rb1.rows.map(x=>x.side.long);
+    assert("riserBoards front long points 60,71,82,93", [60,71,82,93].every((v,i)=>Math.abs(v-frontLP[i])<1e-9), frontLP.join(","));
+    assert("riserBoards side long points 48,59,70,81", [48,59,70,81].every((v,i)=>Math.abs(v-sideLP[i])<1e-9), sideLP.join(","));
+    assert("riser height = r - tread thickness = 5.5", Math.abs(rb1.height-5.5)<1e-9, rb1.height);
+    assert("riser 1 = r - platform decking = 6 (tucks under the platform)", Math.abs(rb1.height1-6)<1e-9, rb1.height1);
+    assert("riser 1 row uses the platform height, the rest use the tread height",
+      Math.abs(rb1.rows[0].height-6)<1e-9 && rb1.rows.slice(1).every(x=>Math.abs(x.height-5.5)<1e-9),
+      rb1.rows.map(x=>x.height).join(","));
+    assert("riser short point = long - board thickness", Math.abs(rb1.rows[0].front.short-(60-sk(S.riserStock).t))<1e-9, rb1.rows[0].front.short);
+    assert("N risers listed", rb1.rows.length===m1.N, rb1.rows.length);
+
+    /* Hand-checked tread layout. Board depth is 11 run + 1 captured riser = 12.
+       With 2x6 (5.5 + 1/4 gap) that is 2 full boards + a 1/2" filler, laid from
+       the NOSING: board 1 at offset 6.5 (front edge on the tip), board 2 at
+       0.75, and the 1/2" rip last at the back. */
+    const tb1 = treadLegBoards("front", 1, m1, "miter");
+    assert("level 1 front mitered long points 72 / 66.25 / 60.5, nosing first",
+      tb1.boards.length===3 && Math.abs(tb1.boards[0].long-72)<1e-9
+        && Math.abs(tb1.boards[1].long-66.25)<1e-9 && Math.abs(tb1.boards[2].long-60.5)<1e-9,
+      tb1.boards.map(b=>b.long).join(", "));
+    assert("board 1 ends at the nosing tip, Wx + board depth",
+      Math.abs(tb1.boards[0].long-(m1.Wx+m1.Tb))<1e-9,
+      tb1.boards[0].long+" vs "+(m1.Wx+m1.Tb));
+    const tb1s = treadLegBoards("side", 1, m1, "miter");
+    assert("level 1 side mitered long points 60 / 54.25 / 48.5, nosing first",
+      Math.abs(tb1s.boards[0].long-60)<1e-9 && Math.abs(tb1s.boards[1].long-54.25)<1e-9
+        && Math.abs(tb1s.boards[2].long-48.5)<1e-9,
+      tb1s.boards.map(b=>b.long).join(", "));
+    const savedThrough = S.throughLeg; S.throughLeg = "front";
+    const thF = treadLegBoards("front", 1, m1, "through"), thS = treadLegBoards("side", 1, m1, "through");
+    assert("through leg runs full (72), butting leg stops short (48)",
+      thF.boards.every(b=>Math.abs(b.long-72)<1e-9) && thS.boards.every(b=>Math.abs(b.long-48)<1e-9),
+      thF.boards[0].long+" / "+thS.boards[0].long);
+    S.throughLeg = savedThrough;
+
+    assert("sum of risers === H", Math.abs(m1.N*m1.r-m1.H)<1e-9);
+    const bottomK=m1.N-1;
+    assert("bottom ring outer extents", Math.abs((m1.Wx+bottomK*m1.R+m1.riserT+m1.nose)-m1.footX)<1e-9 && Math.abs((m1.Wy+bottomK*m1.R+m1.riserT+m1.nose)-m1.footY)<1e-9);
+
+    let mArea=0, tArea=0;
+    for(const lvl of m1.levels) for(const legName of ["front","side"]){
+      const Wb = legName==="front"?m1.Wx:m1.Wy;
+      const isThrough = S.throughLeg===legName;
+      mArea += ringLegAreaMiter(Wb, lvl.k, m1.R, m1.Tb);
+      tArea += ringLegAreaThrough(Wb, lvl.k, m1.R, m1.Tb, isThrough);
+    }
+    assert("mitered vs through-leg cover equal total area", Math.abs(mArea-tArea)<0.01, mArea.toFixed(4)+" vs "+tArea.toFixed(4));
+
+    const fb = fitBoards(3*5.5+2*0.25, 5.5, 0.25);
+    assert("fitBoards round-trips on an exact case", fb.exact && fb.n===3 && Math.abs(fb.spanN-(3*5.5+2*0.25))<1e-9);
+
+    const pieces = collectPieces(m1);
+    const bins = binPack(pieces);
+    let binOk = true;
+    for(const stockName in bins) for(const bin of bins[stockName]){
+      const used = bin.cuts.reduce((s,c)=>s+c.len,0) + Math.max(0,bin.cuts.length-1)*S.kerf;
+      if(used > bin.stockLen+1e-6) binOk=false;
+    }
+    assert("every bin-packed board's cuts + kerf fit within its length", binOk);
+
+    const w=sk(S.treadStock).w, gap=S.treadGap;
+    const savedR=S.run, savedNose=S.nosing, savedRS=S.riserStyle;
+    /* open risers so board depth == run exactly and divides into 3 boards */
+    S.riserStyle="open"; S.run = 3*w+2*gap; S.nosing = 0;
+    const mPitch = computeModel();
+    const bds = treadLegBoards("front", 1, mPitch, "miter").boards;
+    /* Boards run nosing-first, so long points DESCEND by one pitch. */
+    let pitchOk = bds.length>=2;
+    for(let i=1;i<bds.length;i++) if(Math.abs((bds[i-1].long-bds[i].long)-(w+gap))>1e-6) pitchOk=false;
+    assert("consecutive mitered board long-points differ by one pitch (w+gap)", pitchOk,
+      bds.map(b=>b.long.toFixed(2)).join(" → "));
+    S.run=savedR; S.nosing=savedNose; S.riserStyle=savedRS;
+
+    const hip = hipStringer(computeModel());
+    assert("hip run = R*sqrt(2)", Math.abs(hip.run - m1.R*Math.SQRT2)<1e-9, hip.run);
+
+    /* Regression: the required stringer length must include the bottom plumb
+       face drop below the last notch corner. Without it the board comes out
+       c*Ls exactly, which is short by drop*r/Ls (~2.95" here). */
+    const Ls1 = hyp(m1.r, m1.R), drop1 = m1.r - sk(S.treadStock).t;
+    const st1 = stringersForLeg("front", m1);
+    const s3 = st1.list.find(x=>x.c===3);
+    assert("stringer length includes the bottom drop (not just c*Ls)",
+      !!s3 && s3.reqLen > 3*Ls1 + 1e-6 && Math.abs(s3.reqLen-(3*Ls1+drop1*m1.r/Ls1))<1e-9,
+      s3 ? s3.reqLen.toFixed(4)+" vs c*Ls="+(3*Ls1).toFixed(4) : "no 3-notch stringer");
+    assert("hip length includes the bottom drop",
+      hip.reqLen > hip.c*hip.Ls + 1e-6, hip.reqLen.toFixed(4)+" vs "+(hip.c*hip.Ls).toFixed(4));
+    assert("stringers nearer the corner carry fewer notches",
+      st1.list.length>1 && st1.list[st1.list.length-1].c < st1.list[0].c,
+      st1.list.map(x=>x.c).join(","));
+
+    /* Framing density: joists must never end up spaced wider than the tread
+       material's span (a floor()+1 count silently violates this). */
+    const spanLim = sk(S.treadStock).span;
+    let spacingOk = true, worst = 0;
+    for(const lvl of m1.levels) for(const leg of boxesForLevel(m1, lvl.k).legs){
+      worst = Math.max(worst, leg.joistSpacing);
+      if(leg.joistSpacing > spanLim + 1e-9) spacingOk = false;
+    }
+    assert("box joist spacing never exceeds the tread span", spacingOk, "worst "+worst.toFixed(2)+" / limit "+spanLim);
+    const pf1 = platformModel(m1);
+    const pfSpacing = (S.platJoistDir==="y"?m1.Wx:m1.Wy)/(pf1.joistCount-1);
+    assert("platform joist spacing never exceeds the decking span",
+      pfSpacing <= (sk(S.platSurface).span||16)+1e-9, pfSpacing.toFixed(2));
+
+    const blks = boxSupportBlocks(m1);
+    assert("support blocks only for levels 2..N-2, both legs", blks.length===2 && blks.every(b=>b.k===2),
+      blks.map(b=>"k"+b.k+" "+b.legName+" ×"+b.qty).join(", "));
+    assert("support block height = z_(k+1)", blks.every(b=>Math.abs(b.height-(m1.H-(b.k+1)*m1.r))<1e-9), blks[0] && blks[0].height);
+    assert("skirt rake = hyp(total run, H)",
+      Math.abs(skirtInfo(m1).rake - hyp(3*m1.R+m1.nose, m1.H))<1e-9, skirtInfo(m1).rake.toFixed(3));
+
+    /* ---- bearing on the deck STRUCTURE ---------------------------------
+       The whole point: the rise must not move, only the framing gets deeper. */
+    const mSurf = computeModel();
+    const stSurf = stringersForLeg("front", mSurf).list.find(x=>x.c===3);
+    const boxSurf = boxesForLevel(mSurf, mSurf.N-1).rimH;
+    const platSurf = platformModel(mSurf).height;
+    S.bottomBearing="structure"; S.deckBoardT=1.0;
+    const mStruct = computeModel();
+    assert("structure bearing does NOT change riser height or tread heights",
+      mStruct.r===mSurf.r && mStruct.H===mSurf.H &&
+      mStruct.levels.every((l,i)=>l.z===mSurf.levels[i].z),
+      "r "+mStruct.r+" vs "+mSurf.r);
+    assert("structure bearing reports base = one decking thickness", Math.abs(mStruct.base-1)<1e-9, mStruct.base);
+    const stStruct = stringersForLeg("front", mStruct).list.find(x=>x.c===3);
+    assert("stringer gets longer by exactly deckT*r/Ls",
+      Math.abs((stStruct.reqLen-stSurf.reqLen) - 1*mSurf.r/hyp(mSurf.r,mSurf.R))<1e-9,
+      (stStruct.reqLen-stSurf.reqLen).toFixed(4));
+    assert("bottom box rim deepens by the decking, others do not",
+      Math.abs(boxesForLevel(mStruct,mStruct.N-1).rimH-(boxSurf+1))<1e-9 &&
+      Math.abs(boxesForLevel(mStruct,1).rimH-boxSurf)<1e-9,
+      boxesForLevel(mStruct,mStruct.N-1).rimH+" / "+boxesForLevel(mStruct,1).rimH);
+    assert("platform frame deepens by the decking", Math.abs(platformModel(mStruct).height-(platSurf+1))<1e-9, platformModel(mStruct).height);
+    assert("support blocks reach the bearing plane",
+      boxSupportBlocks(mStruct).every((b,i)=>Math.abs(b.height-(boxSupportBlocks(mSurf)[i].height+1))<1e-9));
+    assert("bottom frame in the section stops at -base",
+      Math.abs(sectionPieces(mStruct).frames.slice(-1)[0].zBot+1)<1e-9, sectionPieces(mStruct).frames.slice(-1)[0].zBot);
+    S.bottomBearing="surface";
+
+    /* ---- platform nosing ------------------------------------------------ */
+    S.nosing=1;
+    const mN=computeModel(), pfN=platformModel(mN);
+    assert("platform decking overhangs the riser face by the nosing on both step faces",
+      Math.abs(mN.platFinX-62)<1e-9 && Math.abs(mN.platFinY-50)<1e-9, mN.platFinX+" x "+mN.platFinY);
+    assert("platform decking boards get longer and fill further by riser + nosing",
+      Math.abs(pfN.deckBoardLen-62)<1e-9 && Math.abs(pfN.deckFillDim-50)<1e-9,
+      pfN.deckBoardLen+" / "+pfN.deckFillDim);
+    assert("platform frame itself is NOT enlarged by the nosing",
+      pfN.rimPieces[0].len===60, pfN.rimPieces[0].len);
+    S.nosing=0;
+
+    /* ---- stringers must come out of a real 2x12 ------------------------- */
+    const st12=stringersForLeg("front", computeModel()), hip12=hipStringer(computeModel());
+    assert("2x12 is 11-1/4 wide and carries the leg pitch",
+      Math.abs(sk("2x12").w-11.25)<1e-9 && st12.fitsStock && st12.throat>=S.throatMin,
+      "throat "+st12.throat.toFixed(3)+" min width "+st12.minWidth.toFixed(3));
+    assert("hip needs a wider board than a 2x12 at 7/11 — and is flagged",
+      hip12.minWidth>sk("2x12").w && !hip12.fitsStock,
+      "needs "+hip12.minWidth.toFixed(3)+" vs 11.25");
+    assert("stringer spacing comes from the TREAD span, not the stringer's own",
+      st12.spanLimit===sk(S.treadStock).span && st12.spacing<=st12.spanLimit+1e-9,
+      "limit "+st12.spanLimit+" spacing "+st12.spacing.toFixed(2));
+    const sTread=S.treadStock; S.treadStock="5/4x6 PT";
+    const st16=stringersForLeg("front", computeModel());
+    assert("switching to 5/4x6 treads tightens stringer spacing to 16",
+      st16.spanLimit===16 && st16.spacing<=16+1e-9 && st16.list.length>st12.list.length,
+      "spacing "+st16.spacing.toFixed(2)+" count "+st16.list.length+" vs "+st12.list.length);
+    S.treadStock=sTread;
+
+    /* ---- nosing is measured from the riser FACE -------------------------- */
+    /* With a captured riser the tread must lap the riser board, otherwise the
+       riser's top edge is left exposed when the nosing is 0. */
+    S.riserStyle="closed"; S.riserFit="captured"; S.riserStock="5/4x6 PT"; S.nosing=0;
+    const mR0=computeModel();
+    assert("captured riser: tread board laps the riser even with 0 nosing",
+      Math.abs(mR0.riserT-1)<1e-9 && Math.abs(mR0.Tb-12)<1e-9 && Math.abs(mR0.Twalk-11)<1e-9,
+      "riserT "+mR0.riserT+" Tb "+mR0.Tb+" Twalk "+mR0.Twalk);
+    S.nosing=1;
+    const mR1=computeModel();
+    assert("1\" nosing sits BEYOND the riser face, not inside it",
+      Math.abs(mR1.Tb-13)<1e-9 && Math.abs(mR1.Twalk-12)<1e-9, "Tb "+mR1.Tb+" Twalk "+mR1.Twalk);
+    assert("the tread's front edge clears the riser face by exactly the nosing",
+      Math.abs((mR1.Tb-(mR1.R+mR1.riserT))-mR1.nose)<1e-9);
+    assert("footprint and platform grow by the riser thickness too",
+      Math.abs(mR1.footY-(mR1.Wy+3*mR1.R+mR1.riserT+mR1.nose))<1e-9 &&
+      Math.abs(mR1.platFinY-(mR1.Wy+mR1.riserT+mR1.nose))<1e-9,
+      mR1.footY+" / "+mR1.platFinY);
+    const bdsR=treadLegBoards("front",1,mR1,"miter").boards;
+    const coveredR=bdsR.reduce((s,b)=>s+b.w,0)+(bdsR.length-1)*S.treadGap;
+    assert("the tread boards actually cover the full board depth",
+      coveredR >= mR1.Tb-0.0626, coveredR.toFixed(3)+" covering "+mR1.Tb);
+    S.riserStyle="open";
+    const mOpen=computeModel();
+    assert("open risers: no riser thickness added, depth is back to R + nosing",
+      mOpen.riserT===0 && Math.abs(mOpen.Tb-(mOpen.R+mOpen.nose))<1e-9, mOpen.Tb);
+    S.riserStyle="closed"; S.riserFit="captured"; S.nosing=0;
+
+    /* ---- run is nosing to nosing ---------------------------------------- */
+    S.nosing=1;
+    const mNN=computeModel();
+    const tipOf = k => (mNN.Wy+(k-1)*mNN.R) + mNN.Tb;      // nosing tip of level k
+    assert("nosing tip to nosing tip equals the run, on every step",
+      mNN.levels.slice(1).every(l=>Math.abs((tipOf(l.k)-tipOf(l.k-1))-mNN.R)<1e-9),
+      mNN.levels.map(l=>tipOf(l.k).toFixed(2)).join(" → "));
+    assert("platform nosing tip to the first tread's nosing tip is also one run",
+      Math.abs((tipOf(1)-mNN.platFinY)-mNN.R)<1e-9, tipOf(1)+" vs "+mNN.platFinY);
+
+    /* ---- tread boards start at the nosing -------------------------------- */
+    const offs=treadBoardOffsets(mNN), w0=sk(S.treadStock).w;
+    assert("board 1's front edge IS the nosing tip",
+      Math.abs((offs[0].o+offs[0].w)-mNN.Tb)<1e-9, (offs[0].o+offs[0].w)+" vs "+mNN.Tb);
+    assert("board 1 is a full board, never the ripped one",
+      Math.abs(offs[0].w-w0)<1e-9, offs[0].w);
+    assert("any ripped piece is the LAST one, at the back",
+      offs.length<2 || offs.slice(0,-1).every(b=>Math.abs(b.w-w0)<1e-9), offs.map(b=>b.w).join(", "));
+    assert("offsets march backwards from the nosing",
+      offs.every((b,i)=>i===0 || b.o < offs[i-1].o), offs.map(b=>b.o.toFixed(2)).join(", "));
+    assert("boards never run past the tread's back edge",
+      offs[offs.length-1].o > -1e-9, offs[offs.length-1].o);
+    const bdsNN=treadLegBoards("front",1,mNN,"miter").boards;
+    assert("the section view and the cut list use the same nosing-anchored layout",
+      Math.abs(sectionPieces(mNN).treads[0].bds[0].u-(mNN.Wy+bdsNN[0].o))<1e-9);
+
+    /* ---- floating platform out of the frame stock ------------------------ */
+    S.includePlatform=true; S.platFrame="2x8";
+    const pfF=platformModel(computeModel());
+    assert("floating platform frame depth is the frame stock on edge",
+      Math.abs(pfF.frameDepth-sk("2x8").w)<1e-9, pfF.frameDepth);
+    assert("legs make up exactly the rest of the height",
+      Math.abs(pfF.frameDepth+pfF.legH-pfF.height)<1e-9, pfF.legH);
+    assert("legs are counted on a grid no wider than the frame stock's span",
+      pfF.legCount===pfF.legCols*pfF.legRows &&
+      computeModel().Wx/(pfF.legCols-1)<=pfF.legSpan+1e-9 &&
+      computeModel().Wy/(pfF.legRows-1)<=pfF.legSpan+1e-9,
+      pfF.legCols+"×"+pfF.legRows+" @"+pfF.legSpan);
+    assert("legs appear in the cut list, cut from the platform frame stock",
+      collectPieces(computeModel()).some(p=>p.stock===S.platFrame && Math.abs(p.len-pfF.legH)<1e-9 && p.qty===pfF.legCount));
+    S.platFrame="2x6"; S.nosing=0;
+
+    /* ---- the elevation must draw the stringer at its real width ---------- */
+    {
+      const savedM=S.method; S.method="stringers"; S.stringerStock="2x12";
+      const em=computeModel(), eP=sectionPieces(em);
+      const bw=sk("2x12").w, Ls=hyp(em.r,em.R), cos=em.R/Ls;
+      /* Top edge is the nosing line through the seat FRONT corners; measure the
+         drawn board perpendicular to it. */
+      const edgeAtFace=em.H-eP.tt, lowAtFace=edgeAtFace-bw*Ls/em.R;
+      const drawnWidth=(edgeAtFace-lowAtFace)*cos;
+      assert("elevation draws the stringer at its true board width, not the throat",
+        Math.abs(drawnWidth-bw)<1e-6, drawnWidth.toFixed(4)+" vs "+bw);
+      /* Every notch apex must sit exactly `throat` above the lower edge. */
+      const throat=bw-em.r*em.R/Ls;
+      let worst=0;
+      for(let k=1;k<=em.N-1;k++){
+        const apex=[em.Wy+(k-1)*em.R, em.H-k*em.r-eP.tt];
+        const lowZ=lowAtFace-(apex[0]-em.Wy)*(em.r/em.R);   // lower edge under the apex
+        worst=Math.max(worst, Math.abs((apex[1]-lowZ)*cos-throat));
+      }
+      assert("every notch apex clears the lower edge by exactly the throat", worst<1e-6, worst.toExponential(2));
+      const face=(em.H-em.r-eP.tt)-lowAtFace;
+      assert("top plumb face height = throat / cos θ", Math.abs(face-throat*Ls/em.R)<1e-6,
+        face.toFixed(4)+" vs "+(throat*Ls/em.R).toFixed(4));
+      // and it must actually be in the rendered polygon
+      const poly=/<polygon points="([^"]+)"/.exec(renderElevationSVG(em))[1].split(" ").map(p=>p.split(",").map(Number));
+      assert("elevation stringer polygon closes vertically at the platform face",
+        Math.abs(poly[0][0]-poly[poly.length-1][0])<0.2, poly[0][0]+" vs "+poly[poly.length-1][0]);
+      S.method=savedM;
+    }
+
+    /* ---- the cut list must nest stringers, not buy a board each ---------- */
+    {
+      const savedM=S.method; S.method="stringers";     // collectPieces only emits stringers in this mode
+      const sm=computeModel(), sf=stringersForLeg("front",sm), ss=stringersForLeg("side",sm);
+      const nStr=sf.list.length+ss.list.length+1;
+      const strPieces=collectPieces(sm).filter(p=>p.stock===S.stringerStock);
+      assert("cut list records each stringer's CUT length, not the stock length",
+        strPieces.length===nStr && strPieces.every(p=>p.len<Math.max(...parseStockLens())-1),
+        strPieces.map(p=>p.len.toFixed(1)).join(", "));
+      const boards=(binPack(strPieces)[S.stringerStock]||[]).length;
+      const perBoard=Math.floor((96+S.kerf)/(sf.list[0].reqLen+S.kerf));
+      assert("stringers get nested — fewer boards than stringers",
+        boards<nStr && boards<=Math.ceil(nStr/Math.max(perBoard,1))+1,
+        boards+" boards for "+nStr+" stringers ("+perBoard+" fit per 96\")");
+      S.method=savedM;
+    }
+
+    /* ---- stringer stock layout ------------------------------------------ */
+    const stL=stringersForLeg("front", computeModel()), gL=stL.list[0];
+    const svgStock=stringerStockSVG(gL.c, computeModel().r, computeModel().R, stL.drop, sk("2x12").w, gL.boardLen, "x");
+    const polyS=/<polygon points="([^"]+)"/.exec(svgStock)[1].split(" ").map(p=>p.split(",").map(Number));
+    const vb=/viewBox="0 0 (\d+) (\d+)"/.exec(svgStock);
+    assert("stock layout: the cut nests inside the board it is drawn on",
+      polyS.every(p=>p[0]>=-1 && p[0]<=+vb[1]+1 && p[1]>=-1 && p[1]<=+vb[2]+1));
+    assert("stock layout shows the board you buy, not just the cut",
+      svgStock.indexOf('fill="#f2ede4"')>0 && (gL.boardLen>gL.reqLen ? svgStock.indexOf("offcut")>0 : true));
+
+    /* ---- sidebar width -------------------------------------------------- */
+    assert("sidebar width is clamped to a usable range",
+      clampSB(10)===SB_MIN && clampSB(99999)===SB_MAX && clampSB(420)===420,
+      clampSB(10)+"/"+clampSB(99999));
+
+    /* ---- language ------------------------------------------------------- */
+    /* A translation that loses a {n} placeholder silently swallows a number,
+       which is worse than being untranslated. */
+    let badPh=[], emptyV=[];
+    for(const k in FR){
+      const want=(k.match(/\{\d\}/g)||[]).sort().join(","), got=(FR[k].match(/\{\d\}/g)||[]).sort().join(",");
+      if(want!==got) badPh.push(k+" ["+want+" vs "+got+"]");
+      if(!String(FR[k]).trim()) emptyV.push(k);
+    }
+    assert("every French translation keeps all of its {n} placeholders", badPh.length===0, badPh.slice(0,3).join(" | "));
+    assert("no French translation is blank", emptyV.length===0, emptyV.slice(0,3).join(" | "));
+    assert("t() falls back to English for an unknown string",
+      (()=>{ S.lang="fr"; const r=t("__nope__ zzz"); S.lang="en"; return r==="__nope__ zzz"; })());
+    assert("t() substitutes placeholders in both languages",
+      t("Riser {0} {1}", 2, "front")==="Riser 2 front" &&
+      (()=>{ S.lang="fr"; const r=t("Riser {0} {1}", 2, "avant"); S.lang="en"; return r==="Contremarche 2 avant"; })());
+    const numsEN = JSON.stringify([computeModel(), stringersForLeg("front",computeModel()).list,
+      boxesForLevel(computeModel(),1), platformModel(computeModel()), collectPieces(computeModel()).map(p=>p.len)]);
+    S.lang="fr";
+    const numsFR = JSON.stringify([computeModel(), stringersForLeg("front",computeModel()).list,
+      boxesForLevel(computeModel(),1), platformModel(computeModel()), collectPieces(computeModel()).map(p=>p.len)]);
+    const frWarnCount = validate(computeModel()).length;
+    S.lang="en";
+    assert("switching language changes no computed dimension", numsEN===numsFR);
+    assert("switching language changes no validation outcome", frWarnCount===validate(computeModel()).length);
+    assert("French decimals use a comma, English a period",
+      (()=>{ S.lang="fr"; const f=dec("9.333"); S.lang="en"; return f==="9,333" && dec("9.333")==="9.333"; })());
+    assert("a comma-decimal entry parses like a period", Math.abs(parseLen("9,5")-9.5)<1e-9, parseLen("9,5"));
+
+    const fb2 = fitBoards(11, 5.5, 0.25);
+    assert("T=11 with 2x6 @ 1/4 gap -> 2 boards, 1/4 overshoot, tight gap 0",
+      fb2.recommend==="overshoot" && fb2.overshootN===2 && Math.abs(fb2.overshoot-0.25)<1e-9 && Math.abs(fb2.altGapTight)<1e-9,
+      fb2.recommend+" n+1="+fb2.overshootN+" over="+fb2.overshoot+" tight="+fb2.altGapTight);
+  } finally {
+    Object.keys(S).forEach(k=>delete S[k]);
+    Object.assign(S, backup);
+    Object.assign(CODE, backupCode);
+    STOCK = backupStock;
+  }
+  return results;
+}
+function renderTestsPanel(){
+  const results = runTests();
+  const pass = results.filter(r=>r.pass).length;
+  let h = "<h3>Self-tests</h3><table><thead><tr><th>Test</th><th>Result</th><th>Detail</th></tr></thead><tbody>";
+  for(const r of results) h += "<tr><td>"+r.name+"</td><td>"+(r.pass?'<span class="pill ok">PASS</span>':'<span class="pill rip">FAIL</span>')+"</td><td class=\"mono\">"+r.extra+"</td></tr>";
+  h += "</tbody></table><div class='tests-summary msg "+(pass===results.length?"i":"e")+"'>"+pass+" / "+results.length+" passed</div>";
+  document.getElementById("panel-tests").innerHTML = h;
+}
+
+/* ---------- 22. top-level orchestrator ------------------------------------ */
+function run(){
+  ensurePanels();
+  let model;
+  try{ model = computeModel(); }
+  catch(e){ console.error("computeModel failed:", e); return; }
+  renderSummaryPanel(model);
+  renderPlanPanel(model);
+  renderSchedulePanel(model);
+  renderFramingPanel(model);
+  renderStepsPanel(model);
+  renderCutlistPanel(model);
+  renderWarningsPanel(model);
+  if(isTestMode()) renderTestsPanel();
+  renderTabs();
+  showPanel();
+  renderPrintHead(model);
+}
+
+/* ---------- 23. reset / export / import ----------------------------------- */
+function resetAll(){
+  const keepLang = S.lang, keepUnits = S.units, keepSB = S.sidebarW;   // UI prefs, not stair inputs
+  Object.assign(S, DEFAULTS, {lang:keepLang, units:keepUnits, sidebarW:keepSB});
+  Object.assign(CODE, CODE_DEFAULT);
+  STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
+  save(); renderForm(); run();
+}
+function exportJSON(){
+  const blob = new Blob([JSON.stringify({S,CODE,STOCK}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (S.project||"stair").replace(/[^a-z0-9]+/gi,"_")+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.S) Object.assign(S, DEFAULTS, data.S);
+      if(data.CODE) Object.assign(CODE, CODE_DEFAULT, data.CODE);
+      if(data.STOCK) STOCK = Object.assign(JSON.parse(JSON.stringify(STOCK_DEFAULT)), data.STOCK);
+      save(); renderForm(); run();
+    }catch(e){ alert(t("Could not read that file: {0}", e.message)); }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------- 24. wiring & init ---------------------------------------------- */
+load();
+document.getElementById("lang").value = S.lang;
+document.getElementById("lang").addEventListener("change", e=>{ S.lang=e.target.value; save(); applyChrome(); renderForm(); run(); });
+document.getElementById("units").value = S.units;
+document.getElementById("units").addEventListener("change", e=>{ S.units=e.target.value; save(); renderForm(); run(); });
+document.getElementById("btn-save").addEventListener("click", exportJSON);
+document.getElementById("btn-load").addEventListener("click", ()=>document.getElementById("file").click());
+document.getElementById("file").addEventListener("change", e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=""; });
+document.getElementById("btn-reset").addEventListener("click", ()=>{ if(confirm(t("Reset all inputs to defaults?"))) resetAll(); });
+document.getElementById("btn-print").addEventListener("click", ()=>window.print());
+document.getElementById("inputs").addEventListener("input", onFormInput);
+document.getElementById("inputs").addEventListener("change", onFormInput);
+
+applySidebar();
+initSplitter();
+applyChrome();
+renderForm();
+run();
+</script>
+</body>
+</html>
