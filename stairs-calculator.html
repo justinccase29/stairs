@@ -562,9 +562,31 @@ const FR = {
   /* stringer roles */
   "Three kinds of board. A COMMON stringer reaches the platform and runs the whole flight. A JACK stringer is one the 45° miter cuts short, so it starts partway down and carries fewer notches — its top end is a plain plumb cut against nothing, it lands on the tread of the step above. The HIP is the diagonal at the outside corner; both legs' treads bear on it.":
     "Trois sortes de planches. Un limon COMMUN atteint la plateforme et parcourt toute la volée. Un limon d'EMPANON est raccourci par l'onglet à 45° : il commence plus bas et porte moins d'entailles — son bout supérieur est une simple coupe d'aplomb dans le vide, il repose sur la marche du dessus. L'ARÊTE est la diagonale du coin extérieur ; les marches des deux ailes y prennent appui.",
-  "common":"commun", "jack":"empanon", "Type":"Type",
-  "Common stringer — {0} leg":"Limon commun — aile {0}",
-  "Jack stringer — {0} leg, starts at level {1}":"Limon empanon — aile {0}, débute au niveau {1}",
+  "common":"commun", "jack":"empanon", "Type":"Type", "ID":"ID",
+  "Every stringer has an ID — F1… on the front leg, S1… on the side leg, numbered outward from the house wall, and H for the hip. The same ID is on the plan view, on its sheet and in the cut list.":
+    "Chaque limon porte un ID — F1… sur l'aile avant, S1… sur l'aile latérale, numérotés en s'éloignant du mur de la maison, et H pour l'arête. Le même ID figure sur la vue en plan, sur sa fiche et dans la liste de coupes.",
+  "hip stringer (H)":"limon d'arête (H)",
+  "{0} · {1} (levels {2}–{3}) · run {4} rise {5} · marks every {6} · board ≥ {7}":
+    "{0} · {1} (niveaux {2} à {3}) · giron {4} hauteur {5} · repère chaque {6} · planche ≥ {7}",
+  "{0} — on the board: {1} needed, {2} per board, {3} board(s)":
+    "{0} — sur la planche : {1} requis, {2} par planche, {3} planche(s)",
+  "H · HIP stringer · run {0} (R×√2) · {1} · marks every {2} · board ≥ {3} · throat {4}":
+    "H · limon d'ARÊTE · giron {0} (R×√2) · {1} · repère chaque {2} · planche ≥ {3} · âme {4}",
+  "H — hip on the board: 1 × {0}":"H — arête sur la planche : 1 × {0}",
+  "H · hip stringer":"H · limon d'arête",
+  "{0} — {1} stringer, {2}":"{0} — limon {1}, {2}",
+  "H — hip stringer, {0}":"H — limon d'arête, {0}",
+  "Not drawn: at rise {0} on a run of {1} the notch is {2} deep, which cuts clean through a {3} board ({4}). Use wider stock for this one.":
+    "Non dessiné : à une contremarche de {0} sur un giron de {1}, l'entaille fait {2} de profondeur et traverse complètement une planche de {3} ({4}). Utilisez du bois plus large pour celui-ci.",
+  "board too narrow to reach the bearing plane — pack it up {0}":
+    "planche trop étroite pour atteindre le plan d'appui — calez-la de {0}",
+  "There is none — a {0} is not deep enough to reach the bearing plane here. The board stops {1} short and has to be packed up, or use wider stock.":
+    "Il n'y en a pas — une planche de {0} n'est pas assez large pour atteindre le plan d'appui ici. Elle s'arrête {1} trop haut et doit être calée, sinon prenez du bois plus large.",
+  "top plumb cut — lands on the offcut side, {0} past the end of the board":
+    "coupe d'aplomb du haut — tombe du côté de la retaille, {0} au-delà du bout de la planche",
+  "common stringer ({0} leg)":"limon commun (aile {0})",
+  "jack stringer ({0} leg), from level {1} down":"limon empanon (aile {0}), du niveau {1} vers le bas",
+  "1 notch":"1 entaille", "{0} notches":"{0} entailles",
   /* cut schedule */
   "Cut schedule — {0}{1}":"Tableau de coupe — {0}{1}",
   " × {0}":" × {0}",
@@ -579,7 +601,8 @@ const FR = {
   "First mark, from the bottom end":"Premier repère, depuis le bout du bas",
   "Last mark, from the bottom end":"Dernier repère, depuis le bout du bas",
   "Material past the last mark":"Matière au-delà du dernier repère",
-  "none — the top cut leans back":"aucune — la coupe du haut s'incline vers l'arrière",
+  "none — the board ends {0} short of it, so that mark falls on the offcut":
+    "aucune — la planche s'arrête {0} avant, ce repère tombe donc sur la retaille",
   "Cut length needed":"Longueur de coupe requise",
   "from a {0} board":"dans une planche de {0}",
   "{0} wide":"{0} de largeur",
@@ -1208,8 +1231,11 @@ function connectionInfo(model){
   const gap  = bears ? Math.max(0, tt-st) : 0;   // shim between tab and frame top
   return {
     kind, tab, bears, lift, gap,
-    /* level cut back `tab`, dropped `lift`, projected on the slope */
-    extraLen: tab*R/Ls - lift*r/Ls,
+    /* How much longer the board is than the SAME stringer with no tab. Two
+       parts: the level cut back `tab` dropped `lift`, projected on the slope,
+       plus r²/Ls — because a tab gives the top notch a real riser face, where
+       without one the board stops at the top seat. */
+    extraLen: bears ? tab*R/Ls - lift*r/Ls + r*r/Ls : 0,
     bearing: tab,                           // horizontal bearing on the platform frame
     needsLedger: !bears,
     label: kind==="flushFull" ? t("Flush, full tread") : kind==="flushHalf" ? t("Flush, half tread") : t("Top tread down"),
@@ -1238,7 +1264,13 @@ function stringerPositions(total, span){
 function projectStringerLength(c, r, R, Ls, drop, topRun, topLift){
   if(c<=0) return 0;
   const verts = [[0,0]];
-  for(let i=0;i<c;i++){ verts.push([(i+1)*R, i*r]); verts.push([(i+1)*R, (i+1)*r]); }
+  /* Same rule as stringerBoardLayout: without a tab the top notch has no riser
+     face, so (c·R, c·r) is not material and the top extreme is the top seat's
+     back corner — r²/Ls less board. */
+  for(let i=0;i<c;i++){
+    verts.push([(i+1)*R, i*r]);
+    if(i<c-1 || topRun>0) verts.push([(i+1)*R, (i+1)*r]);
+  }
   /* A flush connection carries the board back under the platform by `topRun`
      horizontally, on a LEVEL cut `topLift` below the top notch corner — not
      along the sloped nosing line. The far corner of that cut is the top
@@ -1274,7 +1306,12 @@ function stringersForLeg(legName, model){
   const drop = Math.max(0, r - sk(S.treadStock).t) + model.base;   // bottom plumb face, down to bearing
   const conn = connectionInfo(model);
   const stockLens = parseStockLens();
-  const list = positions.map(p=>{
+  /* Every stringer gets an ID — F1.. on the front leg, S1.. on the side leg,
+     numbered outward from the house wall — and it is the SAME string in the
+     plan view, the framing tables, the sheets and the cut list, so you can tell
+     which board on the pile goes where. The hip is H. */
+  const tag = legName==="front" ? "F" : "S";
+  const list = positions.map((p,i)=>{
     let kmin = Math.max(1, Math.ceil((p-Wb)/R)+1);
     if(kmin>N) kmin = N;
     const c = Math.max(0, N-kmin);
@@ -1283,7 +1320,7 @@ function stringersForLeg(legName, model){
     const topLift = topRun>0 ? conn.lift : 0;
     const reqLen = c>0 ? projectStringerLength(c,r,R,Ls,drop,topRun,topLift) : 0;
     const boardLen = c>0 ? pickStockLen(reqLen, stockLens) : null;
-    return {pos:p, kmin, c, reqLen, boardLen, topRun, topLift};
+    return {id:tag+(i+1), pos:p, kmin, c, reqLen, boardLen, topRun, topLift};
   }).filter(s=>s.c>0);
   const groups = {};
   for(const s of list) (groups[s.c] = groups[s.c] || []).push(s);
@@ -1444,12 +1481,13 @@ function collectPieces(model){
         /* The PIECE is the stringer's cut length, not the stock it comes from —
            feeding the stock length in here made the packer buy a whole board per
            stringer instead of nesting two or three on one. */
-        pieces.push({role:t("{0} stringer ({1} notches)", t(legName), s.c), stock:S.stringerStock, len:s.reqLen, qty:1,
+        pieces.push({role:t("{0} — {1} stringer, {2}", s.id, s.kmin===1?t("common"):t("jack"), notchCount(s.c)),
+          stock:S.stringerStock, len:s.reqLen, qty:1,
           angle:t("layout marks"), note:t("at {0}", fmtIn(s.pos))+(s.boardLen?"":t(" — needs splice"))});
       }
     }
     const hip = hipStringer(model);
-    pieces.push({role:t("Hip stringer ({0} notches)", hip.c), stock:S.stringerStock, len:hip.reqLen, qty:1,
+    pieces.push({role:t("H — hip stringer, {0}", notchCount(hip.c)), stock:S.stringerStock, len:hip.reqLen, qty:1,
       angle:t("45° plan bevel"), note: hip.boardLen?"":t("needs splice")});
   } else {
     for(const lvl of model.levels){
@@ -1630,6 +1668,9 @@ function declutterSVG(svg){
    inside the zone the next ring's nosing overhangs, so they were being painted
    over entirely. */
 const TAGSTYLE='font-size="10.5" font-weight="700" fill="#3b2a17" stroke="#ffffff" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round"';
+/* stringer ids in the plan — same halo trick, in the framing colour so they do
+   not read as level tags */
+const STRTAG='font-size="10" font-weight="700" fill="#2d4257" stroke="#ffffff" stroke-width="3" paint-order="stroke" stroke-linejoin="round"';
 function levelTag(model,k){
   if(model.N-1<=1) return t("L{0} (only step)", k);
   if(k===1) return t("L{0} (top)", k);
@@ -1878,16 +1919,26 @@ function renderPlanSVG(model){
       }
     }
   } else {
+    /* Each stringer is tagged with the SAME id used in the framing tables, the
+       sheets and the cut list, so a board on the pile can be traced to a line
+       on this drawing. Tags go on the top layer with a halo — they sit over the
+       tread boards, which are drawn after the framing. */
     for(const legName of ["front","side"]){
       const st=stringersForLeg(legName,model);
       for(const g of st.list){
         const start=(legName==="front"?Wy:Wx)+(g.kmin-1)*R;
-        if(legName==="front") s+=svgLine(X(g.pos),Y(start),X(g.pos),Y(footY),dash);
-        else s+=svgLine(X(start),Y(g.pos),X(footX),Y(g.pos),dash);
+        if(legName==="front"){
+          s+=svgLine(X(g.pos),Y(start),X(g.pos),Y(footY),dash);
+          topLayer+=svgText(X(g.pos)+3,Y(footY)-4,g.id,STRTAG);
+        } else {
+          s+=svgLine(X(start),Y(g.pos),X(footX),Y(g.pos),dash);
+          topLayer+=svgText(X(footX)-4,Y(g.pos)-3,g.id,STRTAG+' text-anchor="end"');
+        }
       }
     }
     s+=svgLine(X(Wx),Y(Wy),X(footX),Y(footY),'stroke="#4c6076" stroke-width="1.6" stroke-dasharray="6 3"');
-    s+=svgText(X(footX)+6,Y(footY)+12,t("hip stringer"),'font-size="9" fill="#4c6076"');
+    topLayer+=svgText(X((Wx+footX)/2)+4,Y((Wy+footY)/2)-4,"H",STRTAG);
+    s+=svgText(X(footX)+6,Y(footY)+12,t("hip stringer (H)"),'font-size="9" fill="#4c6076"');
   }
   s+=svgText(mL,Y(footY)+34,capBottom,'font-size="9" fill="#667"');
   // kept high on the right so it clears the overall depth dimension at mid-height
@@ -2077,17 +2128,43 @@ function renderElevationSVG(model){
 function stringerBoardLayout(c,r,R,drop,bw,topRun,topLift){
   const Ls=hyp(r,R), ux=R/Ls, uy=r/Ls, px=uy, py=-ux;  // px,py = perpendicular, below the nosing line
   const lift = topRun>0 ? (topLift||0) : 0;
+  /* WITHOUT A TAB THE LAST NOTCH HAS NO RISER FACE. The topmost triangle taken
+     off the edge has its vertical leg in the very plane the board is cut off
+     in, so the wedge above the top seat is not material — approach the apex
+     (c·R, c·r) from inside the board and there is nothing there. The board's
+     top corner is the top SEAT's back corner, (c·R, (c−1)·r), and one plumb cut
+     runs from it down to the lower edge. Carrying the outline up to the apex
+     and back down the same line drew a zero-width spike above the board — the
+     thin vertical line — and made the board r²/Ls (≈4" at 7/11) too long. */
+  const topRiser = topRun>0;
   const notch=[[0,0]];
-  for(let i=0;i<c;i++){ notch.push([(i+1)*R, i*r]); notch.push([(i+1)*R,(i+1)*r]); }
-  /* Flush tab: the LAST RISER FACE STAYS PLUMB at x=c*R, then the top edge runs
-     back LEVEL. Sloping it (a straight continuation of the nosing line) would
-     draw an angled top riser — not buildable, and it could not pass under the
-     platform decking. */
-  if(topRun>0){ if(lift>0.001) notch.push([c*R, c*r-lift]); notch.push([c*R+topRun, c*r-lift]); }
-  const tipX=c*R+(topRun>0?topRun:0), tipY=c*r-lift;
-  const t1=(tipX-bw*px)/ux,  aLow=[tipX, bw*py+t1*uy];   // lower edge under the top end
-  const t0=(-drop-bw*py)/uy, bLow=[bw*px+t0*ux, -drop];  // where the bottom level cut meets it
-  const outline=notch.concat([aLow, bLow, [0,-drop]]);
+  for(let i=0;i<c;i++){
+    notch.push([(i+1)*R, i*r]);                                   // seat, out to the riser plane
+    if(i<c-1 || topRiser) notch.push([(i+1)*R,(i+1)*r]);          // riser face, up
+  }
+  /* Flush tab: THERE the last riser face is real — it is the front of the tab —
+     and stays plumb at x=c*R, after which the top edge runs back LEVEL.
+     Sloping it (a straight continuation of the nosing line) would draw an
+     angled top riser: not buildable, and it could not pass under the decking. */
+  if(topRiser){ if(lift>0.001) notch.push([c*R, c*r-lift]); notch.push([c*R+topRun, c*r-lift]); }
+  const tipX=c*R+(topRun>0?topRun:0), tipY=topRiser ? c*r-lift : (c-1)*r;
+  const t1=(tipX-bw*px)/ux,  lowTip=bw*py+t1*uy;         // lower edge under the top end
+  const t0=(-drop-bw*py)/uy, lowCut=bw*px+t0*ux;         // where the bottom level cut meets it
+  const lowAt0=-bw*Ls/R;                                 // lower edge at the bottom plumb face
+  /* Two ways a board and a stair can be mismatched, both of which used to make
+     the outline cross itself:
+       - too SHORT: a one-notch jack out of a 2x12 is deeper than its own run,
+         so the lower edge dives past the bearing plane before the top cut and
+         the level cut has to stop AT the plumb cut;
+       - too NARROW: the lower edge never gets down to the bearing plane, so
+         there is no level cut at all and the board's bottom is its own edge —
+         it needs packing up, which `reachesBearing` reports. */
+  const reachesBearing = lowAt0 <= -drop + 1e-9;
+  const botY = reachesBearing ? -drop : lowAt0;
+  const aLow=[tipX, Math.max(lowTip, botY)];
+  const bLow=[reachesBearing ? Math.min(Math.max(lowCut,0), tipX) : 0, botY];
+  const bottom = (Math.abs(aLow[0]-bLow[0])<1e-9 && Math.abs(aLow[1]-bLow[1])<1e-9) ? [aLow] : [aLow, bLow];
+  const outline=notch.concat(bottom, bLow[0]>1e-9 ? [[0,botY]] : []);
   const B = p => [(p[0]*R + p[1]*r)/Ls, (p[0]*r - p[1]*R)/Ls];
   const raw = outline.map(B);
   const startOff = -Math.min(...raw.map(p=>p[0]));       // first mark, from the board end
@@ -2097,7 +2174,12 @@ function stringerBoardLayout(c,r,R,drop,bw,topRun,topLift){
           tipX, tipY, aLow, bLow,
           notchDepth: r*R/Ls,        // perpendicular bite, from the top edge
           setback:    r*r/Ls,        // riser cut, back from its mark on the top edge
-          topPlumb:   bw*Ls/R - lift - (topRun>0?topRun*r/R:0),   // height of the top plumb cut
+          topRiser, reachesBearing, botY,
+          cutsThrough: bw <= r*R/Ls + 1e-9,   // notch deeper than the board: not a stringer at all
+          /* Height of the top plumb cut: down from the tab's back corner, or —
+             with no tab — down from the top seat, so one rise shorter. Measured
+             off the clamped lower edge, so a short board reports what it is. */
+          topPlumb:   tipY - aLow[1],
           bottomLevel: bLow[0],      // length of the bottom bearing cut
           pitchDeg: Math.atan2(r,R)*180/Math.PI};
 }
@@ -2106,10 +2188,19 @@ function stringerProfileSVG(c,r,R,drop,bw,title,topRun,topLift){
   if(c<=0) return "<p>"+t("No notches to draw.")+"</p>";
   const Ls=hyp(r,R);
   const lay=stringerBoardLayout(c,r,R,drop,bw,topRun,topLift);
+  /* A notch deeper than the board is not a stringer — drawing it would produce
+     a shape that cannot exist. Say so instead; the Framing tab already errors. */
+  if(lay.cutsThrough) return '<div class="msg e">'
+    +t("Not drawn: at rise {0} on a run of {1} the notch is {2} deep, which cuts clean through a {3} board ({4}). Use wider stock for this one.",
+       fmtIn(r), fmtIn(R), fmtIn(lay.notchDepth), S.stringerStock, fmtIn(bw))+"</div>";
   const px=lay.px, py=lay.py, lift=lay.lift;
   const tipX=lay.tipX, tipY=lay.tipY, outline=lay.outline;
   let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
-  for(const [x,y] of outline){ x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y); }
+  /* The nosing line and its last mark are drawn too, and without a tab they run
+     PAST the board — mark c sits on the offcut side of the plumb cut — so the
+     frame has to be sized from them, not from the outline alone. */
+  for(const [x,y] of outline.concat([[c*R, c*r]])){
+    x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y); }
   /* Title lives in its own band at the TOP, the explanation of the top cut in
      its own band at the BOTTOM, so neither can collide with the drawing. The
      cut labels on the geometry stay terse — the cut schedule below the sheet
@@ -2131,9 +2222,14 @@ function stringerProfileSVG(c,r,R,drop,bw,title,topRun,topLift){
   let s=svgOpen(W,H);
   // board outline: lower edge, bottom plumb face + level cut, top plumb cut
   s+=svgPoly(outline.map(p=>[X(p[0]),Y(p[1])]),MAT.string);
-  // notch profile drawn heavy — this is the cut line
+  /* Notch profile drawn heavy — this is the cut line. It stops at the last
+     SEAT when there is no tab: that seat's back corner is the top of the board,
+     and the riser cut there is the plumb cut, drawn as part of the outline. */
   let path="M"+X(0).toFixed(1)+" "+Y(0).toFixed(1);
-  for(let i=0;i<c;i++){ path+=" H"+X((i+1)*R).toFixed(1)+" V"+Y((i+1)*r).toFixed(1); }
+  for(let i=0;i<c;i++){
+    path+=" H"+X((i+1)*R).toFixed(1);
+    if(i<c-1 || lay.topRiser) path+=" V"+Y((i+1)*r).toFixed(1);
+  }
   s+='<path d="'+path+'" fill="none" stroke="#654" stroke-width="2"/>';
   // nosing line + a layout tick at every notch corner (spacing = Ls along the edge)
   s+=svgLine(X(0),Y(0),X(c*R),Y(c*r),'stroke="#0f6fbf" stroke-width="1" stroke-dasharray="3 3"');
@@ -2143,7 +2239,10 @@ function stringerProfileSVG(c,r,R,drop,bw,title,topRun,topLift){
     if(i<c) s+=svgText(X(tx+R/2),Y(ty+r/2)-2,String(i+1),'font-size="9" fill="#0f6fbf" text-anchor="middle"');
   }
   s+=svgText(margin,16,title,'font-size="10" fill="#333"');
-  s+=svgText(X(0)-2,Y(-drop)+13,t("level cut — bears here, drop {0}", fmtIn(drop)),'font-size="8.5" fill="#a55"');
+  s+=svgText(X(0)-2,Y(lay.botY)+13,
+    lay.reachesBearing ? t("level cut — bears here, drop {0}", fmtIn(drop))
+                       : t("board too narrow to reach the bearing plane — pack it up {0}", fmtIn(-drop-lay.botY)),
+    'font-size="8.5" fill="#a55"');
   if(topRun>0){
     /* the tab's top is LEVEL — draw it heavy so the plumb last riser reads */
     s+=svgLine(X(c*R),Y(c*r-lift),X(tipX),Y(tipY),'stroke="#0f6fbf" stroke-width="2"');
@@ -2164,8 +2263,12 @@ function stringerStockSVG(c,r,R,drop,bw,stockLen,title,copies,topRun,topLift){
   if(c<=0) return "";
   const Ls=hyp(r,R);
   const lay=stringerBoardLayout(c,r,R,drop,bw,topRun,topLift);
+  if(lay.cutsThrough) return "";                  // the profile sheet explains why
   const x0=lay.startOff, pts=lay.board, req=lay.req;
-  const total=Math.max(stockLen||0, req);
+  /* Without a tab the last mark lands on the OFFCUT side of the plumb cut, so
+     it can sit past the cut length — the board has to be drawn wide enough to
+     show it, or the tick runs off the canvas. */
+  const total=Math.max(stockLen||0, req, x0+c*Ls);
   const kerf=S.kerf||0;
   /* How many of THIS stringer come out of one board — otherwise the sheet
      implies a whole board per stringer while the cut list packs several. */
@@ -2193,7 +2296,11 @@ function stringerStockSVG(c,r,R,drop,bw,stockLen,title,copies,topRun,topLift){
   }
   if(waste>0.5){
     s+=svgRect(X(used),Y(0),waste*sc,bw*sc,'fill="#e8e2d6" stroke="#bfae95" stroke-dasharray="3 2"');
-    s+=svgText(X(used+waste/2),Y(bw/2)+3,t("offcut {0}", L(waste)),'font-size="9" fill="#8a7a5f" text-anchor="middle"');
+    /* A thin offcut leaves no room for its own label — keep the text inside the
+       canvas rather than centred on a 1-1/2" strip at the very end. */
+    const oLbl=t("offcut {0}", L(waste)), oW=estTextW(oLbl,9);
+    const oCx=Math.min(Math.max(X(used+waste/2), oW/2+4), W-oW/2-4);
+    s+=svgText(oCx,Y(bw/2)+3,oLbl,'font-size="9" fill="#8a7a5f" text-anchor="middle"');
   }
   s+=svgText(X(0),Y(0)-24,t("marks along the top edge, every {0} — first mark {1} from the left end", L(Ls), L(x0)),'font-size="8.5" fill="#0f6fbf"');
   s+=dimLineH(X(0),X(req),Y(bw)+20,t("cut length {0}", L(req)));
@@ -2208,8 +2315,16 @@ function stringerStockSVG(c,r,R,drop,bw,stockLen,title,copies,topRun,topLift){
    the corner short, so they carry fewer notches (JACK); the diagonal at the
    outside corner is the HIP. */
 function stringerRole(legName, kmin){
-  return kmin===1 ? t("Common stringer — {0} leg", t(legName))
-                  : t("Jack stringer — {0} leg, starts at level {1}", t(legName), kmin);
+  return kmin===1 ? t("common stringer ({0} leg)", t(legName))
+                  : t("jack stringer ({0} leg), from level {1} down", t(legName), kmin);
+}
+const notchCount = c => c===1 ? t("1 notch") : t("{0} notches", c);
+/* F1, F2, F3, F4, F5 -> F1–F5; anything not a plain run stays a list */
+function idRange(ids){
+  if(ids.length<3) return ids.join(", ");
+  const p=ids[0].replace(/\d+$/,""), num=ids.map(x=>parseInt(x.slice(p.length),10));
+  const run=num.every((v,i)=>i===0 || v===num[i-1]+1) && ids.every(x=>x.startsWith(p));
+  return run ? ids[0]+"–"+ids[ids.length-1] : ids.join(", ");
 }
 
 /* The numbers you actually cut to, in the order you cut them. Everything here
@@ -2221,7 +2336,7 @@ function cutScheduleHTML(model, g){
   const tt = sk(S.treadStock).t;
   const flush = topRun>0;
   const markEnd = lay.startOff + c*Ls;                 // last mark, from the board end
-  const tail = Math.max(0, lay.req - markEnd);         // material past the last mark
+  const past = lay.req - markEnd;                      // signed: negative when the mark is on the offcut
 
   let h = "<h5>"+t("Cut schedule — {0}{1}", name, qty>1?t(" × {0}", qty):"")+"</h5>";
 
@@ -2239,7 +2354,9 @@ function cutScheduleHTML(model, g){
     +"<dt>"+t("Minimum width for this pitch")+"</dt><dd>"+fmtIn(minWidth)+"</dd>"
     +"<dt>"+t("First mark, from the bottom end")+"</dt><dd>"+LD(lay.startOff)+"</dd>"
     +"<dt>"+t("Last mark, from the bottom end")+"</dt><dd>"+LD(markEnd)+"</dd>"
-    +"<dt>"+t("Material past the last mark")+"</dt><dd>"+(tail>0.01?LD(tail):t("none — the top cut leans back"))+"</dd>"
+    +"<dt>"+t("Material past the last mark")+"</dt><dd>"
+      +(past>0.01 ? LD(past)
+                  : t("none — the board ends {0} short of it, so that mark falls on the offcut", fmtIn(-past)))+"</dd>"
     +"<dt>"+t("Cut length needed")+"</dt><dd>"+LD(reqLen)+(boardLen?" — "+t("from a {0} board", L(boardLen)):' <span class="pill rip">'+t("needs splice")+"</span>")+"</dd>"
     +"</div></div>";
 
@@ -2249,8 +2366,10 @@ function cutScheduleHTML(model, g){
     t("The \"drop\": one tread thickness ({0}) so the first step comes out at {1}{2}.",
       fmtIn(tt), fmtIn(r), model.base>0 ? t(", plus {0} down to the deck joists", fmtIn(model.base)) : "")]);
   rows.push([t("Bottom seat"), t("level"), LD(lay.bottomLevel),
-    t("Bears flat on {0}. Runs from the foot of the plumb face out to the lower edge of the board.",
-      model.base>0 ? t("the deck joists") : t("the deck surface"))]);
+    lay.reachesBearing
+      ? t("Bears flat on {0}. Runs from the foot of the plumb face out to the lower edge of the board.",
+          model.base>0 ? t("the deck joists") : t("the deck surface"))
+      : t("There is none — a {0} is not deep enough to reach the bearing plane here. The board stops {1} short and has to be packed up, or use wider stock.", S.stringerStock, fmtIn(-drop-lay.botY))]);
   rows.push([t("Tread (seat) cut × {0}", c), t("level"), LD(R),
     t("From each mark, running back toward the bottom end. The full unit run — this is the surface the tread lands on.")]);
   rows.push([t("Riser cut × {0}", c), t("plumb"), LD(r),
@@ -2286,7 +2405,10 @@ function cutScheduleHTML(model, g){
     h += "<tr><td>"+i+"</td><td>"+LD(lay.startOff+i*Ls)+"</td><td>"
       +(i<c ? levelTag(model, lvl)+" — "+t("tread top {0} above the deck", fmtIn(model.H-lvl*r))
             : t("no seat — top end of the board"))
-      +"</td><td>"+(i<c ? t("notch {0} starts here", i+1) : (flush?t("tab starts here"):t("top plumb cut")))+"</td></tr>";
+      +"</td><td>"+(i<c ? t("notch {0} starts here", i+1)
+                        : flush ? t("tab starts here")
+                                : t("top plumb cut — lands on the offcut side, {0} past the end of the board", fmtIn(lay.startOff+c*Ls-lay.req)))
+      +"</td></tr>";
   }
   h += "</tbody></table>";
 
@@ -2308,34 +2430,36 @@ function renderStringerSheets(model){
     for(const g of st.list){
       if(seen.has(g.c)) continue;
       seen.add(g.c);
-      const qty=st.list.filter(x=>x.c===g.c).length;
-      const title=t("{0} leg · {1} notches (levels {2}–{3}) · ×{4} · run {5} rise {6} · marks every {7} · board ≥ {8}",
-          t(legName), g.c, g.kmin, model.N, qty, L(model.R), L(model.r), L(Ls), L(g.reqLen))
+      const same=st.list.filter(x=>x.c===g.c);
+      const qty=same.length;
+      const ids=idRange(same.map(x=>x.id));
+      const title=t("{0} · {1} (levels {2}–{3}) · run {4} rise {5} · marks every {6} · board ≥ {7}",
+          ids, notchCount(g.c), g.kmin, model.N, L(model.R), L(model.r), L(Ls), L(g.reqLen))
         +(g.boardLen ? t(" — cut from {0}", L(g.boardLen)) : t(" — NEEDS A SPLICE"));
       const perBoard=g.boardLen ? Math.max(1, Math.floor((g.boardLen+S.kerf)/(g.reqLen+S.kerf))) : 1;
       const boardsNeeded=Math.ceil(qty/perBoard);
-      h+='<div class="sheet"><h4>'+t("On the board — {0} needed, {1} per board, {2} board(s)", qty, Math.min(perBoard,qty), boardsNeeded)+"</h4>"
+      h+='<div class="sheet"><h4>'+t("{0} — on the board: {1} needed, {2} per board, {3} board(s)", ids, qty, Math.min(perBoard,qty), boardsNeeded)+"</h4>"
         +'<div class="svgwrap">'+stringerStockSVG(g.c,model.r,model.R,st.drop,bw,g.boardLen,title,Math.min(perBoard,qty),g.topRun,g.topLift)+"</div>"
         +'<h4>'+t("Finished profile")+"</h4>"
         +'<div class="svgwrap">'+stringerProfileSVG(g.c,model.r,model.R,st.drop,bw,title,g.topRun,g.topLift)+"</div>"
         +cutScheduleHTML(model, {c:g.c, r:model.r, R:model.R, Ls, drop:st.drop, bw,
             topRun:g.topRun, topLift:g.topLift, reqLen:g.reqLen, boardLen:g.boardLen,
             notchDepth:st.notchDepth, throat:st.throat, minWidth:st.minWidth, qty,
-            kmin:g.kmin, name:stringerRole(legName, g.kmin)})
+            kmin:g.kmin, name:ids+" · "+stringerRole(legName, g.kmin)})
         +"</div>";
     }
   }
   const hip=hipStringer(model);
-  const hipTitle=t("HIP stringer · run {0} (R×√2) · {1} notches · marks every {2} · board ≥ {3} · throat {4}",
-    L(hip.run), hip.c, L(hip.Ls), L(hip.reqLen), fmtIn(hip.throat));
-  h+='<div class="sheet"><h4>'+t("Hip on the board — 1 × {0}", S.stringerStock)+"</h4>"
+  const hipTitle=t("H · HIP stringer · run {0} (R×√2) · {1} · marks every {2} · board ≥ {3} · throat {4}",
+    L(hip.run), notchCount(hip.c), L(hip.Ls), L(hip.reqLen), fmtIn(hip.throat));
+  h+='<div class="sheet"><h4>'+t("H — hip on the board: 1 × {0}", S.stringerStock)+"</h4>"
     +'<div class="svgwrap">'+stringerStockSVG(hip.c,model.r,hip.run,hip.drop,bw,hip.boardLen,hipTitle,1,hip.topRun,hip.topLift)+"</div>"
     +'<h4>'+t("Finished profile")+"</h4>"
     +'<div class="svgwrap">'+stringerProfileSVG(hip.c,model.r,hip.run,hip.drop,bw,hipTitle,hip.topRun,hip.topLift)+"</div>"
     +cutScheduleHTML(model, {c:hip.c, r:model.r, R:hip.run, Ls:hip.Ls, drop:hip.drop, bw,
         topRun:hip.topRun, topLift:hip.topLift, reqLen:hip.reqLen, boardLen:hip.boardLen,
         notchDepth:hip.notchDepth, throat:hip.throat, minWidth:hip.minWidth, qty:1,
-        kmin:1, name:t("Hip stringer"), hip:true})
+        kmin:1, name:t("H · hip stringer"), hip:true})
     +"</div>";
   return h;
 }
@@ -2501,12 +2625,13 @@ function renderFramingPanel(model){
            L(hip0.run), fmtIn(hip0.notchDepth), fmtIn(hip0.throat), fmtIn(hip0.minWidth))+'</div>';
     h += '<div class="note">'
       +t("Three kinds of board. A COMMON stringer reaches the platform and runs the whole flight. A JACK stringer is one the 45° miter cuts short, so it starts partway down and carries fewer notches — its top end is a plain plumb cut against nothing, it lands on the tread of the step above. The HIP is the diagonal at the outside corner; both legs' treads bear on it.")
+      +" "+t("Every stringer has an ID — F1… on the front leg, S1… on the side leg, numbered outward from the house wall, and H for the hip. The same ID is on the plan view, on its sheet and in the cut list.")
       +"</div>";
     for(const legName of ["front","side"]){
       const st = stringersForLeg(legName, model);
       h += "<h3>"+t("{0} leg stringers", t(legName))+"</h3>";
-      h += '<table><thead><tr><th>'+t("Position")+'</th><th>'+t("Type")+'</th><th>'+t("Notches (levels)")+'</th><th>'+t("Required length")+'</th><th>'+t("Buy length")+'</th></tr></thead><tbody>';
-      for(const s2 of st.list) h += "<tr><td>"+LD(s2.pos)+"</td><td>"+(s2.kmin===1?t("common"):t("jack"))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
+      h += '<table><thead><tr><th>'+t("ID")+'</th><th>'+t("Position")+'</th><th>'+t("Type")+'</th><th>'+t("Notches (levels)")+'</th><th>'+t("Required length")+'</th><th>'+t("Buy length")+'</th></tr></thead><tbody>';
+      for(const s2 of st.list) h += "<tr><td><b>"+s2.id+"</b></td><td>"+LD(s2.pos)+"</td><td>"+(s2.kmin===1?t("common"):t("jack"))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
       h += "</tbody></table>";
     }
     const hip = hipStringer(model);
@@ -2826,17 +2951,25 @@ function runTests(){
     const hip = hipStringer(computeModel());
     assert("hip run = R*sqrt(2)", Math.abs(hip.run - m1.R*Math.SQRT2)<1e-9, hip.run);
 
-    /* Regression: the required stringer length must include the bottom plumb
-       face drop below the last notch corner. Without it the board comes out
-       c*Ls exactly, which is short by drop*r/Ls (~2.95" here). */
+    /* Two regressions in one formula, for a stringer with no tab:
+         + drop*r/Ls  — the bottom plumb face below the last notch corner, left
+                        out once and the board came up ~2.95" short;
+         − r²/Ls      — the top notch has no riser face, so the apex (c·R, c·r)
+                        is not material and the board ends at the top SEAT.
+       Including it drew a zero-width spike and bought ~3.76" too much. */
     const Ls1 = hyp(m1.r, m1.R), drop1 = m1.r - sk(S.treadStock).t;
     const st1 = stringersForLeg("front", m1);
     const s3 = st1.list.find(x=>x.c===3);
-    assert("stringer length includes the bottom drop (not just c*Ls)",
-      !!s3 && s3.reqLen > 3*Ls1 + 1e-6 && Math.abs(s3.reqLen-(3*Ls1+drop1*m1.r/Ls1))<1e-9,
-      s3 ? s3.reqLen.toFixed(4)+" vs c*Ls="+(3*Ls1).toFixed(4) : "no 3-notch stringer");
-    assert("hip length includes the bottom drop",
-      hip.reqLen > hip.c*hip.Ls + 1e-6, hip.reqLen.toFixed(4)+" vs "+(hip.c*hip.Ls).toFixed(4));
+    const want3 = 3*Ls1 - m1.r*m1.r/Ls1 + drop1*m1.r/Ls1;
+    assert("stringer length = c*Ls − r²/Ls + drop*r/Ls",
+      !!s3 && Math.abs(s3.reqLen-want3)<1e-9,
+      s3 ? s3.reqLen.toFixed(4)+" vs "+want3.toFixed(4) : "no 3-notch stringer");
+    assert("it includes the bottom drop and excludes the phantom top apex",
+      !!s3 && s3.reqLen > 3*Ls1 - m1.r*m1.r/Ls1 + 1e-6 && s3.reqLen < 3*Ls1 - 1e-6,
+      s3 ? s3.reqLen.toFixed(4)+" vs c*Ls="+(3*Ls1).toFixed(4) : "");
+    assert("hip length follows the same rule",
+      Math.abs(hip.reqLen-(hip.c*hip.Ls - m1.r*m1.r/hip.Ls + hip.drop*m1.r/hip.Ls))<1e-9,
+      hip.reqLen.toFixed(4)+" vs "+(hip.c*hip.Ls).toFixed(4));
     assert("stringers nearer the corner carry fewer notches",
       st1.list.length>1 && st1.list[st1.list.length-1].c < st1.list[0].c,
       st1.list.map(x=>x.c).join(","));
@@ -3011,12 +3144,18 @@ function runTests(){
         b.bearing+" / "+c2.bearing);
       /* The tab is a LEVEL cut, so it projects tab*R/Ls on the slope — NOT
          tab*Ls/R, which is what carrying the sloped nosing line back would
-         give, and which is longer, so the old formula bought too much board. */
-      assert("a flush tab makes the board tab*R/Ls longer, not tab*Ls/R",
-        Math.abs((lenB-lenA)-(cm.R/2)*cm.R/Ls)<1e-6 && Math.abs((lenC-lenA)-cm.R*cm.R/Ls)<1e-6,
+         give, and which is longer, so the old formula bought too much board.
+         A tab also gives the top notch a real riser face, worth another r²/Ls
+         over the tabless board, whose top corner is the top seat. */
+      const grow = tab => tab*cm.R/Ls + cm.r*cm.r/Ls;
+      assert("a flush tab adds tab*R/Ls (the level cut) + r²/Ls (the top riser)",
+        Math.abs((lenB-lenA)-grow(cm.R/2))<1e-6 && Math.abs((lenC-lenA)-grow(cm.R))<1e-6,
         (lenB-lenA).toFixed(3)+" / "+(lenC-lenA).toFixed(3));
+      assert("connectionInfo reports that same growth",
+        Math.abs(b.extraLen-grow(cm.R/2))<1e-6 && Math.abs(c2.extraLen-grow(cm.R))<1e-6 && a.extraLen===0,
+        b.extraLen.toFixed(3)+" / "+c2.extraLen.toFixed(3));
       assert("the level cut is shorter than the sloped one it replaced",
-        (lenC-lenA) < cm.R*Ls/cm.R - 1e-6);
+        (lenC-lenA) < cm.R*Ls/cm.R + cm.r*cm.r/Ls - 1e-6);
       assert("connection type does NOT change the stair geometry",
         (()=>{ S.stairConnection="topTreadDown"; const m1=computeModel();
                S.stairConnection="flushFull";    const m2=computeModel();
@@ -3053,16 +3192,116 @@ function runTests(){
         const eSvg=renderElevationSVG(m3);
         assert(kind+": the elevation renders with the level tab", /<svg/.test(eSvg) && !/NaN/.test(eSvg));
       }
-      /* top-tread-down: the board must stop dead at the face, nothing past it */
+      /* NO TAB -> NO TOP RISER FACE. The topmost triangle's vertical leg is the
+         plumb cut, so the apex is a zero-width spike, not material. Leaving it
+         on the outline is what drew the stray thin vertical line. */
       S.stairConnection="topTreadDown";
       {
-        const m4=computeModel(), st4=stringersForLeg("front",m4);
-        const lay4=stringerBoardLayout(st4.list[0].c,m4.r,m4.R,st4.drop,sk(S.stringerStock).w,0,0);
-        assert("top tread down: nothing extends past the top notch corner",
-          lay4.outline.every(p=>p[0] <= st4.list[0].c*m4.R + 1e-9),
-          Math.max(...lay4.outline.map(p=>p[0]))+" vs "+(st4.list[0].c*m4.R));
+        const m4=computeModel(), st4=stringersForLeg("front",m4), c4=st4.list[0].c;
+        const bw4=sk(S.stringerStock).w;
+        const lay4=stringerBoardLayout(c4,m4.r,m4.R,st4.drop,bw4,0,0);
+        const o4=lay4.outline, xTop=c4*m4.R;
+        assert("top tread down: nothing extends past the platform face",
+          o4.every(p=>p[0] <= xTop + 1e-9),
+          Math.max(...o4.map(p=>p[0]))+" vs "+xTop);
+        assert("top tread down: the phantom apex is NOT on the outline",
+          !o4.some(p=>Math.abs(p[0]-xTop)<1e-9 && Math.abs(p[1]-c4*m4.r)<1e-9),
+          JSON.stringify(o4));
+        assert("the board's top corner is the top seat's back corner",
+          Math.abs(Math.max(...o4.map(p=>p[1])) - (c4-1)*m4.r)<1e-9,
+          Math.max(...o4.map(p=>p[1]))+" vs "+((c4-1)*m4.r));
+        /* no two consecutive edges may double back along the same line */
+        let spike=null;
+        for(let i=0;i<o4.length;i++){
+          const a=o4[i], b=o4[(i+1)%o4.length], c5=o4[(i+2)%o4.length];
+          const d1=[b[0]-a[0],b[1]-a[1]], d2=[c5[0]-b[0],c5[1]-b[1]];
+          const cross=d1[0]*d2[1]-d1[1]*d2[0], dot=d1[0]*d2[0]+d1[1]*d2[1];
+          if(Math.abs(cross)<1e-9 && dot<-1e-9) spike=JSON.stringify([a,b,c5]);
+        }
+        assert("the outline never doubles back on itself (no zero-width spike)", !spike, spike||"");
+        assert("the top plumb cut is one rise shorter than the board is deep on the plumb",
+          Math.abs(lay4.topPlumb-(bw4*hyp(m4.r,m4.R)/m4.R - m4.r))<1e-9, lay4.topPlumb);
       }
       S.method=savedM; S.stairConnection=savedC;
+    }
+
+    /* ---- no stringer outline may cross itself ---------------------------- */
+    {
+      const savedM=S.method, savedC=S.stairConnection, savedN=S.risers, savedSt=S.stringerStock;
+      S.method="stringers";
+      const seg=(p,q,a,b)=>{                       // proper segment intersection
+        const d=(u,v,w)=>Math.sign((v[0]-u[0])*(w[1]-u[1])-(v[1]-u[1])*(w[0]-u[0]));
+        const d1=d(p,q,a), d2=d(p,q,b), d3=d(a,b,p), d4=d(a,b,q);
+        return d1*d2<0 && d3*d4<0;
+      };
+      let bad=null, checked=0, through=0;
+      for(const conn of ["topTreadDown","flushHalf","flushFull"])
+      for(const N of [2,3,4,6,9]) for(const stock of ["2x10","2x12"]){
+        S.stairConnection=conn; S.risers=N; S.stringerStock=stock;
+        const m6=computeModel(), bw6=sk(stock).w;
+        const all=[["front",stringersForLeg("front",m6)],["side",stringersForLeg("side",m6)]];
+        const cases=[];
+        for(const [ln,st6] of all) for(const g of st6.list)
+          cases.push([g.c,m6.r,m6.R,st6.drop,bw6,g.topRun,g.topLift,ln+g.id]);
+        const hp=hipStringer(m6);
+        cases.push([hp.c,m6.r,hp.run,hp.drop,bw6,hp.topRun,hp.topLift,"hip"]);
+        for(const cse of cases){
+          const la=stringerBoardLayout(...cse.slice(0,7));
+          if(la.cutsThrough){ through++; continue; }   // refused, not drawn
+          const o=la.outline;
+          checked++;
+          for(let i=0;i<o.length && !bad;i++) for(let j=i+2;j<o.length;j++){
+            if(i===0 && j===o.length-1) continue;      // adjacent through the close
+            if(seg(o[i],o[(i+1)%o.length],o[j],o[(j+1)%o.length]))
+              bad=conn+"/N"+N+"/"+stock+"/"+cse[7]+" "+JSON.stringify([o[i],o[j]]);
+          }
+        }
+      }
+      assert("no stringer outline crosses itself, at any depth of board", !bad,
+        bad || checked+" outlines checked, "+through+" refused as un-cuttable");
+      /* the refused ones must SAY so, not silently draw nothing */
+      S.stairConnection="topTreadDown"; S.risers=2; S.stringerStock="2x10";
+      {
+        const m7=computeModel(), hp7=hipStringer(m7);
+        const prof=stringerProfileSVG(hp7.c,m7.r,hp7.run,hp7.drop,sk("2x10").w,"t",hp7.topRun,hp7.topLift);
+        assert("a notch deeper than the board is refused with a reason, not drawn",
+          through>0 && !/<svg/.test(prof) && /msg e/.test(prof), prof.slice(0,90));
+      }
+      S.method=savedM; S.stairConnection=savedC; S.risers=savedN; S.stringerStock=savedSt;
+    }
+
+    /* ---- every stringer is identifiable ---------------------------------- */
+    {
+      const savedM=S.method; S.method="stringers";
+      const mi=computeModel();
+      const fl=stringersForLeg("front",mi).list, sl=stringersForLeg("side",mi).list;
+      assert("front stringers are F1..Fn, side stringers S1..Sn, numbered outward",
+        fl.every((x,i)=>x.id==="F"+(i+1)) && sl.every((x,i)=>x.id==="S"+(i+1)),
+        fl.map(x=>x.id).join(",")+" / "+sl.map(x=>x.id).join(","));
+      assert("ids are unique across the job",
+        new Set([...fl,...sl].map(x=>x.id)).size === fl.length+sl.length);
+      const planSVG=renderPlanSVG(mi,"miter");
+      assert("every id is tagged on the plan view, plus H for the hip",
+        [...fl,...sl].every(x=>planSVG.includes(">"+x.id+"</text>")) && planSVG.includes(">H</text>"),
+        [...fl,...sl].map(x=>x.id).filter(id=>!planSVG.includes(">"+id+"</text>")).join(",")||"all present");
+      const cuts=collectPieces(mi).filter(p=>p.stock===S.stringerStock).map(p=>p.role);
+      assert("the cut list names every stringer by the same id",
+        [...fl,...sl].every(x=>cuts.some(rr=>rr.indexOf(x.id+" —")===0)) && cuts.some(rr=>rr.indexOf("H —")===0),
+        cuts.join(" | "));
+      /* Sheets collapse a run of identical boards to "F1–F5", so expand any
+         range before checking that no stringer is missing a sheet. */
+      const sheets=renderStringerSheets(mi);
+      const covered=new Set(sheets.match(/\b[FS]\d+\b/g)||[]);
+      for(const m8 of sheets.matchAll(/\b([FS])(\d+)–[FS](\d+)\b/g))
+        for(let v=+m8[2]; v<=+m8[3]; v++) covered.add(m8[1]+v);
+      assert("every id appears on a sheet, directly or inside a range",
+        [...fl,...sl].every(x=>covered.has(x.id)),
+        [...fl,...sl].map(x=>x.id).filter(id=>!covered.has(id)).join(",")||"all covered");
+      assert("idRange collapses a clean run and leaves anything else alone",
+        idRange(["F1","F2","F3","F4"])==="F1–F4" && idRange(["S1","S2"])==="S1, S2" &&
+        idRange(["F1","F2","F4"])==="F1, F2, F4" && idRange(["F1","S2","S3"])==="F1, S2, S3",
+        idRange(["F1","F2","F3","F4"])+" / "+idRange(["F1","F2","F4"]));
+      S.method=savedM;
     }
 
     /* ---- the cut schedule has to match the board layout, not restate it --- */
@@ -3129,7 +3368,9 @@ function runTests(){
           const dd=new DOMParser().parseFromString(svg,"image/svg+xml");
           const kids=[...dd.documentElement.children];
           kids.forEach((node,idx)=>{
-            if(node.tagName!=="text" || !/^(L|N)\d/.test(node.textContent)) return;
+            /* level tags (L1/N1…) and stringer ids (F1, S2, H) — both live on
+               the deferred top layer and both must survive it */
+            if(node.tagName!=="text" || !/^(L|N)\d|^[FS]\d+$|^H$/.test(node.textContent)) return;
             seen++;
             const x=+node.getAttribute("x"), y=+node.getAttribute("y");
             const an=node.getAttribute("text-anchor")||"start";
@@ -3154,8 +3395,8 @@ function runTests(){
           });
         }
       }
-      assert("every level tag is drawn on top, none painted over", hidden===0 && seen>0,
-        hidden+" hidden of "+seen);
+      assert("every level tag and stringer id is drawn on top, none painted over",
+        hidden===0 && seen>0, hidden+" hidden of "+seen);
       S.method=savedM;
     }
 

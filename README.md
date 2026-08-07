@@ -246,11 +246,17 @@ between treads, or the full `r` when it laps the tread edge.
 on a leg only supports levels `k ≥ k_min`, where `k_min = max(1, ⌈(p − Wb)/R⌉ + 1)` — **stringers nearer
 the corner carry fewer notches**, which is what makes the pyramid work. Three kinds come out of that:
 
-| Trade name | What it is | Top end |
-|---|---|---|
-| **Common** | reaches the platform, runs the whole flight | the connection type you picked (below) |
-| **Jack** | the 45° miter cuts it short, so it starts partway down | plain plumb cut against the framing of the step above — needs a cleat, hanger or blocking there; the connection type does **not** apply to it |
-| **Hip** | the diagonal at the outside corner, run `R√2` | same as a common |
+| Trade name | ID | What it is | Top end |
+|---|---|---|---|
+| **Common** | `F1…`, `S1…` | reaches the platform, runs the whole flight | the connection type you picked (below) |
+| **Jack** | `F6`, `S3`… | the 45° miter cuts it short, so it starts partway down | plain plumb cut against the framing of the step above — needs a cleat, hanger or blocking there; the connection type does **not** apply to it |
+| **Hip** | `H` | the diagonal at the outside corner, run `R√2` | same as a common |
+
+**Every stringer is identified.** `F1…Fn` on the front leg, `S1…Sn` on the side leg, numbered outward
+from the house wall, `H` for the hip. The same ID is tagged on the **plan view**, heads its **sheet and
+cut schedule**, and names its piece in the **cut list** (`F6 — jack stringer, 1 notch @ 12-1/4"`), so a
+board on the pile traces back to a line on the drawing. Sheets covering a run of identical boards
+collapse to `F1–F5`.
 
 **The cut schedule.** Every distinct board gets its own sheet — the cut nested on the stock you buy, the
 finished profile, and then the numbers, all generated from one function (`stringerBoardLayout`) so a
@@ -277,6 +283,34 @@ cut running out to the board's lower edge — not a line to the corner of the bo
 same rise `r` but run `R√2`, so it bites deepest and keeps the least throat; its seats are square across
 the face and it is the tread boards landing on it that are cut at 45°.
 
+### The top notch has no riser face
+
+Without a tab, the **topmost triangle taken off the edge has its vertical leg in the very plane the
+board is cut off in**. Approach the apex `(c·R, c·r)` from inside the board and there is nothing there —
+the material above the top seat belongs to the notch. So the board's top corner is the top **seat's**
+back corner `(c·R, (c−1)·r)`, and one plumb cut runs from it down to the lower edge:
+
+* board length is `c·Ls − r²/Ls + drop·r/Ls`, i.e. **`r²/Ls` shorter** than the naive `c·Ls` (≈4" at 7/11)
+* the top plumb cut is `bw·Ls/R − r` tall, one rise shorter than the full plumb depth of the board
+* the last mark, `mark c`, falls on the **offcut** side of that cut — you still need it to lay the cut
+  out, but it is past the end of the finished board, and the schedule says by how much
+
+Carrying the outline up to the apex and back down the same line drew a **zero-width spike** above the
+board, which is the stray thin vertical line that used to appear on jack stringers and on every
+*top tread down* board. A flush tab is different: there the last riser face is real — it is the front of
+the tab — so the apex is material and the board is `tab·R/Ls + r²/Ls` longer than the tabless one.
+
+### Boards that do not match the stair
+
+Two mismatches used to make the outline cross itself, and both are now reported instead:
+
+* **too short** — a one-notch jack out of a 2x12 is deeper than its own run, so the lower edge dives
+  past the bearing plane before the top cut. The level cut stops *at* the plumb cut.
+* **too narrow** — the lower edge never reaches the bearing plane, so there is no bottom level cut at
+  all and the board has to be packed up. The schedule gives the packing.
+* **un-cuttable** — when the notch is deeper than the board (`r·R/Ls ≥ board width`) it cuts clean
+  through. The sheet refuses to draw it and says why, rather than rendering an impossible shape.
+
 **Box frames.** One L-shaped box per level, rim height `r − tread thickness`, outer rim mitered at the
 corner, joists spanning `R` at the tread material's spacing, plus a 45° corner block. Load path: box `k`'s
 outer rim bears on box `k+1`'s tread directly over box `k+1`'s **inner** rim (keep that rim continuous or
@@ -302,7 +336,7 @@ board changes.
 
 | Connection | Bearing on the frame | Ledger | Board length (7/11, 3 notches) |
 |---|---|---|---|
-| **Top tread down** — tread sits on the stringer | none, butts the face | **required** — ledger, cleat, or stringer hangers (Simpson LSC-type) | 42-1/16" |
+| **Top tread down** — tread sits on the stringer | none, butts the face | **required** — ledger, cleat, or stringer hangers (Simpson LSC-type) | 38-5/16" |
 | **Flush, half tread** | half a run (5½") | not needed for support | 46-11/16" |
 | **Flush, full tread** | a full run (11") | not needed for support | 51-3/8" |
 
@@ -394,12 +428,16 @@ the back of the tab, where it is `bw·Ls/R − lift − tab·r/R` tall. See *the
 
 A colour legend above the drawings maps each fill to the stock you selected.
 
-### Known limitation
+### Known limitations
 
-In **Both** units mode a few dimension labels in the plan and elevation can run past the edge of the
-canvas, because the gutters are sized for a single unit and `12-1/2" / 318 mm` is more than twice as
-wide. Same for the level tags on an 8-riser stair in mm. Imperial and mm-only are clean across every
-configuration swept. Not yet fixed.
+Two label-placement issues survive, both pre-dating the current work and both confined to
+non-default settings. Everything else is clean across 576 swept configurations (64,752 labels).
+
+* **Both units mode** — a few dimension labels in the plan and elevation run past the edge of the
+  canvas, because the gutters are sized for a single unit and `12-1/2" / 318 mm` is more than twice as
+  wide. Same for the level tags on an 8-riser stair in mm.
+* **2x10 stringer stock** — in the elevation the connection note can land on a level tag, and on a
+  9-riser stair two level tags can collide. A 2x12 (the default) is clean.
 
 ---
 
