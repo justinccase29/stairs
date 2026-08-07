@@ -38,6 +38,15 @@ the numbers will not apply.
 
 ---
 
+## Running it
+
+Open `stairs-calculator.html` in any browser — it is one self-contained file with no dependencies, no
+build step and no network access, so it works straight off disk and offline.
+
+**Published:** <https://justinccase29.github.io/stairs/> (GitHub Pages, `main` branch, root folder).
+`index.html` redirects to the calculator so the bare URL works. Add `?test=1` to the URL to show the
+self-test tab.
+
 ## Layout
 
 The input column is **resizable** — drag the divider between it and the drawings, double-click it to

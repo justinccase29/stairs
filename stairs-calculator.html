@@ -1465,6 +1465,11 @@ function declutterSVG(svg){
    platform, L(N-1) is the last one before the deck. Everything — drawings,
    tables, cut list — uses these two helpers so the numbering never disagrees
    between views. */
+/* Level tags are drawn LAST, in a top layer, with a white halo behind the
+   glyphs (paint-order:stroke) — they sit over wood-coloured fills and, in plan,
+   inside the zone the next ring's nosing overhangs, so they were being painted
+   over entirely. */
+const TAGSTYLE='font-size="10.5" font-weight="700" fill="#3b2a17" stroke="#ffffff" stroke-width="3.2" paint-order="stroke" stroke-linejoin="round"';
 function levelTag(model,k){
   if(model.N-1<=1) return t("L{0} (only step)", k);
   if(k===1) return t("L{0} (top)", k);
@@ -1643,7 +1648,7 @@ function renderPlanSVG(model){
   const scale=Math.min(7.5, 690/Math.max(footX+5,1));
   const W=Math.max(mL+(footX+5)*scale+mR, mL+estTextW(capBottom,9)+24), H=mT+(footY+5)*scale+mB;
   const X=x=>mL+x*scale, Y=y=>mT+y*scale;
-  let s=svgOpen(W,H);
+  let s=svgOpen(W,H), topLayer="";        // topLayer is appended after everything
   // house wall along y=0, and the open/walled far side face at x=0
   s+=svgRect(X(0)-4,Y(-4),(footX+4)*scale+4,4*scale,MAT.wall);
   s+=svgText(X(1),Y(-4)+12,t("house wall"),'font-size="10" fill="#78838f"');
@@ -1670,10 +1675,11 @@ function renderPlanSVG(model){
         }
       }
     }
-    // miter line and level tag
+    /* Miter line and level tag are deferred to a top layer — the next ring's
+       tread boards are drawn after this one and would cover them. */
     const ix=Wx+(k-1)*R, iy=Wy+(k-1)*R, ox=Wx+k*R+model.riserT+nose, oy=Wy+k*R+model.riserT+nose;
-    if(style==="miter") s+=svgLine(X(ix),Y(iy),X(ox),Y(oy),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
-    s+=svgText(X(ox)-5,Y(oy)-5,levelTag(model,k),'font-size="9.5" fill="#6b4a2a" text-anchor="end"');
+    if(style==="miter") topLayer+=svgLine(X(ix),Y(iy),X(ox),Y(oy),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
+    topLayer+=svgText(X(ox)-6,Y(oy)-6,levelTag(model,k),TAGSTYLE+' text-anchor="end"');
   }
   /* Platform decking last, so its nosing overhangs level 1's tread the same way
      every tread overhangs the one below it. Frame is Wx × Wy; decking is +nosing
@@ -1728,6 +1734,7 @@ function renderPlanSVG(model){
   s+=svgText(X(footX)+16,Y(footY*0.22),t("side leg (+X)"),'font-size="9" fill="#667"');
   s+=dimLineH(X(0),X(footX),Y(footY)+18,L(footX));
   s+=dimLineV(X(footX)+46,Y(0),Y(footY),L(footY));
+  s+=topLayer;                             // level tags + miter lines, on top of every board
   s+=scaleBarSVG(mL,H-12,scale);
   s+="</svg>";
   return declutterSVG(s);
@@ -1765,7 +1772,7 @@ function renderElevationSVG(model){
   const D=u=>u-shift, X=d=>mL+(d-uMin)*scale, Y=z=>mT+(zMax-z)*scale;
   const box=(u0,u1,z0,z1,st)=>svgRect(X(D(u0)),Y(z1),(u1-u0)*scale,(z1-z0)*scale,st);
   const boxD=(d0,d1,z0,z1,st)=>svgRect(X(d0),Y(z1),(d1-d0)*scale,(z1-z0)*scale,st);
-  let s=svgOpen(W,Ht);
+  let s=svgOpen(W,Ht), tagLayer="";        // tags drawn last so nothing covers them
   s+=svgRect(X(uMin),Y(H+1),(0-uMin)*scale,(H+1-zMin)*scale,MAT.wall);
   s+=svgText(X(uMin)+3,Y(H+1)+12,t("house"),'font-size="9" fill="#78838f"');
   /* Existing deck: joists always, decking either full width or cut away where
@@ -1856,7 +1863,7 @@ function renderElevationSVG(model){
   if(S.riserStyle==="closed") for(const ri of P.risers) s+=box(ri.u, ri.u+P.rt, ri.zBot, ri.zTop, MAT.riser);
   for(const tr of P.treads){
     for(const b of tr.bds) s+=box(b.u, b.u+b.w, tr.z-P.tt, tr.z, MAT.tread);
-    s+=svgText(X(D(tr.u0))+3,Y(tr.z)-4,levelTag(model,tr.k)+" · "+L(tr.z),'font-size="8.5" fill="#6b4a2a"');
+    tagLayer+=svgText(X(D(tr.u0))+3,Y(tr.z)-5,levelTag(model,tr.k)+" · "+L(tr.z),TAGSTYLE);
   }
   // name the two landings, so the numbered steps read unambiguously
   s+=svgText(X(D(Wy-pd))+5,Y(H)-16,t("platform = top landing"),'font-size="8.5" fill="#33556e"');
@@ -1883,6 +1890,7 @@ function renderElevationSVG(model){
     // nosing is measured from the riser FACE, not the frame
     if(nose>0.01) s+=dimLineH(X(D(lastT.u0+R+model.riserT)),X(D(lastT.u0+model.Tb)),Y(lastT.z)-14,L(nose));
   }
+  s+=tagLayer;                             // level tags, above the boards
   s+=svgText(mL,Ht-24,footer,'font-size="9" fill="#78838f"');
   s+=scaleBarSVG(mL,Ht-8,scale);
   s+="</svg>";
@@ -2699,6 +2707,49 @@ function runTests(){
         stringersForLeg("front",computeModel()).list.every(x=>(x.kmin===1)===(x.topRun>0)),
         stringersForLeg("front",computeModel()).list.map(x=>"k"+x.kmin+":"+x.topRun.toFixed(1)).join(" "));
       S.method=savedM; S.stairConnection=savedC;
+    }
+
+    /* ---- level tags must not be painted over -----------------------------
+       They used to be drawn inside the level loop, so the NEXT ring's tread
+       boards covered them — the nosing overhangs into the next ring. */
+    {
+      const savedM=S.method;
+      let hidden=0, seen=0;
+      for(const meth of ["boxes","stringers"]){
+        S.method=meth;
+        const lm=computeModel();
+        for(const svg of [renderPlanSVG(lm), renderElevationSVG(lm)]){
+          const dd=new DOMParser().parseFromString(svg,"image/svg+xml");
+          const kids=[...dd.documentElement.children];
+          kids.forEach((node,idx)=>{
+            if(node.tagName!=="text" || !/^(L|N)\d/.test(node.textContent)) return;
+            seen++;
+            const x=+node.getAttribute("x"), y=+node.getAttribute("y");
+            const an=node.getAttribute("text-anchor")||"start";
+            const fs=parseFloat(node.getAttribute("font-size"));
+            const w=node.textContent.length*fs*0.55;
+            const cx=an==="end"?x-w/2:x+w/2, cy=y-fs*0.3;
+            for(let j=idx+1;j<kids.length;j++){
+              const e=kids[j];
+              if(e.tagName==="rect"){
+                const rx=+e.getAttribute("x"),ry=+e.getAttribute("y"),rw=+e.getAttribute("width"),rh=+e.getAttribute("height");
+                if(cx>=rx&&cx<=rx+rw&&cy>=ry&&cy<=ry+rh){ hidden++; break; }
+              } else if(e.tagName==="polygon"){
+                const pts=(e.getAttribute("points")||"").split(" ").filter(Boolean).map(z=>z.split(",").map(Number));
+                let inside=false;
+                for(let a1=0,b1=pts.length-1;a1<pts.length;b1=a1++){
+                  const [xi,yi]=pts[a1],[xj,yj]=pts[b1];
+                  if(((yi>cy)!==(yj>cy)) && (cx<(xj-xi)*(cy-yi)/(yj-yi)+xi)) inside=!inside;
+                }
+                if(inside){ hidden++; break; }
+              }
+            }
+          });
+        }
+      }
+      assert("every level tag is drawn on top, none painted over", hidden===0 && seen>0,
+        hidden+" hidden of "+seen);
+      S.method=savedM;
     }
 
     /* ---- no drawing may render two labels on top of each other ----------- */
