@@ -244,11 +244,38 @@ between treads, or the full `r` when it laps the tread edge.
 
 **Cut stringers.** Stringers sit at spacing ≤ the tread material's span. A stringer at width position `p`
 on a leg only supports levels `k ≥ k_min`, where `k_min = max(1, ⌈(p − Wb)/R⌉ + 1)` — **stringers nearer
-the corner carry fewer notches**, which is what makes the pyramid work. Per stringer the tool reports
-notch count, framing-square settings (rise `r`, run `R`), mark spacing along the board edge
-`Ls = √(r² + R²)`, the bottom cut reduced by one tread thickness ("drop the stringer"), and the throat
-`= board width − r·R/Ls` with a warning below the practical minimum. The **hip stringer** at the corner
-has the same rise `r` but run `R√2`, needs 45° plan bevels on every cut, and usually has a tighter throat.
+the corner carry fewer notches**, which is what makes the pyramid work. Three kinds come out of that:
+
+| Trade name | What it is | Top end |
+|---|---|---|
+| **Common** | reaches the platform, runs the whole flight | the connection type you picked (below) |
+| **Jack** | the 45° miter cuts it short, so it starts partway down | plain plumb cut against the framing of the step above — needs a cleat, hanger or blocking there; the connection type does **not** apply to it |
+| **Hip** | the diagonal at the outside corner, run `R√2` | same as a common |
+
+**The cut schedule.** Every distinct board gets its own sheet — the cut nested on the stock you buy, the
+finished profile, and then the numbers, all generated from one function (`stringerBoardLayout`) so a
+number can never contradict a drawing. Two coordinate systems are in play:
+
+* **profile** — `x` out along the stair, `y` up. The nosing line is `y = x·r/R`.
+* **board** — `x'` along the board from the bottom end, `y'` down from the **top edge**, which *is* the
+  nosing line: `x' = (x·R + y·r)/Ls`, `y' = (x·r − y·R)/Ls`.
+
+In board coordinates every notch is the **same right triangle sitting on the top edge**: hypotenuse
+`Ls = √(r² + R²)` along the edge, legs `r` and `R`, apex `r·R/Ls` deep and set back `r²/Ls` from its
+mark. So the sheet gives you, per board:
+
+* framing square: rise `r` on the tongue, run `R` on the blade; pitch `atan(r/R)`
+* **marks measured from one datum** — the bottom end of the board — at `startOff + i·Ls`, not stepped off
+  one from the last, which accumulates the square's own thickness
+* which level each seat carries, and that tread's height above the deck
+* the cuts in the order you make them, each with its size and why: bottom riser face (the "drop"),
+  bottom seat, the `c` tread cuts, the `c` riser cuts, and the top end
+* throat, minimum board width for the pitch, cut length, material past the last mark, board to buy
+
+The **bottom** is a plumb face `drop = r − tread thickness (+ base)` below the lowest seat, then a level
+cut running out to the board's lower edge — not a line to the corner of the board. The **hip** has the
+same rise `r` but run `R√2`, so it bites deepest and keeps the least throat; its seats are square across
+the face and it is the tread boards landing on it that are cut at 45°.
 
 **Box frames.** One L-shaped box per level, rim height `r − tread thickness`, outer rim mitered at the
 corner, joists spanning `R` at the tread material's spacing, plus a 45° corner block. Load path: box `k`'s
@@ -271,19 +298,40 @@ finished size is `frame + nosing` on those two faces, and the decking boards are
 Three ways the stringer can meet the platform. They differ in one thing that matters structurally:
 whether the stringer merely **hangs** on the platform face or runs back **under** it and **bears** on the
 frame. The sawtooth, riser count, run and footprint are identical in all three — only the top of the
-board changes, and it gets `tab · Ls / R` longer.
+board changes.
 
 | Connection | Bearing on the frame | Ledger | Board length (7/11, 3 notches) |
 |---|---|---|---|
 | **Top tread down** — tread sits on the stringer | none, butts the face | **required** — ledger, cleat, or stringer hangers (Simpson LSC-type) | 42-1/16" |
-| **Flush, half tread** | half a run (5½") | not needed for support | 48-5/8" |
-| **Flush, full tread** | a full run (11") | not needed for support | 55-1/8" |
+| **Flush, half tread** | half a run (5½") | not needed for support | 46-11/16" |
+| **Flush, full tread** | a full run (11") | not needed for support | 51-3/8" |
 
 With *top tread down* nothing carries the stringer — the entire load is in the fasteners, in shear —
 so a ledger or proper hangers is not optional. The flush options put the stringer on top of the frame,
 so fasteners only need to stop it sliding. The Framing tab states which case you are in and why, and
 the elevation highlights the bearing surface. Only the stringers that actually reach the platform get
-the tab; ones nearer the corner start lower down and are unaffected.
+the tab; jack stringers nearer the corner start lower down and are unaffected.
+
+### The tab is a level cut — the last riser stays plumb
+
+The bearing tab is **not** the sloped nosing line carried on past the platform face. It has to slide
+under the platform decking and sit flat on the frame, so its top edge is **horizontal**. The nosing line
+stops at the face, the last riser face stays **plumb** through a full rise `r`, and only then does the
+top edge turn level and run back `tab`. Two consequences:
+
+* **Length.** The far corner of a level cut projects `tab·R/Ls` on the slope, not `tab·Ls/R`. At 7/11
+  a half-tread tab adds **4-5/8"**, not 6-1/2" — the sloped version buys ~2" of board per stringer that
+  you do not need, and on a marginal board it buys the next stock length up.
+* **Two thicknesses set its height.** The tab can sit no higher than the material that is there — the
+  nosing line at the face, one tread thickness below the platform surface — and no higher than the
+  underside of the platform decking. So it is cut `lift = max(0, platform decking − tread)` below the
+  top notch corner. When the treads are the *thicker* stock instead, the tab lands
+  `gap = tread − platform decking` **below** the frame top and has to be packed out; the tool says so
+  with the number, rather than drawing a joint that does not close.
+
+A self-test walks the actual board outline for both flush types and asserts the last riser is one full
+rise at a constant `x`, that the tab leaves that corner level, that nothing sits above the nosing line,
+and that the tab measures exactly the advertised bearing.
 
 ## Will it come out of a standard 2x12?
 
@@ -323,10 +371,13 @@ the lower edge from that back corner (the notch apex) instead draws a 2x12 half 
 the apex line lies `r·cos θ` below the real edge. The lower edge is `bw` perpendicular below the nosing
 line, i.e. `bw·Ls/R` down on a vertical cut, which puts every notch apex exactly one *throat* above it.
 
-The stringer's **top end is a plumb cut in the plane of the platform face**, bearing against the rim —
-not a diagonal back to the corner of the board. That plumb face is `board width × Ls / run` tall, which
-is *taller* than the board is wide (13-3/8" for a 2x12 at 7/11), because a vertical cut across a sloped
-board is longer than the board's width. Same detail as a standard cut stringer hung off a rim.
+With *top tread down* the stringer's **top end is a plumb cut in the plane of the platform face**,
+bearing against the rim — not a diagonal back to the corner of the board. That plumb face is
+`board width × Ls / run` tall, which is *taller* than the board is wide (13-3/8" for a 2x12 at 7/11),
+because a vertical cut across a sloped board is longer than the board's width. Same detail as a
+standard cut stringer hung off a rim. With a **flush** connection the last riser face is still plumb
+through a full rise; the top edge then turns **level** and runs back `tab`, and the plumb cut moves to
+the back of the tab, where it is `bw·Ls/R − lift − tab·r/R` tall. See *the tab is a level cut* above.
 
 * **Stringer stock layout** — the board you *buy*, laid flat, with the cut nested inside it and the
   offcut shaded at the end. Profile coordinates are rotated into board coordinates, where the nosing
@@ -337,9 +388,18 @@ board is longer than the board's width. Same detail as a standard cut stringer h
   fewer notches, so they are not all the same board), plus the hip at its `R·√2` run. Each shows the
   real board outline: notches, nosing line, a layout tick every `√(r²+R²)` along the edge, the top plumb
   cut, and the bottom **level cut** — horizontal, because it bears flat — set `drop` below the last
-  seat, where `drop = r − tread thickness (+ decking thickness when bearing on the structure)`.
+  seat, where `drop = r − tread thickness (+ decking thickness when bearing on the structure)`. Below
+  the two drawings, that board's **cut schedule** — square settings, marks from one datum, every cut in
+  order with its size and reason, and what each seat carries.
 
 A colour legend above the drawings maps each fill to the stock you selected.
+
+### Known limitation
+
+In **Both** units mode a few dimension labels in the plan and elevation can run past the edge of the
+canvas, because the gutters are sized for a single unit and `12-1/2" / 318 mm` is more than twice as
+wide. Same for the level tags on an 8-riser stair in mm. Imperial and mm-only are clean across every
+configuration swept. Not yet fixed.
 
 ---
 
