@@ -63,15 +63,35 @@ narrow to cover the profile.
 
 Every edit is written to `localStorage` immediately and read back when you reopen the page — including
 the stock library and the code-limit table. The header shows `Saved 14:32` after each change, or
-`Restored your last design` on open.
+`Restored: 6 risers, box frames` on open — it **names** what came back, so a silent revert to the
+defaults is obvious instead of looking like a normal restore.
+
+### The bug that lost designs
+
+The flush on unload was the problem. It fired whatever the page happened to be holding, so a visit that
+**did not restore anything** — storage briefly unreadable, a payload the build could not parse, a fresh
+profile — wrote its *defaults* straight over a good design on the way out. One bad load and the design
+was gone for good. That is what "it forgets my options after an update" looked like.
+
+Three things now stand in the way:
+
+* **A session has to earn the right to write.** The unload flush only runs if this visit restored the
+  saved design or actually changed something. An untouched page that started from defaults can no
+  longer overwrite anything.
+* **One step of undo.** The payload being replaced is kept, and a **Restore previous** button appears in
+  the header whenever one exists. It swaps, so pressing it twice puts you back.
+* **A version on the payload**, so a future rename migrates instead of silently falling back to the
+  default for that field. A corrupt payload is *kept* and reported, not treated as "nothing saved".
+
+The stock library is also **merged over the defaults** rather than replacing them, so a library saved
+before an item existed no longer loses that item.
 
 If a browser blocks storage (private windows, some `file://` configurations), the header says so
-**instead of failing silently**, so you know to use `Export JSON`. Storage is also flushed on page hide
-and unload as a safety net.
+**instead of failing silently**, so you know to use `Export JSON`.
 
-One caveat worth knowing: `localStorage` is **per origin**. The published copy at
-`justinccase29.github.io` and a local copy opened from disk keep *separate* saved designs — that is the
-usual reason a design looks "lost". Use `Export JSON` / `Import` to move one between them.
+One caveat remains: `localStorage` is **per origin**. The published copy at
+`justinccase29.github.io` and a local copy opened from disk keep *separate* saved designs. Use
+`Export JSON` / `Import` to move one between them.
 
 ## Layout
 
@@ -98,17 +118,17 @@ is `5½" + 5½" + 1¾" rip`, the rip at the back.
 
 ## Floating platform
 
-The platform is modelled as a **free-standing (floating) frame built entirely from the platform frame
-stock** — nothing is fastened to the house:
+The platform is modelled as a **free-standing (floating) frame** — nothing is fastened to the house:
 
-* the frame is that stock **on edge**, so its depth is the stock's width (a 2x8 gives 7¼");
-* **legs cut from the same stock** make up the remaining height, on a grid no wider than that stock's
-  span (a 27" platform on 2x8 → 12 legs at 19¾", 4 × 3 at 24" o.c.);
-* legs taller than a few stock thicknesses raise a bracing warning (double into an L at the corners, or
-  switch to 4x4 posts);
-* if the stock is deeper than the whole platform, it says to rip it instead.
+* the frame is the platform frame stock **on edge**, so its depth is that stock's width (a 2x8 gives 7¼");
+* **legs have their own stock**, defaulting to **4x4**. A square post takes the load in compression on
+  its own; frame stock on edge is a plank and wants doubling into an L at the corners plus a diagonal
+  brace once it gets tall, so that warning only fires for the plank case and names the fix;
+* leg **spacing** still comes from the *frame*, because that is the member spanning between the legs
+  (a 27" platform on 2x8 → 12 legs at 19¾", 4 × 3 at 24" o.c.);
+* if the frame stock is deeper than the whole platform, it says to rip it instead.
 
-The elevation draws it that way — frame band on legs, not a solid block.
+The elevation draws it that way — frame band on real legs at the leg stock's width, not a solid block.
 
 ## Nosing is measured from the riser face
 
@@ -170,6 +190,23 @@ To add or fix wording, edit the `FR` object near the top of the file: `"English 
 |---|---|---|
 | **`span`** | *Structural.* The largest clear distance allowed between supports when that board is walked on. 5/4x6 = 16", 2x6 = 24". | How **many** joists / stringers you need, and their spacing. Note it is the **tread** material's span that spaces the stringers, not the stringer's own — 5/4x6 treads force 16" o.c. even though the 2x12 under them is good for 24" |
 | **`Stock lengths`** | *Commercial.* The lengths the yard sells — 96, 120, 144, 192 in (8/10/12/16 ft). | The **buy list** and how pieces are cut from each board |
+
+## Pricing follows the length
+
+A 16' 2x12 is not four times a 4' one, and the long lengths carry a premium per foot, so price is keyed
+to **(stock, length)**, not to stock alone. Three forms in the `Prices` field, most specific wins:
+
+| Form | Means |
+|---|---|
+| `2x6@96:12.50` | that stock **at that length** |
+| `2x12:2.10/ft` | by the **foot** — `length ÷ 12 × rate` |
+| `5/4x6 PT:11.25` | one **flat** price whatever the length |
+
+Lengths are read in the current unit, so `2x6@2438:29.00` works in mm. The buy table shows the unit
+price, the line total, and **where each price came from** — `your price`, `2.10/ft`, `flat, any length`,
+or `estimated from your 96" price` when a length you did not list is scaled from the nearest one you
+did. An unpriced stock reads `no price given` and contributes nothing, rather than silently costing
+zero and making the total look complete.
 
 **Total rise is measured finished surface → finished surface:** from the top of the platform's
 **decking** down to the top of the existing deck **boards**. Not to the framing, and not to the
@@ -395,6 +432,13 @@ All drawings are to scale, with a scale bar, and show real material sizes rather
   platform frame and its decking, and the existing deck surface. In stringer mode the actual sawtooth
   stringer outline is drawn, including its lower edge, top plumb cut and bottom level cut. The platform
   is drawn cut short with a break line so the steps stay legible.
+* **Box frames — one drawing per level** (box mode). The plan view shows the *finished* stair, so the
+  boxes under it are hidden lines and you cannot see what to build. This draws each box on its own, as
+  the boards it is made of: outer rim, inner rim, the joists between them, the corner block, and the 45°
+  miters where the two legs meet at the **outside** corner `(Wx+kR, Wy+kR)` and the **inside** one a run
+  back. Each rim is therefore a board with a mitered end, not a rectangle butted at the corner: the
+  front outer rim's long point is at `Xo` and its short point one thickness back. Every rim, the joist
+  count/length/spacing and the rim height are called out, and the step above is shaded for context.
 * **Terminology** — a labelled schematic of two steps at your actual rise and run, defining total rise,
   unit rise, unit run/going, tread depth, nosing, tread board, riser board, box rim/stringer, platform
   decking and frame, and the bearing point where each rim lands over the rim below.

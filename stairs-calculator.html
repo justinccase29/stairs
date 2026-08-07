@@ -127,6 +127,7 @@ h5{font-size:12px;margin:12px 0 4px;color:var(--muted);text-transform:uppercase;
       <option value="in">Imperial</option><option value="mm">Metric (mm)</option><option value="both">Both</option>
     </select>
   </label>
+  <button id="btn-undo" style="display:none">Restore previous</button>
   <button id="btn-save">Export JSON</button>
   <button id="btn-load">Import</button>
   <button id="btn-reset">Reset</button>
@@ -531,7 +532,53 @@ const FR = {
     "Un {0} est plus haut que la plateforme entière ({1}) — refendez le bois d'ossature ou choisissez un bois moins large.",
   "Platform leg (floating)":"Patte de plateforme (flottante)",
   "{0} × {1} grid at {2} o.c.":"grille de {0} × {1} à {2} c/c",
-  "{0} legs @ {1}":"{0} pattes de {1}",
+  "{0} {1} legs @ {2}":"{0} pattes de {1} de {2}",
+  /* --- leg stock --- */
+  "Platform leg stock":"Bois des pattes de plateforme",
+  "The posts the floating platform stands on. 4x4 is the usual choice — it takes the load in compression without doubling or bracing. Frame stock on edge works too, but tall legs then want an L at the corners and a diagonal brace.":
+    "Les poteaux sur lesquels repose la plateforme flottante. Le 4x4 est le choix habituel : il reprend la charge en compression sans doublage ni contreventement. Le bois d'ossature sur chant fonctionne aussi, mais des pattes hautes exigent alors un L aux coins et une diagonale.",
+  "{0} × {1} of {2} ({3} × {4}), on a {5} × {6} grid at {7} o.c.":
+    "{0} × {1} de {2} ({3} × {4}), sur une grille de {5} × {6} à {7} c/c",
+  "square post — no bracing needed":"poteau carré — aucun contreventement requis",
+  "Free-standing (floating): nothing is fastened to the house. The frame is the {0} on edge; the legs are {1} and make up the rest of the height.":
+    "Autoportante (flottante) : rien n'est fixé à la maison. L'ossature est le {0} sur chant ; les pattes sont en {1} et comblent le reste de la hauteur.",
+  "The legs are {0} tall and only {1} thick — a plank on edge that slender wants doubling into an L at the corners plus diagonal bracing. Switching the leg stock to 4x4 removes the need.":
+    "Les pattes font {0} de haut et seulement {1} d'épaisseur — une planche sur chant aussi élancée exige un doublage en L aux coins et un contreventement diagonal. Choisir du 4x4 pour les pattes règle le problème.",
+  "Floating platform legs are {0} tall out of {1}, which is a plank on edge at that height — double them into an L at the corners and brace them diagonally, or set the leg stock to 4x4.":
+    "Les pattes de la plateforme flottante font {0} de haut en {1}, ce qui reste une planche sur chant à cette hauteur — doublez-les en L aux coins et contreventez en diagonale, ou choisissez du 4x4 pour les pattes.",
+  /* --- box frame drawings --- */
+  "Box frames — one drawing per level":"Caissons — un dessin par niveau",
+  "Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.":
+    "Chaque caisson dessiné comme les planches qui le composent, et non en trait caché sous l'escalier fini : bordure extérieure, bordure intérieure, solives entre les deux, et les onglets à 45° où les deux ailes se rejoignent au coin extérieur et au coin intérieur.",
+  "{0} — rim {1} of {2}, mitered both corners":"{0} — bordure de {1} en {2}, onglet aux deux coins",
+  "outer rim {0}":"bordure extérieure {0}", "inner rim {0}":"bordure intérieure {0}",
+  "side outer rim {0}":"bordure extérieure latérale {0}", "side inner rim {0}":"bordure intérieure latérale {0}",
+  "{0} joists × {1} @ {2} o.c.":"{0} solives × {1} à {2} c/c",
+  "corner block, 45°":"bloc de coin, 45°", "corner block":"bloc de coin",
+  "step above":"marche du dessus", "the step above":"la marche du dessus",
+  "rim boards ({0})":"bordures ({0})", "joists ({0})":"solives ({0})",
+  "bottom box — bears on {0}":"caisson du bas — repose sur {0}",
+  "bears on the tread boards of {0}, over its inner rim":"repose sur les planches de marche de {0}, au-dessus de sa bordure intérieure",
+  /* --- pricing by length --- */
+  "Prices":"Prix",
+  "Optional, comma separated. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length.":
+    "Facultatif, séparé par des virgules. Le prix est par LONGUEUR, car une planche de 16 pi ne vaut pas quatre planches de 4 pi. Trois formes, la plus précise l'emporte : 2x6@96:12,50 pour ce bois à cette longueur · 2x12:2,10/ft au pied · 5/4x6 PT:11,25 pour un prix unique quelle que soit la longueur.",
+  "Each":"Unitaire", "Price basis":"Base du prix",
+  "your price":"votre prix", "{0}/ft":"{0}/pi", "flat, any length":"forfait, toute longueur",
+  "estimated from your {0} price":"estimé d'après votre prix pour {0}",
+  "no price given":"aucun prix fourni", "some lengths unpriced":"certaines longueurs sans prix",
+  "Some rows are scaled from a price you gave for a different length. Lumber is rarely linear — the long lengths cost more per foot — so add the real length with {0} for the ones that matter.":
+    "Certaines lignes sont extrapolées d'un prix donné pour une autre longueur. Le bois est rarement linéaire — les grandes longueurs coûtent plus cher au pied — alors ajoutez la vraie longueur avec {0} pour celles qui comptent.",
+  "Price the lengths you actually buy: {0} for one length, {1} by the foot, or a bare {2} for one flat price whatever the length.":
+    "Indiquez le prix des longueurs que vous achetez vraiment : {0} pour une longueur, {1} au pied, ou simplement {2} pour un prix unique quelle que soit la longueur.",
+  /* --- persistence --- */
+  "Restore previous":"Rétablir la précédente",
+  "Put back the previous saved design? The current one becomes the undo step.":
+    "Rétablir la conception enregistrée précédente ? L'actuelle devient l'étape d'annulation.",
+  "Your saved design could not be read — it is kept, click Restore previous.":
+    "Votre conception enregistrée n'a pas pu être lue — elle est conservée, cliquez sur Rétablir la précédente.",
+  "Restored: {0} risers, {1}":"Rétabli : {0} contremarches, {1}",
+  "box frames":"caissons", "stringers":"limons",
   /* stringer stock layout */
   "offcut {0}":"retaille {0}",
   "marks along the top edge, every {0}":"repères sur le bord supérieur, chaque {0}",
@@ -794,7 +841,7 @@ const DEFAULTS = {
   riseMode:"fixed", totalRise:28, targetRise:28, riseTol:1.5,
   risers:4, run:11, nosing:0,
   bottomBearing:"surface", deckBoardT:1.0, stairConnection:"topTreadDown",
-  platX:60, platY:48, faceX0:"open", platSurface:"5/4x6 PT", platFrame:"2x6",
+  platX:60, platY:48, faceX0:"open", platSurface:"5/4x6 PT", platFrame:"2x6", legStock:"4x4",
   platJoistDir:"y", includePlatform:true,
   method:"boxes", cornerStyle:"miter", throughLeg:"front",
   treadStock:"2x6", treadGap:0.25, riserStock:"5/4x6 PT", riserFit:"captured",
@@ -831,6 +878,8 @@ const FIELDS = [
    hint:"The stair wraps two faces and the house closes a third; this is the fourth. Open means its stepped end is visible and gets a skirt board."},
   {k:"includePlatform", t:"chk", l:"Include platform framing"},
   {k:"platFrame", t:"stock", l:"Platform frame stock", when:s=>s.includePlatform},
+  {k:"legStock", t:"stock", l:"Platform leg stock", when:s=>s.includePlatform,
+   hint:"The posts the floating platform stands on. 4x4 is the usual choice — it takes the load in compression without doubling or bracing. Frame stock on edge works too, but tall legs then want an L at the corners and a diagonal brace."},
   {k:"platSurface", t:"stock", l:"Platform decking", when:s=>s.includePlatform},
   {k:"platJoistDir", t:"sel", l:"Platform joists run", o:[["y","Out from the wall (Y)"],["x","Along the wall (X)"]], when:s=>s.includePlatform},
   {h:"Construction"},
@@ -857,7 +906,8 @@ const FIELDS = [
   {k:"stockLen", t:"text", l:"Stock lengths you can buy (in)", hint:'Inches, comma separated. 96,120,144,192 = 8,10,12,16 ft. This is what the yard sells — not the same as the structural "span" in the stock library below.'},
   {k:"kerf", t:"len", l:"Saw kerf"},
   {k:"minOffcut", t:"len", l:"Ignore offcuts under"},
-  {k:"price", t:"text", l:"Price per stock board", hint:'Optional, e.g. 2x6:14.50, 5/4x6 PT:11.25'}
+  {k:"price", t:"text", l:"Prices",
+   hint:"Optional, comma separated. Price is per LENGTH, because a 16' board is not four 4' boards. Three forms, most specific wins: 2x6@96:12.50 is that stock at that length · 2x12:2.10/ft is by the foot · 5/4x6 PT:11.25 is one flat price whatever the length."}
 ];
 
 /* ---------- 6. form render / bind -------------------------------------- */
@@ -893,6 +943,7 @@ function renderForm(){
 }
 function onFormInput(e){
   const t = e.target;
+  SAVE_STATE.dirty = true;          // this session has earned the right to write
   if(t.dataset.k){
     const k = t.dataset.k, ty = t.dataset.t;
     if(ty==="chk") S[k] = t.checked;
@@ -910,28 +961,44 @@ function onFormInput(e){
    Every edit is written to localStorage immediately and read back on open.
    A silent failure here looks exactly like "it doesn't remember anything", so
    the outcome is always reported in the header rather than swallowed. */
-let SAVE_STATE = {ok:null, at:null, restored:false};
+let SAVE_STATE = {ok:null, at:null, restored:false, dirty:false, badPayload:false, from:null};
 function showSaveState(){
   const el = document.getElementById("savestate");
   if(!el) return;
   if(SAVE_STATE.ok===false){
     el.textContent = "⚠ " + t("Not saving — this browser is blocking storage. Use Export JSON.");
     el.className = "sub bad";
-    return;
+  } else if(SAVE_STATE.badPayload){
+    el.textContent = "⚠ " + t("Your saved design could not be read — it is kept, click Restore previous.");
+    el.className = "sub bad";
+  } else {
+    el.className = "sub";
+    if(SAVE_STATE.at){
+      const time = SAVE_STATE.at.toLocaleTimeString(S.lang==="fr"?"fr-CA":"en-CA",{hour:"2-digit",minute:"2-digit"});
+      el.textContent = t("Saved {0}", time);
+    } else if(SAVE_STATE.restored){
+      /* Name what came back, so a silent revert to the defaults is obvious at a
+         glance instead of looking like a normal restore. */
+      el.textContent = t("Restored: {0} risers, {1}", S.risers,
+        S.method==="boxes" ? t("box frames") : t("stringers"));
+    } else el.textContent = "";
   }
-  el.className = "sub";
-  if(SAVE_STATE.at){
-    const time = SAVE_STATE.at.toLocaleTimeString(S.lang==="fr"?"fr-CA":"en-CA",{hour:"2-digit",minute:"2-digit"});
-    el.textContent = t("Saved {0}", time);
-  } else if(SAVE_STATE.restored){
-    el.textContent = t("Restored your last design");
-  } else el.textContent = "";
+  const btn = document.getElementById("btn-undo");
+  if(btn) btn.style.display = hasBackup() ? "" : "none";
 }
+const SAVE_KEY = "stairs-calc-v1", SAVE_BAK = "stairs-calc-v1-prev", SAVE_VER = 2;
+/* Every payload carries its version, so a future rename can migrate instead of
+   silently falling back to the default for that field. */
+const snapshot = () => JSON.stringify({v:SAVE_VER, S, CODE, STOCK});
 function save(){
   try{
-    localStorage.setItem("stairs-calc-v1", JSON.stringify({S,CODE,STOCK}));
+    const next = snapshot(), prev = localStorage.getItem(SAVE_KEY);
+    /* One step of undo: keep the payload we are about to replace. A bad write
+       then costs a click instead of the whole design. */
+    if(prev && prev!==next) localStorage.setItem(SAVE_BAK, prev);
+    localStorage.setItem(SAVE_KEY, next);
     /* verify it actually landed — some browsers accept the write and drop it */
-    SAVE_STATE.ok = !!localStorage.getItem("stairs-calc-v1");
+    SAVE_STATE.ok = localStorage.getItem(SAVE_KEY)===next;
     SAVE_STATE.at = new Date();
   }catch(e){
     SAVE_STATE.ok = false;
@@ -940,18 +1007,69 @@ function save(){
   showSaveState();
   return SAVE_STATE.ok;
 }
+/* THE FLUSH IS THE DANGEROUS ONE. It fires on unload and on hide, whatever the
+   page happens to be holding — so if a visit started from the defaults because
+   the load did not restore (storage briefly unreadable, a payload this build
+   cannot parse, a fresh profile), leaving the page would write those defaults
+   straight over a good design. That is a one-way loss and it is exactly what
+   "it forgot my options after an update" looks like. So: only a session that
+   restored the saved design, or that actually changed something, is allowed to
+   write on the way out. */
+function flushSave(){
+  try{
+    const stored = localStorage.getItem(SAVE_KEY);
+    if(stored && !SAVE_STATE.restored && !SAVE_STATE.dirty) return false;
+    if(stored===snapshot()) return true;                 // nothing to write
+    return save();
+  }catch(e){ return false; }
+}
+function migrate(data){
+  /* v1 had no version field and no legStock. Nothing to rewrite yet — this is
+     the hook so the next rename does not cost anyone their inputs. */
+  if(!data.v) data.v = 1;
+  return data;
+}
 function load(){
   try{
-    const raw = localStorage.getItem("stairs-calc-v1");
+    const raw = localStorage.getItem(SAVE_KEY);
     if(!raw) return false;
-    const data = JSON.parse(raw);
+    const data = migrate(JSON.parse(raw));
     if(data.S) Object.assign(S, data.S);
     if(data.CODE) Object.assign(CODE, data.CODE);
-    if(data.STOCK) STOCK = data.STOCK;
+    /* MERGE the stock library over the defaults, never replace it: a saved
+       library from an older build is missing anything added since, and dropping
+       those left stock selects pointing at names that no longer existed. */
+    if(data.STOCK) STOCK = Object.assign(JSON.parse(JSON.stringify(STOCK_DEFAULT)), data.STOCK);
     SAVE_STATE.restored = true;
+    SAVE_STATE.from = data.v;
     return true;
-  }catch(e){ console.warn("Could not restore saved project:", e); return false; }
+  }catch(e){
+    /* Do not let a corrupt payload become a silent reset — keep it, say so. */
+    try{ localStorage.setItem(SAVE_BAK, localStorage.getItem(SAVE_KEY)||""); }catch(_){}
+    SAVE_STATE.badPayload = true;
+    console.warn("Could not restore saved project:", e);
+    return false;
+  }
 }
+/* Put back whatever the previous save held. */
+function restorePrevious(){
+  try{
+    const bak = localStorage.getItem(SAVE_BAK);
+    if(!bak) return false;
+    const cur = localStorage.getItem(SAVE_KEY);
+    const data = migrate(JSON.parse(bak));
+    Object.assign(S, DEFAULTS, data.S||{});
+    Object.assign(CODE, CODE_DEFAULT, data.CODE||{});
+    STOCK = Object.assign(JSON.parse(JSON.stringify(STOCK_DEFAULT)), data.STOCK||{});
+    if(cur) localStorage.setItem(SAVE_BAK, cur);          // swap, so it undoes itself
+    localStorage.setItem(SAVE_KEY, snapshot());
+    SAVE_STATE.dirty = false;
+    return true;
+  }catch(e){ console.warn("Could not restore the previous design:", e); return false; }
+}
+const hasBackup = () => { try{
+  const b=localStorage.getItem(SAVE_BAK); return !!b && b!==localStorage.getItem(SAVE_KEY);
+}catch(e){ return false; } };
 
 /* ---------- 8. small parsing helpers ------------------------------------ */
 function parseStockLens(){
@@ -963,16 +1081,55 @@ function pickStockLen(need, lens){
   for(const Ln of lens) if(Ln >= need-1e-6) return Ln;
   return null;                                   // nothing long enough — needs a splice
 }
+/* Lumber is not priced per board — a 16' 2x12 is not four times a 4' one, and
+   the long lengths carry a premium per foot. Three forms, most specific wins:
+     2x6@96:12.50    this stock AT that length          -> exact
+     2x6:1.65/ft     this stock by the foot             -> len/12 * rate
+     2x6:14.50       one flat price whatever the length -> legacy, still works
+   Length is written in the current unit, so "2x6@2438:12.50" works in mm. */
 function parsePrices(){
-  const map = {};
-  if(!S.price) return map;
+  const out = {exact:{}, perFt:{}, flat:{}};
+  if(!S.price) return out;
   for(const part of String(S.price).split(",")){
     const idx = part.lastIndexOf(":");
     if(idx<0) continue;
-    const name = part.slice(0,idx).trim(), val = parseFloat(part.slice(idx+1));
-    if(name && isFinite(val)) map[name] = val;
+    let name = part.slice(0,idx).trim();
+    const rhs = part.slice(idx+1).trim();
+    const val = parseFloat(rhs.replace(",", "."));
+    if(!name || !isFinite(val)) continue;
+    const at = name.lastIndexOf("@");
+    if(at>0){
+      const len = parseLen(name.slice(at+1).trim());
+      name = name.slice(0,at).trim();
+      if(isFinite(len) && len>0){ (out.exact[name] = out.exact[name] || {})[Math.round(len*16)] = val; continue; }
+    }
+    if(/\/\s*(ft|pi|foot|')\s*$/i.test(rhs)) out.perFt[name] = val;
+    else out.flat[name] = val;
   }
-  return map;
+  return out;
+}
+/* Price of ONE board of this stock at this length, and where it came from, so
+   the cut list can show its working instead of an unexplained number. */
+function priceBoard(prices, name, len){
+  const ex = prices.exact[name];
+  if(ex){
+    const key = Math.round(len*16);
+    if(ex[key]!=null) return {cost:ex[key], basis:"exact"};
+  }
+  if(prices.perFt[name]!=null) return {cost:prices.perFt[name]*len/12, basis:"perFt", rate:prices.perFt[name]};
+  if(prices.flat[name]!=null) return {cost:prices.flat[name], basis:"flat"};
+  /* A length we were not given but the stock has other lengths priced: fall
+     back to the cheapest per-foot rate implied by them, flagged as an estimate
+     rather than silently costing the board at zero. */
+  if(ex){
+    const keys = Object.keys(ex).map(Number);
+    if(keys.length){
+      const nearest = keys.reduce((a,b)=>Math.abs(b-len*16)<Math.abs(a-len*16)?b:a);
+      const rate = ex[nearest]/(nearest/16);
+      return {cost:rate*len, basis:"scaled", from:nearest/16};
+    }
+  }
+  return {cost:0, basis:"none"};
 }
 
 /* ---------- 9. board fitting — "do I have to cut boards?" --------------- */
@@ -1090,7 +1247,7 @@ function validate(model){
   if(S.includePlatform){
     const pfv = platformModel(model);
     if(pfv.braceNeeded)
-      warnings.push({level:"warn", msg:t("Floating platform legs are {0} tall — double them into an L at the corners and brace them diagonally, or use 4x4 posts.", LD(pfv.legH))});
+      warnings.push({level:"warn", msg:t("Floating platform legs are {0} tall out of {1}, which is a plank on edge at that height — double them into an L at the corners and brace them diagonally, or set the leg stock to 4x4.", LD(pfv.legH), pfv.legName)});
     if(pfv.ripFrame)
       warnings.push({level:"warn", msg:t("A {0} is deeper than the whole platform ({1}) — rip the frame stock down, or pick a shallower stock.", S.platFrame, LD(pfv.height))});
   }
@@ -1433,16 +1590,26 @@ function platformModel(model){
      same stock. Nothing is attached to the house. */
   const frameDepth = frame.w;
   const legH = height - frameDepth;                       // what the legs have to make up
+  /* Legs are their own stock — a 4x4 post carries the load in compression on
+     its own, where frame stock on edge is a plank and wants doubling and
+     bracing once it gets tall. Spacing still comes from the FRAME, since that
+     is the member spanning between the legs. */
+  const leg = sk(S.legStock || S.platFrame);
   const legSpan = frame.span || 24;
   const legCols = Math.max(2, Math.ceil(model.Wx/legSpan)+1);
   const legRows = Math.max(2, Math.ceil(model.Wy/legSpan)+1);
   const needsLegs = legH > 0.25;
   const legCount = needsLegs ? legCols*legRows : 0;
+  /* A post is square-ish, so it is stable on its own; a plank on edge is not.
+     Only warn about bracing when the leg is far taller than it is thick. */
+  const legMin = Math.min(leg.t, leg.w);
+  const isPost = Math.abs(leg.t-leg.w) < 0.51 && legMin >= 3;
   const ripFrame = height < frameDepth - 0.0626;          // stock deeper than the whole platform
   return {height, dir, joistLen, joistCount, rimPieces, deckFit, deckBoardLen, deckFillDim,
-          surf, frame, nose, finX:model.platFinX, finY:model.platFinY,
+          surf, frame, leg, legName:S.legStock||S.platFrame, isPost,
+          nose, finX:model.platFinX, finY:model.platFinY,
           frameDepth, legH, legSpan, legCols, legRows, legCount, needsLegs, ripFrame,
-          braceNeeded: needsLegs && legH > 3*frame.t*2};
+          braceNeeded: needsLegs && !isPost && legH > 6*legMin};
 }
 /* ---------- 15b. skirts on the open side face (X=0) ---------------------- */
 /* The exposed end runs from the platform face (y=Wy, z=H) down to the deck
@@ -1527,7 +1694,7 @@ function collectPieces(model){
     for(const rp of pf.rimPieces) pieces.push({role:t(rp.role), stock:S.platFrame, len:rp.len, qty:rp.qty});
     pieces.push({role:t("Platform joist"), stock:S.platFrame, len:pf.joistLen, qty:pf.joistCount});
     if(pf.needsLegs)
-      pieces.push({role:t("Platform leg (floating)"), stock:S.platFrame, len:pf.legH, qty:pf.legCount,
+      pieces.push({role:t("Platform leg (floating)"), stock:pf.legName, len:pf.legH, qty:pf.legCount,
         note:t("{0} × {1} grid at {2} o.c.", pf.legCols, pf.legRows, fmtIn(pf.legSpan))});
     pieces.push({role:t("Platform decking"), stock:S.platSurface, len:pf.deckBoardLen, qty:pf.deckFit.n + (pf.deckFit.recommend==="rip"?1:pf.deckFit.recommend==="overshoot"?1:0)});
   }
@@ -1705,6 +1872,9 @@ const MAT = {
   string:'fill="#cdb693" stroke="#8a6a45" stroke-width="1"',
   block:'fill="#b39875" stroke="#8a6a45" stroke-width=".8"',
   plat:'fill="#cfe0ef" stroke="#5b87ad" stroke-width=".9"',
+  post:'fill="#a9c4da" stroke="#41708f" stroke-width="1"',
+  rim: 'fill="#b79a6f" stroke="#6b5335" stroke-width="1.1"',
+  joist:'fill="#d7c4a4" stroke="#8a6a45" stroke-width=".8"',
   platDeck:'fill="#e6bd8c" stroke="#5b87ad" stroke-width=".8"',
   exist:'fill="#d3d9df" stroke="#9aa6b2" stroke-width=".8"',
   wall:'fill="#e7e9ec" stroke="#9aa6b2" stroke-width=".8"'
@@ -2018,12 +2188,14 @@ function renderElevationSVG(model){
     const frameTop=H-P.st, frameBot=Math.max(-base, frameTop-pf.frameDepth);
     s+=box(Wy-pd,Wy,frameBot,frameTop,MAT.plat);
     if(pf.needsLegs){
-      const legT=Math.max(pf.frame.t,1);
-      for(const lu of [Wy-pd+0.5, Wy-legT-0.5]) s+=box(lu,lu+legT,-base,frameBot,MAT.plat);
+      /* legs at their own stock's real width — a 4x4 post reads differently
+         from frame stock on edge, which is the point of choosing it */
+      const legT=Math.max(pf.leg.w,1);
+      for(const lu of [Wy-pd+0.5, Wy-legT-0.5]) s+=box(lu,lu+legT,-base,frameBot,MAT.post);
       const midU=Wy-pd/2;
-      if(pd>legT*6) s+=box(midU,midU+legT,-base,frameBot,MAT.plat);
+      if(pd>legT*6) s+=box(midU,midU+legT,-base,frameBot,MAT.post);
       s+=svgLead(X(D(Wy-legT-0.5))-2,Y((frameBot-base)/2),X(D(Wy-pd))+4,Y(-base)-6,
-        t("{0} legs @ {1}", pf.legCount, fmtIn(pf.legH)));
+        t("{0} {1} legs @ {2}", pf.legCount, pf.legName, fmtIn(pf.legH)));
     }
   } else s+=box(Wy-pd,Wy,-base,H-P.st,MAT.plat);
   s+=svgLine(X(2),Y(-base),X(2),Y(H),'stroke="#5b87ad" stroke-width=".9" stroke-dasharray="5 3"');
@@ -2429,6 +2601,93 @@ function cutScheduleHTML(model, g){
   return h;
 }
 
+/* ---------- 18f. box frames, drawn as boards -----------------------------
+   The plan view shows the FINISHED stair, so the boxes under it are hidden
+   lines and you cannot see what to build. This draws one box on its own, as
+   the boards it is made of: outer rim, inner rim, joists between them, and the
+   45 degree miters where the two legs meet at the outside and inside corners.
+
+   Outer corner at (Xo,Yo) = (Wx+kR, Wy+kR), inner at (Xi,Yi) one run back. The
+   miter runs corner to corner, so each rim is a parallelogram-ended board, not
+   a rectangle: the front outer rim's LONG point is at Xo and its short point
+   one thickness back. */
+function boxFramePlanSVG(model,k){
+  const bx=boxesForLevel(model,k), R=model.R, tk=sk(S.frameStock).t;
+  const Xo=model.Wx+k*R, Yo=model.Wy+k*R, Xi=Xo-R, Yi=Yo-R;
+  const legF=bx.legs[0], legS=bx.legs[1];
+  /* Gutters sized from the real label text — a 9-joist box or a long French
+     string is far wider than any fixed margin would allow for. */
+  const LBL={
+    outer:t("outer rim {0}", L(legF.outer)),
+    inner:t("inner rim {0}", L(legF.inner)),
+    sOuter:t("side outer rim {0}", L(legS.outer)),
+    sInner:t("side inner rim {0}", L(legS.inner)),
+    joist:t("{0} joists × {1} @ {2} o.c.", legF.joistCount+legS.joistCount, L(legF.joistLen), fmtIn(legF.joistSpacing)),
+    block:t("corner block, 45°")
+  };
+  const title=t("{0} — rim {1} of {2}, mitered both corners", levelTag(model,k), LD(bx.rimH), S.frameStock);
+  const foot=bx.isBottom ? t("bottom box — bears on {0}", model.base>0?t("the deck joists"):t("the deck surface"))
+                         : t("bears on the tread boards of {0}, over its inner rim", levelTag(model,k+1));
+  const mL=54, mT=34, mB=54;
+  const mR=Math.max(60, Math.max(...Object.keys(LBL).map(x=>estTextW(LBL[x],10)))+26);
+  const sc=Math.min(6.5, 560/Math.max(Xo,1), 420/Math.max(Yo,1));
+  const W=Math.max(mL+Xo*sc+mR,
+                   mL+estTextW(title.replace(/<[^>]*>/g,""),10)+24,
+                   mL+estTextW(foot,9)+24);
+  const H=mT+Yo*sc+mB;
+  const X=x=>mL+x*sc, Y=y=>mT+(Yo-y)*sc;          // +y drawn upward, like the plan
+  const poly=(pts,st)=>svgPoly(pts.map(p=>[X(p[0]),Y(p[1])]),st);
+  let s=svgOpen(W,H);
+  // the step above, for context — this box lands on its tread boards
+  s+=svgRect(X(0),Y(Yi),Xi*sc,Yi*sc,'fill="#f2f5f8" stroke="#c3ced8" stroke-width=".8" stroke-dasharray="4 3"');
+  s+=svgText(X(Xi/2),Y(Yi/2),t("step above"),'font-size="9" fill="#8b98a5" text-anchor="middle"');
+  // joists first, so the rims read as continuous over them
+  const joists=[];
+  for(let i=0;i<legF.joistCount;i++){
+    const x=Math.min(i*legF.joistSpacing, legF.outer-tk);
+    if(x+tk>Xi+tk) continue;                       // past the corner: the side leg's ground
+    joists.push([[x,Yi+tk],[x+tk,Yi+tk],[x+tk,Yo-tk],[x,Yo-tk]]);
+  }
+  for(let i=0;i<legS.joistCount;i++){
+    const y=Math.min(i*legS.joistSpacing, legS.outer-tk);
+    if(y+tk>Yi+tk) continue;
+    joists.push([[Xi+tk,y],[Xo-tk,y],[Xo-tk,y+tk],[Xi+tk,y+tk]]);
+  }
+  for(const j of joists) s+=poly(j,MAT.joist);
+  // rims, mitered at both corners
+  s+=poly([[0,Yo-tk],[Xo-tk,Yo-tk],[Xo,Yo],[0,Yo]],MAT.rim);            // front outer
+  s+=poly([[Xo-tk,0],[Xo,0],[Xo,Yo],[Xo-tk,Yo-tk]],MAT.rim);            // side outer
+  s+=poly([[0,Yi],[Xi,Yi],[Xi+tk,Yi+tk],[0,Yi+tk]],MAT.rim);            // front inner
+  s+=poly([[Xi,0],[Xi+tk,0],[Xi+tk,Yi+tk],[Xi,Yi]],MAT.rim);            // side inner
+  // corner block on the miter
+  s+=poly([[Xi+tk,Yi+tk],[Xi+tk+tk*2,Yi+tk],[Xi+tk,Yi+tk+tk*2]],MAT.block);
+  s+=svgLine(X(Xi),Y(Yi),X(Xo),Y(Yo),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
+  // dimensions and callouts, all in the right gutter or below
+  const gx=X(Xo)+10;
+  s+=svgText(mL,16,title,'font-size="10" fill="#333"');
+  s+=svgLead(X(Xo/2),Y(Yo-tk/2),gx,Y(Yo)+4,LBL.outer);
+  s+=svgLead(X(Xi/2),Y(Yi+tk/2),gx,Y(Yi)-6,LBL.inner);
+  s+=svgLead(X(Xo-tk/2),Y(Yo*0.3),gx,Y(Yo*0.35),LBL.sOuter);
+  s+=svgLead(X(Xi+tk/2),Y(Yo*0.12),gx,Y(Yo*0.14),LBL.sInner);
+  if(joists.length) s+=svgLead(X(Math.min(legF.joistSpacing,Xi)+tk/2),Y((Yi+Yo)/2),gx,Y(Yo*0.62),LBL.joist);
+  s+=svgLead(X(Xi+tk*1.4),Y(Yi+tk*1.4),gx,Y(Yo*0.8),LBL.block);
+  s+=dimLineH(X(0),X(Xo),Y(0)-14,L(Xo));
+  s+=dimLineV(X(0)-16,Y(0),Y(Yo),L(Yo),"left");
+  s+=svgText(mL,H-24,foot,'font-size="9" fill="#78838f"');
+  s+=scaleBarSVG(mL,H-8,sc);
+  s+="</svg>";
+  return declutterSVG(s);
+}
+function renderBoxSheets(model){
+  let h=legendHTML([["#b79a6f","#6b5335",t("rim boards ({0})", S.frameStock)],
+                    ["#d7c4a4","#8a6a45",t("joists ({0})", S.frameStock)],
+                    ["#b39875","#8a6a45",t("corner block")],
+                    ["#f2f5f8","#c3ced8",t("the step above")]]);
+  for(const lvl of model.levels)
+    h+='<div class="sheet"><div class="svgwrap">'+boxFramePlanSVG(model,lvl.k)+"</div></div>";
+  return h;
+}
+
 /* One sheet per DISTINCT stringer in the job, plus the hip — they are not all
    the same board: the ones nearer the corner carry fewer notches. */
 function renderStringerSheets(model){
@@ -2677,6 +2936,9 @@ function renderFramingPanel(model){
       for(const b of blocks) h += "<tr><td>"+b.k+"</td><td>"+t(b.legName)+"</td><td>"+LD(b.inner)+"</td><td>"+LD(b.height)+"</td><td>"+b.qty+"</td></tr>";
       h += "</tbody></table>";
     }
+    h += "<h3>"+t("Box frames — one drawing per level")+"</h3>"
+      + '<div class="note">'+t("Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.")+"</div>"
+      + renderBoxSheets(model);
   }
   if(S.faceX0==="open"){
     const si = skirtInfo(model);
@@ -2697,13 +2959,15 @@ function renderFramingPanel(model){
       +"<dt>"+t("Frame depth")+"</dt><dd>"+t("{0} — the {1} on edge", fmtIn(pf.frameDepth), S.platFrame)
         +(pf.ripFrame?' <span class="pill rip">'+t("deeper than the whole platform — rip it to {0}", fmtIn(pf.height))+'</span>':'')+"</dd>"
       +"<dt>"+t("Legs")+"</dt><dd>"+(pf.needsLegs
-          ? t("{0} legs at {1}, cut from the same {2}, on a {3} × {4} grid at {5} o.c.",
-              pf.legCount, LD(pf.legH), S.platFrame, pf.legCols, pf.legRows, fmtIn(pf.legSpan))
+          ? t("{0} × {1} of {2} ({3} × {4}), on a {5} × {6} grid at {7} o.c.",
+              pf.legCount, LD(pf.legH), pf.legName, fmtIn(pf.leg.t), fmtIn(pf.leg.w),
+              pf.legCols, pf.legRows, fmtIn(pf.legSpan))
+            +(pf.isPost?' <span class="pill ok">'+t("square post — no bracing needed")+'</span>':'')
           : t("none — the frame alone reaches the height"))+"</dd>"
       +"<dt>"+t("Joists")+"</dt><dd>"+t("{0} × {1} running {2}", pf.joistCount, LD(pf.joistLen), pf.dir==="y"?t("out from wall (Y)"):t("along wall (X)"))+"</dd></div>";
-    h += '<div class="note">'+t("Free-standing (floating): everything is cut from the {0}, nothing is fastened to the house. The frame is that stock on edge; legs of the same stock make up the rest of the height.", S.platFrame)+'</div>';
+    h += '<div class="note">'+t("Free-standing (floating): nothing is fastened to the house. The frame is the {0} on edge; the legs are {1} and make up the rest of the height.", S.platFrame, pf.legName)+'</div>';
     if(pf.braceNeeded)
-      h += '<div class="msg w">'+t("Legs are {0} tall — double them into an L at the corners and add diagonal bracing, or switch to 4x4 posts.", LD(pf.legH))+'</div>';
+      h += '<div class="msg w">'+t("The legs are {0} tall and only {1} thick — a plank on edge that slender wants doubling into an L at the corners plus diagonal bracing. Switching the leg stock to 4x4 removes the need.", LD(pf.legH), fmtIn(Math.min(pf.leg.t,pf.leg.w)))+'</div>';
     h += '<table><thead><tr><th>'+t("Piece")+'</th><th>'+t("Length")+'</th><th>'+t("Qty")+'</th></tr></thead><tbody>';
     for(const rp of pf.rimPieces) h += "<tr><td>"+t(rp.role)+"</td><td>"+LD(rp.len)+"</td><td>"+rp.qty+"</td></tr>";
     h += "</tbody></table>";
@@ -2742,20 +3006,43 @@ function renderCutlistPanel(model){
   const pieces = collectPieces(model);
   const bins = binPack(pieces);
   const prices = parsePrices();
-  let h = "<h3>"+t("Boards to buy")+"</h3><table><thead><tr><th>"+t("Stock")+"</th><th>"+t("Length")+"</th><th>"+t("Qty")+"</th><th>"+t("Cost")+"</th></tr></thead><tbody>";
-  let grandCost = 0, haveCost = false;
+  /* Priced per (stock, LENGTH) — a 16' board is not four 4' boards, and the
+     long lengths carry a premium per foot. The basis of each row is shown so an
+     estimated price never passes for a quoted one. */
+  const BASIS = {
+    exact:  ()=>'<span class="pill ok">'+t("your price")+"</span>",
+    perFt:  p=>'<span class="pill">'+t("{0}/ft", "$"+p.rate.toFixed(2))+"</span>",
+    flat:   ()=>'<span class="pill">'+t("flat, any length")+"</span>",
+    scaled: p=>'<span class="pill rip">'+t("estimated from your {0} price", L(p.from))+"</span>",
+    none:   ()=>'<span class="pill rip">'+t("no price given")+"</span>"
+  };
+  let h = "<h3>"+t("Boards to buy")+"</h3><table><thead><tr><th>"+t("Stock")+"</th><th>"+t("Length")+"</th><th>"+t("Qty")
+    +"</th><th>"+t("Each")+"</th><th>"+t("Cost")+"</th><th>"+t("Price basis")+"</th></tr></thead><tbody>";
+  let grandCost = 0, haveCost = false, anyMissing = false, anyScaled = false;
   for(const stockName in bins){
     const byLen = {};
     for(const bin of bins[stockName]) byLen[bin.stockLen] = (byLen[bin.stockLen]||0)+1;
     for(const len in byLen){
-      const qty = byLen[len], price = prices[stockName]||0, cost = price*qty;
-      if(price) haveCost = true;
+      const qty = byLen[len], boardLen = parseFloat(len);
+      const p = priceBoard(prices, stockName, boardLen), cost = p.cost*qty;
+      if(p.basis!=="none") haveCost = true;
+      if(p.basis==="none") anyMissing = true;
+      if(p.basis==="scaled") anyScaled = true;
       grandCost += cost;
-      h += "<tr><td>"+stockName+"</td><td>"+L(parseFloat(len))+"</td><td>"+qty+"</td><td>"+(price?("$"+cost.toFixed(2)):"—")+"</td></tr>";
+      h += "<tr><td>"+stockName+"</td><td>"+L(boardLen)+"</td><td>"+qty+"</td>"
+        +"<td>"+(p.basis==="none"?"—":"$"+dec(p.cost.toFixed(2)))+"</td>"
+        +"<td>"+(p.basis==="none"?"—":"$"+dec(cost.toFixed(2)))+"</td>"
+        +'<td class="tl">'+BASIS[p.basis](p)+"</td></tr>";
     }
   }
   h += "</tbody></table>";
-  if(haveCost) h += '<div class="kv"><dt>'+t("Estimated material cost")+'</dt><dd>'+dec(grandCost.toFixed(2))+' $</dd></div>';
+  if(haveCost){
+    h += '<div class="kv"><dt>'+t("Estimated material cost")+'</dt><dd>'+dec(grandCost.toFixed(2))+' $'
+      +(anyMissing?' <span class="pill rip">'+t("some lengths unpriced")+"</span>":"")+'</dd></div>';
+    if(anyScaled) h += '<div class="msg w">'+t("Some rows are scaled from a price you gave for a different length. Lumber is rarely linear — the long lengths cost more per foot — so add the real length with {0} for the ones that matter.", '<code>2x6@144:18.75</code>')+'</div>';
+  }
+  if(anyMissing) h += '<div class="note">'+t('Price the lengths you actually buy: {0} for one length, {1} by the foot, or a bare {2} for one flat price whatever the length.',
+      '<code>2x6@96:12.50</code>', '<code>2x12:2.10/ft</code>', '<code>5/4x6 PT:11.25</code>')+'</div>';
   h += "<h3>"+t("Cut list per board")+"</h3>";
   for(const stockName in bins){
     h += "<h4>"+stockName+"</h4><table><thead><tr><th>"+t("Board #")+"</th><th>"+t("Stock length")+"</th><th>"+t("Cuts")+"</th><th>"+t("Waste")+"</th></tr></thead><tbody>";
@@ -2787,6 +3074,7 @@ function applyChrome(){
   set("btn-save",  t("Export JSON"));
   set("btn-load",  t("Import"));
   set("btn-reset", t("Reset"));
+  set("btn-undo",  t("Restore previous"));
   set("btn-print", t("Print / PDF"));
   document.title = t("Corner Deck Stair Calculator");
   const u=document.getElementById("units");
@@ -3143,8 +3431,9 @@ function runTests(){
       computeModel().Wx/(pfF.legCols-1)<=pfF.legSpan+1e-9 &&
       computeModel().Wy/(pfF.legRows-1)<=pfF.legSpan+1e-9,
       pfF.legCols+"×"+pfF.legRows+" @"+pfF.legSpan);
-    assert("legs appear in the cut list, cut from the platform frame stock",
-      collectPieces(computeModel()).some(p=>p.stock===S.platFrame && Math.abs(p.len-pfF.legH)<1e-9 && p.qty===pfF.legCount));
+    assert("legs appear in the cut list, cut from the LEG stock",
+      collectPieces(computeModel()).some(p=>p.stock===pfF.legName && Math.abs(p.len-pfF.legH)<1e-9 && p.qty===pfF.legCount),
+      pfF.legName+" × "+pfF.legCount);
     S.platFrame="2x6"; S.nosing=0;
 
     /* ---- stair connection type: ledger or bearing ------------------------ */
@@ -3375,8 +3664,49 @@ function runTests(){
         S.run+"/"+S.method+"/"+S.platX);
       assert("save() also persists the stock and code tables",
         raw.STOCK && raw.CODE && raw.STOCK["2x12"] && raw.CODE.riserMax>0);
+      assert("the payload is versioned, so a future rename can migrate it",
+        raw.v===SAVE_VER, raw.v);
+
+      /* THE BUG: a visit that did not restore anything used to write its
+         DEFAULTS over a good design on the way out — one bad load and the
+         design was gone. flushSave must refuse that. */
+      const keepBak=localStorage.getItem(SAVE_BAK);
+      const good=JSON.stringify({v:SAVE_VER, S:Object.assign({},DEFAULTS,{run:12.75,risers:7,project:"KEEPME"}), CODE, STOCK});
+      localStorage.setItem(SAVE_KEY, good);
+      const wasRestored=SAVE_STATE.restored, wasDirty=SAVE_STATE.dirty;
+      SAVE_STATE.restored=false; SAVE_STATE.dirty=false;
+      Object.assign(S, DEFAULTS);                       // a page sitting on the defaults
+      flushSave();
+      assert("an unloaded, untouched page never overwrites a saved design",
+        localStorage.getItem(SAVE_KEY)===good,
+        JSON.parse(localStorage.getItem(SAVE_KEY)).S.project);
+      /* but a page the user actually edited must still write */
+      SAVE_STATE.dirty=true; S.project="EDITED";
+      flushSave();
+      assert("a page the user edited does write on the way out",
+        JSON.parse(localStorage.getItem(SAVE_KEY)).S.project==="EDITED",
+        JSON.parse(localStorage.getItem(SAVE_KEY)).S.project);
+      /* and the design it replaced is one click away */
+      assert("the replaced design is kept as an undo step",
+        hasBackup() && JSON.parse(localStorage.getItem(SAVE_BAK)).S.project==="KEEPME",
+        localStorage.getItem(SAVE_BAK)? JSON.parse(localStorage.getItem(SAVE_BAK)).S.project : "no backup");
+      assert("Restore previous puts it back, and becomes its own undo",
+        restorePrevious() && S.project==="KEEPME" && S.risers===7 &&
+        JSON.parse(localStorage.getItem(SAVE_BAK)).S.project==="EDITED",
+        S.project+"/"+S.risers);
+      /* a stock library saved before an item existed must not lose that item */
+      const thin=JSON.parse(JSON.stringify(STOCK_DEFAULT)); delete thin["4x4"];
+      localStorage.setItem(SAVE_KEY, JSON.stringify({v:SAVE_VER, S, CODE, STOCK:thin}));
+      load();
+      assert("an older saved stock library is merged over the defaults, not swapped in",
+        !!STOCK["4x4"] && stockNames().length===Object.keys(STOCK_DEFAULT).length,
+        stockNames().join(","));
+
+      SAVE_STATE.restored=wasRestored; SAVE_STATE.dirty=wasDirty;
       Object.assign(S, before);
-      if(keep!==null) localStorage.setItem("stairs-calc-v1", keep); else localStorage.removeItem("stairs-calc-v1");
+      STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
+      if(keep!==null) localStorage.setItem(SAVE_KEY, keep); else localStorage.removeItem(SAVE_KEY);
+      if(keepBak!==null) localStorage.setItem(SAVE_BAK, keepBak); else localStorage.removeItem(SAVE_BAK);
     }
 
     /* ---- level tags must not be painted over -----------------------------
@@ -3424,9 +3754,91 @@ function runTests(){
       S.method=savedM;
     }
 
+    /* ---- legs are their own stock --------------------------------------- */
+    {
+      const savedL=S.legStock, savedF=S.platFrame;
+      S.includePlatform=true; S.platFrame="2x6"; S.legStock="4x4";
+      const p4=platformModel(computeModel());
+      assert("legs are cut from the leg stock, not the frame stock",
+        p4.legName==="4x4" && Math.abs(p4.leg.w-sk("4x4").w)<1e-9, p4.legName+" "+p4.leg.w);
+      assert("leg spacing still comes from the FRAME — that is what spans between them",
+        Math.abs(p4.legSpan-(sk("2x6").span||24))<1e-9, p4.legSpan);
+      assert("a 4x4 is a post, so no bracing is demanded",
+        p4.isPost && !p4.braceNeeded, p4.isPost+"/"+p4.braceNeeded);
+      assert("the cut list buys the legs as 4x4",
+        collectPieces(computeModel()).some(p=>p.stock==="4x4" && Math.abs(p.len-p4.legH)<1e-9 && p.qty===p4.legCount),
+        collectPieces(computeModel()).filter(p=>/leg|patte/i.test(p.role)).map(p=>p.stock+" ×"+p.qty).join(","));
+      S.legStock="2x6";
+      const p6=platformModel(computeModel());
+      assert("frame stock on edge is NOT a post — it is flagged when it gets tall",
+        !p6.isPost && p6.legH===p4.legH, p6.isPost+" h="+p6.legH);
+      assert("switching the leg stock changes nothing about the stair itself",
+        p6.height===p4.height && p6.legCount===p4.legCount && p6.joistCount===p4.joistCount);
+      S.legStock=savedL; S.platFrame=savedF;
+    }
+
+    /* ---- price follows the LENGTH --------------------------------------- */
+    {
+      const savedP=S.price, savedU=S.units;
+      S.units="in";
+      S.price = "2x6@96:12.50, 2x6@192:29.00, 2x12:2.10/ft, 5/4x6 PT:11.25";
+      const pr=parsePrices();
+      assert("an @length price wins for that exact length",
+        priceBoard(pr,"2x6",96).cost===12.50 && priceBoard(pr,"2x6",96).basis==="exact",
+        JSON.stringify(priceBoard(pr,"2x6",96)));
+      assert("the long length is priced on its own, not as a multiple",
+        priceBoard(pr,"2x6",192).cost===29.00 && 29.00 !== 2*12.50,
+        priceBoard(pr,"2x6",192).cost);
+      assert("a /ft rate is charged by the foot",
+        Math.abs(priceBoard(pr,"2x12",144).cost-2.10*12)<1e-9 && priceBoard(pr,"2x12",144).basis==="perFt",
+        priceBoard(pr,"2x12",144).cost);
+      assert("a bare price is still flat, whatever the length",
+        priceBoard(pr,"5/4x6 PT",96).cost===11.25 && priceBoard(pr,"5/4x6 PT",192).cost===11.25);
+      const est=priceBoard(pr,"2x6",120);
+      assert("an unlisted length is estimated from the nearest one you gave, and says so",
+        est.basis==="scaled" && est.cost>0 && Math.abs(est.from-96)<1e-9, JSON.stringify(est));
+      assert("an unpriced stock costs nothing and is reported, not silently zero",
+        priceBoard(pr,"2x8",96).basis==="none" && priceBoard(pr,"2x8",96).cost===0);
+      /* the panel has to actually charge different lengths differently */
+      const savedStock=S.stringerStock, savedLen=S.stockLen;
+      S.stockLen="96,192"; renderCutlistPanel(computeModel());
+      const txt=document.getElementById("panel-cutlist").textContent;
+      assert("the cut list shows a per-board price and its basis",
+        /Each|Unitaire/.test(txt) && /your price|votre prix|flat|forfait|no price|aucun prix/.test(txt),
+        txt.slice(0,120));
+      S.stockLen=savedLen; S.stringerStock=savedStock; S.price=savedP; S.units=savedU;
+    }
+
+    /* ---- box frames are drawn as boards ---------------------------------- */
+    {
+      const savedM=S.method; S.method="boxes";
+      const mb=computeModel(), tkb=sk(S.frameStock).t;
+      const svgB=boxFramePlanSVG(mb,1);
+      assert("a box frame drawing renders cleanly", /<svg/.test(svgB) && !/NaN|undefined/.test(svgB));
+      const db=new DOMParser().parseFromString(svgB,"image/svg+xml");
+      assert("it is well formed", !db.querySelector("parsererror"));
+      const polys=[...db.querySelectorAll("polygon")];
+      /* 4 rims + 1 corner block + the joists */
+      const bx1=boxesForLevel(mb,1);
+      assert("all four rims and the corner block are drawn as boards",
+        polys.length >= 5, polys.length+" polygons");
+      /* the mitered rims must be 4-point boards one thickness deep, not lines */
+      const rims=polys.filter(p=>p.getAttribute("points").trim().split(/\s+/).length===4);
+      assert("the rims are mitered boards, not rectangles butted at the corner",
+        rims.length>=4, rims.length);
+      assert("every level gets its own drawing",
+        (renderBoxSheets(mb).match(/<svg/g)||[]).length === mb.levels.length,
+        (renderBoxSheets(mb).match(/<svg/g)||[]).length+" vs "+mb.levels.length);
+      assert("the drawing agrees with the rim lengths in the table",
+        svgB.includes(L(bx1.legs[0].outer)) && svgB.includes(L(bx1.legs[0].inner)),
+        L(bx1.legs[0].outer)+" / "+L(bx1.legs[0].inner));
+      S.method=savedM;
+    }
+
     /* ---- the tab bar has to stay reachable ------------------------------- */
     {
       const hdr=document.querySelector("header"), bar=document.getElementById("tabs");
+      syncHeaderHeight();                       // the observer is async; test the function
       const cs=bar?getComputedStyle(bar):null;
       const hh=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--hh"));
       assert("the tab bar is pinned, under the header, below it in the stack",
@@ -3626,10 +4038,11 @@ function resetAll(){
   Object.assign(S, DEFAULTS, {lang:keepLang, units:keepUnits, sidebarW:keepSB});
   Object.assign(CODE, CODE_DEFAULT);
   STOCK = JSON.parse(JSON.stringify(STOCK_DEFAULT));
+  SAVE_STATE.dirty = true; SAVE_STATE.badPayload = false;
   save(); renderForm(); run();
 }
 function exportJSON(){
-  const blob = new Blob([JSON.stringify({S,CODE,STOCK}, null, 2)], {type:"application/json"});
+  const blob = new Blob([JSON.stringify({v:SAVE_VER,S,CODE,STOCK}, null, 2)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = (S.project||"stair").replace(/[^a-z0-9]+/gi,"_")+".json";
@@ -3644,6 +4057,7 @@ function importJSON(file){
       if(data.S) Object.assign(S, DEFAULTS, data.S);
       if(data.CODE) Object.assign(CODE, CODE_DEFAULT, data.CODE);
       if(data.STOCK) STOCK = Object.assign(JSON.parse(JSON.stringify(STOCK_DEFAULT)), data.STOCK);
+      SAVE_STATE.dirty = true; SAVE_STATE.badPayload = false;
       save(); renderForm(); run();
     }catch(e){ alert(t("Could not read that file: {0}", e.message)); }
   };
@@ -3653,9 +4067,13 @@ function importJSON(file){
 /* ---------- 24. wiring & init ---------------------------------------------- */
 load();
 document.getElementById("lang").value = S.lang;
-document.getElementById("lang").addEventListener("change", e=>{ S.lang=e.target.value; save(); applyChrome(); renderForm(); run(); });
+document.getElementById("lang").addEventListener("change", e=>{ S.lang=e.target.value; SAVE_STATE.dirty=true; save(); applyChrome(); renderForm(); run(); });
 document.getElementById("units").value = S.units;
-document.getElementById("units").addEventListener("change", e=>{ S.units=e.target.value; save(); renderForm(); run(); });
+document.getElementById("units").addEventListener("change", e=>{ S.units=e.target.value; SAVE_STATE.dirty=true; save(); renderForm(); run(); });
+document.getElementById("btn-undo").addEventListener("click", ()=>{
+  if(!confirm(t("Put back the previous saved design? The current one becomes the undo step."))) return;
+  if(restorePrevious()){ SAVE_STATE.badPayload=false; applyChrome(); renderForm(); run(); showSaveState(); }
+});
 document.getElementById("btn-save").addEventListener("click", exportJSON);
 document.getElementById("btn-load").addEventListener("click", ()=>document.getElementById("file").click());
 document.getElementById("file").addEventListener("change", e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value=""; });
@@ -3681,9 +4099,15 @@ applyChrome();
 renderForm();
 run();
 showSaveState();
-/* last-ditch write, in case a change slipped through without an input event */
-window.addEventListener("beforeunload", save);
-document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") save(); });
+/* showSaveState can add the Restore-previous button, which changes the header's
+   height — re-measure once the chrome is final, rather than waiting a frame for
+   the observer and letting the first paint sit at the wrong offset. */
+syncHeaderHeight();
+/* Last-ditch write, in case a change slipped through without an input event.
+   flushSave, not save: a page that never restored and never changed anything
+   must not write its defaults over a saved design on the way out. */
+window.addEventListener("beforeunload", flushSave);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") flushSave(); });
 </script>
 </body>
 </html>
