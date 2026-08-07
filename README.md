@@ -92,6 +92,23 @@ leaves the riser's top edge exposed. Open risers (or `riserFit: laps the tread e
 the depth returns to `run + nosing`. The bottom footprint and the platform's finished size grow by the
 riser thickness too, and the Summary reports both depths.
 
+## Step numbering
+
+Steps are numbered **from the platform down**: `L1` is the first step below the platform, `L(N−1)` is
+the last one before the deck. The platform is the top landing and the deck the bottom landing — neither
+is numbered. Drawings tag each tread `L1 (top)`, `L2`, `L3 (bottom)` with its height, the step schedule
+adds a plain-language "which step" column and rows for both landings, and every table, sheet and cut
+list uses the same two helpers so the numbering can't disagree between views.
+
+## Label placement
+
+Every drawing runs through a **declutter pass** before it is returned: overlapping labels are nudged
+apart and any leader line that pointed at a moved label is dragged with it. Pairwise relaxation was
+tried first and oscillated — a label pushed off one neighbour landed on another and got pushed back —
+so it uses a single ordered placement pass that never revisits a settled label and always terminates.
+Dimension lines and their ticks are deliberately excluded from the leader-dragging, since moving those
+would falsify the measurement. A test renders the tightest layouts and asserts zero overlaps.
+
 ## Language
 
 **EN / FR toggle** in the header, next to Units. It re-labels everything — inputs, hints, tables,
@@ -213,6 +230,25 @@ rather than under a tread board, so a different decking thickness makes it a dif
 **The platform is the top tread.** Its decking overhangs the two faces that have steps below them by
 the tread nosing, exactly like every other step. `Platform width/depth` are **frame** dimensions; the
 finished size is `frame + nosing` on those two faces, and the decking boards are cut to match.
+
+## Stair connection at the top — do I need a ledger?
+
+Three ways the stringer can meet the platform. They differ in one thing that matters structurally:
+whether the stringer merely **hangs** on the platform face or runs back **under** it and **bears** on the
+frame. The sawtooth, riser count, run and footprint are identical in all three — only the top of the
+board changes, and it gets `tab · Ls / R` longer.
+
+| Connection | Bearing on the frame | Ledger | Board length (7/11, 3 notches) |
+|---|---|---|---|
+| **Top tread down** — tread sits on the stringer | none, butts the face | **required** — ledger, cleat, or stringer hangers (Simpson LSC-type) | 42-1/16" |
+| **Flush, half tread** | half a run (5½") | not needed for support | 48-5/8" |
+| **Flush, full tread** | a full run (11") | not needed for support | 55-1/8" |
+
+With *top tread down* nothing carries the stringer — the entire load is in the fasteners, in shear —
+so a ledger or proper hangers is not optional. The flush options put the stringer on top of the frame,
+so fasteners only need to stop it sliding. The Framing tab states which case you are in and why, and
+the elevation highlights the bearing surface. Only the stringers that actually reach the platform get
+the tab; ones nearer the corner start lower down and are unaffected.
 
 ## Will it come out of a standard 2x12?
 
