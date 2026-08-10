@@ -451,6 +451,18 @@ A tapered corner has no 90° point to hip, so the hip simply **does not exist**.
 * `Corner tread joint` (miter / through / compare) is hidden — a tapered corner has no square butt to
   run a board through, so the joint is always the mitered one, at the taper's own angle.
 
+### Joint nailers — two per step, not optional
+
+A tapered corner has **two joint lines per ring**, where the leg tread boards meet the corner ones, and
+nothing runs along either of them: the leg rims stop at the joint, the corner rims run along the face,
+and the corner joists cross it at 90°. Without a nailer under each miter, both boards' mitered points
+land on air. Every mitered deck corner needs one, and the square corner had it (its "corner block").
+
+The joint line across one ring is `hyp(R − dc, R)` — 11-15/16" at 7/11. In box mode the nailer fits
+*between* the inner and outer rims, so it is shorter by those two thicknesses measured along the line
+(8-11/16"); with stringers nothing is in its way and it runs the full joint. Both ends cut at the
+taper's angle, top flush with the framing. They are in the cut list and drawn on the framing plan.
+
 ## Stair connection at the top — do I need a ledger?
 
 Three ways the stringer can meet the platform. They differ in one thing that matters structurally:
@@ -519,6 +531,10 @@ All drawings are to scale, with a scale bar, and show real material sizes rather
   platform frame and its decking, and the existing deck surface. In stringer mode the actual sawtooth
   stringer outline is drawn, including its lower edge, top plumb cut and bottom level cut. The platform
   is drawn cut short with a break line so the steps stay legible.
+* **Framing only** — the plan view again, same scale and orientation, with every tread board and the
+  platform decking taken away and the framing drawn as the real stock it is rather than dashed hidden
+  lines. Rims, joists, stringers, blocking, nailers, the platform frame and its legs, all at true
+  thickness, with the level tags and stringer IDs on top. This is the sheet you build from.
 * **Box frames — one drawing per level** (box mode). The plan view shows the *finished* stair, so the
   boxes under it are hidden lines and you cannot see what to build. This draws each box on its own, as
   the boards it is made of: outer rim, inner rim, the joists between them, the corner block, and the 45°

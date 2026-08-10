@@ -599,6 +599,24 @@ const FR = {
   "Box {0} corner outer rim":"Caisson {0} bordure extérieure du coin",
   "Box {0} corner inner rim":"Caisson {0} bordure intérieure du coin",
   "Box {0} corner joist":"Caisson {0} solive du coin",
+  "Joint nailer {0} (under the corner miters)":"Fourrure de joint {0} (sous les onglets du coin)",
+  "cut to fit between the rims":"coupée pour s'ajuster entre les bordures",
+  "along the joint line, top flush with the framing":"le long de la ligne de joint, dessus au niveau de l'ossature",
+  "Framing only — the same view with the decking stripped off":
+    "Ossature seule — la même vue, platelage retiré",
+  "Same scale and orientation as the plan above, with every tread board and the platform decking taken away, so you can see what to build and what lands on what. Real stock thicknesses, not single lines.":
+    "Même échelle et même orientation que le plan ci-dessus, sans les planches de marche ni le platelage de la plateforme, pour voir ce qu'il faut construire et ce qui repose sur quoi. Épaisseurs réelles du bois, pas de simples traits.",
+  "framing only — no treads, no decking":"ossature seule — sans marches ni platelage",
+  "blocking / nailers":"blocage / fourrures", "joists":"solives",
+  "platform legs ({0})":"pattes de plateforme ({0})",
+  "Corner joint nailers":"Fourrures de joint du coin",
+  "Two per step, and they are not optional.":"Deux par marche, et elles ne sont pas facultatives.",
+  "Nothing else runs along the joint lines where the leg tread boards meet the corner ones: the leg rims stop at the joint, the corner rims run along the face, and the corner joists cross it at 90°. Without a nailer under each miter both boards' points land on air.":
+    "Rien d'autre ne suit les lignes de joint où les planches des ailes rejoignent celles du coin : les bordures des ailes s'arrêtent au joint, celles du coin suivent le pan, et les solives du coin le traversent à 90°. Sans fourrure sous chaque onglet, les pointes des deux planches ne reposent sur rien.",
+  "Length each":"Longueur chacune", "Ends cut at":"Bouts coupés à", "How many":"Combien",
+  "{0} — two per step, one each side of the corner":"{0} — deux par marche, une de chaque côté du coin",
+  "Joint line across one ring":"Ligne de joint sur un anneau",
+  "the full joint line":"la ligne de joint complète",
   "The corner step is {0} deep across the diagonal ({1} mm), outside the {2}–{3} mm the code allows for a run. Set the taper to match the legs' going, or change the clip growth.":
     "La marche du coin a {0} de profondeur en travers de la diagonale ({1} mm), hors de la plage de {2} à {3} mm permise par le code pour un giron. Réglez l'effilement pour égaler le giron des ailes, ou changez l'élargissement.",
   "The corner step is {0} deep where the legs are {1} — legal, but it is a different depth underfoot at the corner, and its tread boards need their own layout. Matching the legs' going removes both.":
@@ -1834,6 +1852,26 @@ function boxesForLevel(model,k){
   return {k, rimH, isBottom, legs, diag:dg, rimFit: fitBoards(rimH, rimStock.w, 0),
           rimStockOK: rimStock.w >= rimH - 1e-9};
 }
+/* ---------- 14b. backing under the corner joints -------------------------
+   A tapered corner has TWO joint lines per ring — where the leg tread boards
+   meet the corner ones — and nothing runs along either of them: the leg rims
+   stop at the joint, the corner rims run along the face, and the corner joists
+   cross the joint at 90°. So both boards' mitered points land on air.
+
+   Every mitered deck corner needs a nailer under the miter, and the square
+   corner had one (its "corner block"). The taper needs two per step. */
+function cornerJointBlocks(model){
+  if(!model.taper.on) return null;
+  const R=model.R, dc=model.taper.dc;
+  const full=hyp(R-dc,R);                    // the joint line across one whole ring
+  const rimT=sk(S.frameStock).t;
+  /* In box mode it fits BETWEEN the inner and outer rims, so it is shorter by
+     those two thicknesses measured along the line. With stringers there are no
+     rims in its way and it runs the full joint. */
+  const len = S.method==="boxes" ? Math.max(1, (R-2*rimT))*full/R : full;
+  return {len, full, perLevel:2, total:2*Math.max(0,model.N-1),
+          angleDeg:model.taper.sawDeg, betweenRims:S.method==="boxes"};
+}
 /* The inner rim runs the whole length of BOTH legs, so it needs a block at
    every joist position — not one per level. Level 1 fastens to the platform
    frame and the bottom level sits on the deck, so neither needs blocks. */
@@ -2002,6 +2040,13 @@ function collectPieces(model){
         note:t("under level {0}'s {1} inner rim, down to the deck", blk.k, t(blk.legName))});
     }
   }
+  /* The corner miters need a nailer under them in BOTH framing methods — the
+     tread boards' mitered points have nothing else to land on. */
+  const jb = cornerJointBlocks(model);
+  if(jb) for(const lvl of model.levels)
+    pieces.push({role:t("Joint nailer {0} (under the corner miters)", levelTag(model,lvl.k)),
+      stock:S.frameStock, len:jb.len, qty:jb.perLevel, angle:cornerAng,
+      note:jb.betweenRims ? t("cut to fit between the rims") : t("along the joint line, top flush with the framing")});
   /* Skirts. Only the X=0 side face is ever exposed — the wall closes Y=0, and
      the other two faces are the stairs themselves. */
   if(S.faceX0==="open"){
@@ -2413,9 +2458,14 @@ function renderPlanSVG(model){
       /* mid-way along the front leg: clear of the leg ends where the F ids sit
          and clear of the hip line where the C ids sit, and the rings are one
          full run apart in y so the tags never crowd each other */
-      topLayer+=svgText(X((ix-cPrev+Tb*m)*0.5),Y(iy+Tb)-5,levelTag(model,k),TAGSTYLE+' text-anchor="middle"');
+      /* 17px up, same as the square branch: on the bottom ring iy+Tb IS the
+         footprint edge, where the stringer-id row sits. */
+      topLayer+=svgText(X((ix-cPrev+Tb*m)*0.5),Y(iy+Tb)-17,levelTag(model,k),TAGSTYLE+' text-anchor="middle"');
     } else {
-      topLayer+=svgText(X(ix+Tb)-6,Y(iy+Tb)-6,levelTag(model,k),TAGSTYLE+' text-anchor="end"');
+      /* Clear of the stringer-id row, which sits 4px above the footprint edge —
+         on a single-step stair the ring's outer edge IS that edge, and the long
+         "L1 (only step)" tag used to land right on the last id. */
+      topLayer+=svgText(X(ix+Tb)-6,Y(iy+Tb)-17,levelTag(model,k),TAGSTYLE+' text-anchor="end"');
     }
   }
   /* Platform decking last, so its nosing overhangs level 1's tread the same way
@@ -2430,7 +2480,9 @@ function renderPlanSVG(model){
   if(model.nose>0.01){
     s+=svgLine(X(0),Y(Wy),X(Wx),Y(Wy),'stroke="#5b87ad" stroke-width=".8" stroke-dasharray="3 2"');
     s+=svgLine(X(Wx),Y(0),X(Wx),Y(Wy),'stroke="#5b87ad" stroke-width=".8" stroke-dasharray="3 2"');
-    s+=svgText(X(Wx)+3,Y(Wy)+11,t("platform frame {0} × {1}", L(Wx), L(Wy)),'font-size="8.5" fill="#5b87ad"');
+    /* At the LEFT end of the dashed frame line, not the right: on a shallow
+       platform in mm the label reached the side-leg stringer ids. */
+    s+=svgText(X(1),Y(Wy)+11,t("platform frame {0} × {1}", L(Wx), L(Wy)),'font-size="8.5" fill="#5b87ad"');
   }
   s+=svgText(X(Math.min(Wx,fX)/2),Y(Wy/2),
     model.nose>0.01 ? t("platform {0} × {1} finished", L(fX), L(fY)) : t("platform {0} × {1}", L(fX), L(fY)),
@@ -2498,6 +2550,175 @@ function renderPlanSVG(model){
   s+=dimLineH(X(0),X(footX),Y(footY)+18,L(footX));
   s+=dimLineV(X(footX)+46,Y(0),Y(footY),L(footY));
   s+=topLayer;                             // level tags + miter lines, on top of every board
+  s+=scaleBarSVG(mL,H-12,scale);
+  s+="</svg>";
+  return declutterSVG(s);
+}
+
+/* ---------- 18b2. framing-only plan ---------------------------------------
+   The plan view above shows the finished stair, so the framing is dashed
+   hidden lines under the boards. This is the same view, same scale, same
+   orientation, with every tread board and the platform decking taken away and
+   the framing drawn as the real stock it is. What you build from. */
+function renderFramingPlanSVG(model){
+  const {Wx,Wy,R,nose,N,footX,footY}=model, tp=model.taper;
+  const tk=sk(S.frameStock).t, sT=sk(S.stringerStock).t;
+  const cap=t("framing only — no treads, no decking");
+  const rightLabels=[t("side leg (+X)"), t("blocking / nailers"),
+    S.method==="boxes"?t("joists"):(tp.on?t("corner stringers"):t("hip stringer"))];
+  const mL=52, mT=40, mB=52;
+  const mR=Math.max(76, Math.max(...rightLabels.map(s=>estTextW(s,9)))+24);
+  const scale=Math.min(7.5, 690/Math.max(footX+5,1));
+  const W=Math.max(mL+(footX+5)*scale+mR, mL+estTextW(cap,9)+24), H=mT+(footY+5)*scale+mB;
+  const X=x=>mL+x*scale, Y=y=>mT+y*scale;
+  const poly=(pts,st)=>svgPoly(pts.map(p=>[X(p[0]),Y(p[1])]),st);
+  const rect=(x0,y0,x1,y1,st)=>svgRect(X(x0),Y(y0),(x1-x0)*scale,(y1-y0)*scale,st);
+  let s=svgOpen(W,H), topLayer="";
+  // house wall, so the orientation matches the plan above at a glance
+  s+=svgRect(X(0)-4,Y(-4),(footX+4)*scale+4,4*scale,MAT.wall);
+  s+=svgText(X(1),Y(-4)+12,t("house wall"),'font-size="10" fill="#78838f"');
+  if(S.faceX0==="wall") s+=svgRect(X(-4),Y(-4),4*scale,(footY+4)*scale,MAT.wall);
+
+  /* ---- platform frame: rims, joists, and the legs under it ---- */
+  if(S.includePlatform){
+    const pf=platformModel(model);
+    const pt=pf.frame.t;
+    if(pf.needsLegs){
+      const lw=pf.leg.w, lt=pf.leg.t;
+      for(let i=0;i<pf.legCols;i++) for(let j=0;j<pf.legRows;j++){
+        const x=Math.min(i*(Wx/(pf.legCols-1)), Wx-lw), y=Math.min(j*(Wy/(pf.legRows-1)), Wy-lt);
+        s+=rect(x,y,x+lw,y+lt,MAT.post);
+      }
+    }
+    if(pf.dir==="y"){                                  // joists run out from the wall
+      for(let i=0;i<pf.joistCount;i++){
+        const x=Math.min(i*(Wx/Math.max(1,pf.joistCount-1)), Wx-pt);
+        s+=rect(x,pt,x+pt,Wy-pt,MAT.joist);
+      }
+    } else {
+      for(let i=0;i<pf.joistCount;i++){
+        const y=Math.min(i*(Wy/Math.max(1,pf.joistCount-1)), Wy-pt);
+        s+=rect(pt,y,Wx-pt,y+pt,MAT.joist);
+      }
+    }
+    s+=rect(0,0,Wx,pt,MAT.rim); s+=rect(0,Wy-pt,Wx,Wy,MAT.rim);      // rims along X
+    s+=rect(0,pt,pt,Wy-pt,MAT.rim); s+=rect(Wx-pt,pt,Wx,Wy-pt,MAT.rim);
+  } else s+=rect(0,0,Wx,Wy,MAT.plat);
+  /* Left-anchored, not centred: in mm and French this label is 214px wide, and
+     centred on a shallow platform it reached the side-leg stringer ids. */
+  s+=svgText(X(2),Y(Wy/2)+3,t("platform frame {0} × {1}", L(Wx), L(Wy)),
+    'font-size="10" fill="#33556e"');
+
+  /* ---- the steps ---- */
+  if(S.method==="boxes"){
+    for(const lvl of model.levels){
+      const k=lvl.k, bx=boxesForLevel(model,k);
+      const cI=model.clip(k-1), cO=model.clip(k), m=tp.m;
+      const yi=Wy+(k-1)*R, yo=Wy+k*R, xi=Wx+(k-1)*R, xo=Wx+k*R;
+      // front leg band: joists first, then the rims over them
+      const fOut=bx.legs[0].outer, fIn=bx.legs[0].inner;
+      for(let i=0;i<bx.legs[0].joistCount;i++){
+        const x=Math.min(i*bx.legs[0].joistSpacing, fOut-tk);
+        if(x+tk > fIn+ (yo-yi-2*tk)*m) continue;       // past the joint: corner's ground
+        s+=rect(x,yi+tk,x+tk,yo-tk,MAT.joist);
+      }
+      const sOut=bx.legs[1].outer, sIn=bx.legs[1].inner;
+      for(let i=0;i<bx.legs[1].joistCount;i++){
+        const y=Math.min(i*bx.legs[1].joistSpacing, sOut-tk);
+        if(y+tk > sIn+(xo-xi-2*tk)*m) continue;
+        s+=rect(xi+tk,y,xo-tk,y+tk,MAT.joist);
+      }
+      if(bx.diag){
+        /* corner band: joists perpendicular to the 45° face, i.e. along the old
+           hip direction, spaced across it */
+        const half=cO*Math.SQRT2/2, u=k*R-cO/2;
+        const n=Math.max(2,bx.diag.joistCount);
+        for(let i=0;i<n;i++){
+          const lat=-half+(i*(2*half)/Math.max(1,n-1));
+          const hx=lat/Math.SQRT2, uIn=(k-1)*R-cI/2;
+          const a=[Wx+uIn+hx+tk/2, Wy+uIn-hx+tk/2], b=[Wx+u+hx, Wy+u-hx];
+          s+=poly([[a[0]-tk/2,a[1]+tk/2],[a[0]+tk/2,a[1]-tk/2],
+                   [b[0]+tk/2,b[1]-tk/2],[b[0]-tk/2,b[1]+tk/2]],MAT.joist);
+        }
+      }
+      // rims, mitered where they meet the corner
+      s+=poly([[0,yo-tk],[fOut-tk*m,yo-tk],[fOut,yo],[0,yo]],MAT.rim);
+      s+=poly([[0,yi],[fIn,yi],[fIn+tk*m,yi+tk],[0,yi+tk]],MAT.rim);
+      s+=poly([[xo-tk,0],[xo,0],[xo,sOut],[xo-tk,sOut-tk*m]],MAT.rim);
+      s+=poly([[xi,0],[xi+tk,0],[xi+tk,sIn+tk*m],[xi,sIn]],MAT.rim);
+      if(bx.diag){
+        const nn=tk/Math.SQRT2;
+        s+=poly([[fOut,yo],[xo,sOut],[xo-nn,sOut-nn],[fOut-nn,yo-nn]],MAT.rim);
+        if(!bx.diag.triangle)
+          s+=poly([[fIn,yi],[xi,sIn],[xi+nn,sIn+nn],[fIn+nn,yi+nn]],MAT.rim);
+      } else {
+        s+=poly([[xi+tk,yi+tk],[xi+tk*3,yi+tk],[xi+tk,yi+tk*3]],MAT.block);
+      }
+      topLayer+=svgText(X(fOut*0.5),Y(yo)-4,levelTag(model,k),TAGSTYLE+' text-anchor="middle"');
+    }
+    for(const b of boxSupportBlocks(model)){
+      const off=(b.legName==="front"?Wy:Wx)+(b.k-1)*R;
+      for(let i=0;i<b.qty;i++){
+        const p=Math.min(i*(b.inner/Math.max(1,b.qty-1)), b.inner-tk*2);
+        if(b.legName==="front") s+=rect(p,off+tk,p+tk*2,off+tk*3,MAT.block);
+        else s+=rect(off+tk,p,off+tk*3,p+tk*2,MAT.block);
+      }
+    }
+  } else {
+    for(const legName of ["front","side"]){
+      const st=stringersForLeg(legName,model);
+      for(const g of st.list){
+        const start=(legName==="front"?Wy:Wx)+(g.kmin-1)*R;
+        /* Same id placement as the plan view above — inside the footprint, not
+           below it, where the overall width dimension label lives. */
+        if(legName==="front"){
+          s+=rect(g.pos-sT/2,start,g.pos+sT/2,footY-nose-model.riserT,MAT.rim);
+          topLayer+=svgText(X(g.pos)+3,Y(footY)-4,g.id,STRTAG);
+        } else {
+          s+=rect(start,g.pos-sT/2,footX-nose-model.riserT,g.pos+sT/2,MAT.rim);
+          topLayer+=svgText(X(footX)-4,Y(g.pos)-3,g.id,STRTAG+' text-anchor="end"');
+        }
+      }
+    }
+    const cs=cornerStringers(model);
+    const reach=(N-1)*R;
+    if(cs){
+      for(const g of cs.list){
+        const h=g.lateral/Math.SQRT2, u0=(g.kmin-1)*R, d=sT/2;
+        s+=poly([[Wx+u0+h-d,Wy+u0-h-d],[Wx+u0+h+d,Wy+u0-h+d],
+                 [Wx+reach+h+d,Wy+reach-h+d],[Wx+reach+h-d,Wy+reach-h-d]],MAT.rim);
+        topLayer+=svgText(X(Wx+(u0+reach)/2+h)+5,Y(Wy+(u0+reach)/2-h)-5,g.id,STRTAG);
+      }
+    } else {
+      const d=sT/2;
+      s+=poly([[Wx-d,Wy-d],[Wx+d,Wy+d],[Wx+reach+d,Wy+reach+d],[Wx+reach-d,Wy+reach-d]],MAT.rim);
+      topLayer+=svgText(X(Wx+reach/2)+5,Y(Wy+reach/2)-5,"H",STRTAG);
+    }
+    /* Level tags at the LEFT edge of each band, like a row header. Mid-leg they
+       could land on any stringer — the stringers are vertical lines and the tag
+       is horizontal, so some geometry always collides. Here the only neighbours
+       are the other tags, and the rings are a full run apart in y. */
+    for(const lvl of model.levels)
+      topLayer+=svgText(X(1),Y(Wy+(lvl.k-0.45)*R),levelTag(model,lvl.k),TAGSTYLE);
+  }
+
+  /* ---- the nailers under the corner miters, both methods ---- */
+  const jb=cornerJointBlocks(model);
+  if(jb) for(const lvl of model.levels){
+    const k=lvl.k, cI=model.clip(k-1), cO=model.clip(k), d=tk/2;
+    const dirs=[[[Wx+(k-1)*R-cI, Wy+(k-1)*R],[Wx+k*R-cO, Wy+k*R]],
+                [[Wx+(k-1)*R, Wy+(k-1)*R-cI],[Wx+k*R, Wy+k*R-cO]]];
+    for(const [a,b] of dirs){
+      const vx=b[0]-a[0], vy=b[1]-a[1], ln=hyp(vx,vy)||1;
+      const nx=-vy/ln*d, ny=vx/ln*d;
+      s+=poly([[a[0]+nx,a[1]+ny],[b[0]+nx,b[1]+ny],[b[0]-nx,b[1]-ny],[a[0]-nx,a[1]-ny]],MAT.block);
+    }
+  }
+  s+=svgText(mL,Y(footY)+34,cap,'font-size="9" fill="#667"');
+  s+=svgText(X(footX)+16,Y(footY*0.22),t("side leg (+X)"),'font-size="9" fill="#667"');
+  s+=dimLineH(X(0),X(footX),Y(footY)+18,L(footX));
+  s+=dimLineV(X(footX)+46,Y(0),Y(footY),L(footY));
+  s+=topLayer;
   s+=scaleBarSVG(mL,H-12,scale);
   s+="</svg>";
   return declutterSVG(s);
@@ -3241,6 +3462,14 @@ function renderSummaryPanel(model){
 function renderPlanPanel(model){
   let h = materialsLegend();
   h += '<h3>'+t("Plan view — looking down")+'</h3><div class="sheet svgwrap">'+renderPlanSVG(model)+'</div>';
+  h += '<h3>'+t("Framing only — the same view with the decking stripped off")+'</h3>'
+    + legendHTML([["#b79a6f","#6b5335",S.method==="boxes"?t("rim boards ({0})", S.frameStock):t("stringers ({0})", S.stringerStock)],
+                  ["#d7c4a4","#8a6a45",t("joists ({0})", S.frameStock)],
+                  ["#b39875","#8a6a45",t("blocking / nailers")],
+                  ["#cfe0ef","#5b87ad",t("platform frame")],
+                  ["#a9c4da","#41708f",t("platform legs ({0})", S.legStock||S.platFrame)]])
+    + '<div class="sheet svgwrap">'+renderFramingPlanSVG(model)+'</div>';
+  h += '<div class="note">'+t("Same scale and orientation as the plan above, with every tread board and the platform decking taken away, so you can see what to build and what lands on what. Real stock thicknesses, not single lines.")+'</div>';
   h += '<div class="note">'
     +t("Every tread board is drawn at its real width with your {0} gap{1}. Dashed lines are the framing hidden below the treads{2}.",
        fmtIn(S.treadGap),
@@ -3395,6 +3624,18 @@ function renderFramingPanel(model){
     h += "<h3>"+t("Box frames — one drawing per level")+"</h3>"
       + '<div class="note">'+t("Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.")+"</div>"
       + renderBoxSheets(model);
+  }
+  const jbp = cornerJointBlocks(model);
+  if(jbp){
+    h += "<h3>"+t("Corner joint nailers")+"</h3>"
+      + '<div class="msg w"><b>'+t("Two per step, and they are not optional.")+'</b> '
+      + t("Nothing else runs along the joint lines where the leg tread boards meet the corner ones: the leg rims stop at the joint, the corner rims run along the face, and the corner joists cross it at 90°. Without a nailer under each miter both boards' points land on air.")
+      + '</div>'
+      + '<div class="kv"><dt>'+t("Length each")+"</dt><dd>"+LD(jbp.len)
+        +(jbp.betweenRims?" — "+t("cut to fit between the rims"):" — "+t("the full joint line"))+"</dd>"
+        +"<dt>"+t("Ends cut at")+"</dt><dd>"+dec(jbp.angleDeg.toFixed(1))+"°</dd>"
+        +"<dt>"+t("How many")+"</dt><dd>"+t("{0} — two per step, one each side of the corner", jbp.total)+"</dd>"
+        +"<dt>"+t("Joint line across one ring")+"</dt><dd>"+LD(jbp.full)+"</dd></div>";
   }
   if(S.faceX0==="open"){
     const si = skirtInfo(model);
@@ -4338,6 +4579,49 @@ function runTests(){
       assert("the clip growth is capped below the unit run, so the legs survive",
         computeModel().taper.dc < computeModel().R && computeModel().taper.m > 0,
         computeModel().taper.dc);
+      /* THE CORNER MITERS NEED BACKING. Nothing runs along the joint lines, so
+         without a nailer under each one the mitered tread points land on air. */
+      S.taperMode="match"; S.taperGrow=0;
+      for(const meth of ["boxes","stringers"]){
+        S.method=meth;
+        const mj=computeModel(), jb=cornerJointBlocks(mj);
+        assert(meth+": two joint nailers per step, at the corner's own angle",
+          !!jb && jb.perLevel===2 && jb.total===2*(mj.N-1) && Math.abs(jb.angleDeg-mj.taper.sawDeg)<1e-9,
+          jb?jb.total+" of "+fmtIn(jb.len):"none");
+        assert(meth+": the nailer spans the joint line, hyp(R−dc, R)",
+          Math.abs(jb.full-hyp(mj.R-mj.taper.dc, mj.R))<1e-9, jb.full);
+        assert(meth+": box mode fits them between the rims, stringer mode does not",
+          meth==="boxes" ? jb.len<jb.full-0.5 : Math.abs(jb.len-jb.full)<1e-9,
+          jb.len+" vs "+jb.full);
+        assert(meth+": they reach the cut list, two per level",
+          collectPieces(mj).filter(p=>/Joint nailer|Fourrure de joint/.test(p.role))
+            .every(p=>p.qty===2) &&
+          collectPieces(mj).filter(p=>/Joint nailer|Fourrure de joint/.test(p.role)).length===mj.N-1,
+          collectPieces(mj).filter(p=>/Joint nailer/.test(p.role)).length+" rows");
+      }
+      S.cornerShape="square"; S.method="boxes";
+      assert("a square corner keeps its corner block and needs no joint nailers",
+        cornerJointBlocks(computeModel())===null &&
+        collectPieces(computeModel()).some(p=>/corner block|bloc de coin/.test(p.role)) &&
+        !collectPieces(computeModel()).some(p=>/Joint nailer|Fourrure de joint/.test(p.role)));
+
+      /* ---- the framing-only plan ---- */
+      for(const sh of ["square","taper"]) for(const meth of ["boxes","stringers"]){
+        S.cornerShape=sh; S.method=meth;
+        const mf=computeModel(), fp=renderFramingPlanSVG(mf);
+        const dd=new DOMParser().parseFromString(fp,"image/svg+xml");
+        assert("framing plan renders for "+sh+"/"+meth,
+          /<svg/.test(fp) && !/NaN|undefined/.test(fp) && !dd.querySelector("parsererror"));
+        /* it must NOT contain any tread or decking material */
+        assert("framing plan shows no tread boards and no decking ("+sh+"/"+meth+")",
+          !fp.includes("#e6bd8c"), "tread fill present");
+        /* and it must be the same frame as the plan it copies */
+        const pv=renderPlanSVG(mf,"miter");
+        const vb=x=>(x.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)||[]).slice(1).map(Number);
+        assert("framing plan is the same size and scale as the plan view ("+sh+"/"+meth+")",
+          Math.abs(vb(fp)[1]-vb(pv)[1])<1 && Math.abs(vb(fp)[0]-vb(pv)[0])<80,
+          vb(fp).join("×")+" vs "+vb(pv).join("×"));
+      }
       S.cornerShape=savedSh; S.taperMode=savedTm; S.taperGrow=savedTg;
       S.method=savedM; S.cornerStyle=savedCs;
     }
