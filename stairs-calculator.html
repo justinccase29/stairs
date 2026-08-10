@@ -604,6 +604,35 @@ const FR = {
   "Ring k's joint line, where the leg tread boards meet the corner ones, runs from (Wx+(k−1)R−c, Wy+(k−1)R) to (Wx+kR−c′, Wy+kR). Its direction is (R−dc, R) for EVERY k, and ring 1's starts at the platform corner itself — so all of them are segments of ONE straight line from that corner down to the deck. There are two, mirrored. That makes them hips, and they get a real notched stringer: a member on the hip carries the mitered ends of the leg boards and of the corner boards at once, which is exactly what those miters need.":
     "La ligne de joint de l'anneau k, là où les planches des ailes rejoignent celles du coin, va de (Wx+(k−1)R−c, Wy+(k−1)R) à (Wx+kR−c′, Wy+kR). Sa direction est (R−dc, R) pour CHAQUE k, et celle de l'anneau 1 part du coin même de la plateforme — toutes sont donc des segments d'UNE seule droite allant de ce coin jusqu'à la terrasse. Il y en a deux, en miroir. Ce sont donc des arêtes, et elles méritent un vrai limon entaillé : une pièce sur l'arête porte à la fois les bouts à onglet des planches des ailes et ceux des planches du coin, exactement ce qu'il faut à ces onglets.",
   "Plan angle":"Angle en plan",
+  /* --- runs at the corner --- */
+  "Runs at the corner — where each number comes from":"Girons au coin — d'où vient chaque nombre",
+  "Three different runs live at a corner, measured along three different directions, and all of them come out of the same ring growth: the ring advances R square to the leg face, and R − dc along it once the clip is eating in. Set the clip growth to 0 and every one of them collapses to R×√2 — the square corner's single hip. That is exactly what a taper is for.":
+    "Trois girons différents cohabitent au coin, mesurés selon trois directions différentes, et tous découlent de la même croissance de l'anneau : l'anneau avance de R perpendiculairement à la face de l'aile, et de R − dc le long de celle-ci dès que le pan coupé mord. Mettez l'élargissement à 0 et tous se réduisent à R×√2 — l'unique arête du coin carré. C'est précisément à cela que sert l'effilement.",
+  "What":"Quoi", "Formula":"Formule", "Measured how":"Mesuré comment",
+  "Throat in a {0}":"Âme dans un {0}", "outside code":"hors code", "needs {0}":"exige {0}",
+  "Leg step — the normal run":"Marche d'aile — le giron courant",
+  "square to the leg face, nosing tip to nosing tip":"perpendiculaire à la face de l'aile, nez à nez",
+  "Corner hips H1 H2 — {0}° in plan":"Arêtes du coin H1 H2 — {0}° en plan",
+  "along the joint line: the ring grows {0} in x and {1} in y":"le long de la ligne de joint : l'anneau croît de {0} en x et de {1} en y",
+  "Corner face — the step depth at the corner":"Pan du coin — la profondeur de marche au coin",
+  "square to the 45° face: consecutive face lines x+y=S are {0} apart in S, and ÷√2 gives the perpendicular gap":
+    "perpendiculaire au pan à 45° : les lignes de pan successives x+y=S sont espacées de {0} en S, et ÷√2 donne l'écart perpendiculaire",
+  "(a square corner's single 45° hip, for comparison)":"(l'unique arête à 45° d'un coin carré, à titre de comparaison)",
+  "the same formulas at clip growth 0 — hyp(R,R) = 2R/√2 = R√2":"les mêmes formules à élargissement 0 — hyp(R,R) = 2R/√2 = R√2",
+  "Hip H — 45° in plan":"Arête H — 45° en plan",
+  "along the diagonal: the ring grows {0} in x AND {0} in y, so the hip covers hyp of the two":
+    "le long de la diagonale : l'anneau croît de {0} en x ET de {0} en y, l'arête couvre donc l'hypoténuse des deux",
+  /* --- long point vs short point --- */
+  "Long point vs short point.":"Point long et point court.",
+  "Every length below is the LONG point — the longest corner of the board, which is what you cut to and what the cut list buys. The short point is the other corner of the same mitered end, and the gap between them is set by the joint ANGLE, not by the length:":
+    "Chaque longueur ci-dessous est le point LONG — le coin le plus long de la planche, celui auquel vous coupez et que la liste de coupes achète. Le point court est l'autre coin du même bout à onglet, et l'écart entre les deux est fixé par l'ANGLE du joint, non par la longueur :",
+  "board width × {0} = {1} × {2} = {3}":"largeur de planche × {0} = {1} × {2} = {3}",
+  "At {0}° that is {1} on a {2} board, where a square corner's 45° miter would eat the full {3}. The corner-face boards are mitered at BOTH ends, so they lose twice: {4}.":
+    "À {0}°, cela fait {1} sur une planche de {2}, alors que l'onglet à 45° d'un coin carré mangerait les {3} au complet. Les planches du pan du coin sont à onglet aux DEUX bouts, elles perdent donc le double : {4}.",
+  "A 45° miter has slope 1, so the two points differ by the full board width — the classic rule.":
+    "Un onglet à 45° a une pente de 1 : les deux points diffèrent de toute la largeur de la planche — la règle classique.",
+  "Riser boards use their THICKNESS instead of their width, so they lose only {0}.":
+    "Les contremarches utilisent leur ÉPAISSEUR au lieu de leur largeur, elles ne perdent donc que {0}.",
   "{0}° each side of where a square corner's single 45° hip would be":
     "{0}° de chaque côté de l'emplacement de l'unique arête à 45° d'un coin carré",
   " — they run the whole flight":" — elles parcourent toute la volée",
@@ -3125,6 +3154,69 @@ function stringerStockSVG(c,r,R,drop,bw,stockLen,title,copies,topRun,topLift){
   s+="</svg>";
   return declutterSVG(s);
 }
+/* ---------- 18g. every run at the corner, and where it comes from ---------
+   Three different "runs" live at a corner and they are measured along three
+   different directions. All three come out of the SAME ring growth — the ring
+   advances R in y, and (R − dc) in x once the clip is eating into it — so each
+   is just that growth resolved along a different line:
+
+     leg        R                measured square to the leg face
+     hip        hyp(R − dc, R)   measured along the joint line
+     face       (2R − dc)/√2     measured square to the 45 degree face
+
+   The face one is the perpendicular gap between consecutive face lines
+   x + y = S_k, where S_k = Wx + Wy + 2kR − c_k. Consecutive S differ by
+   2R − dc, and a gap of ΔS between two lines of slope −1 is ΔS/√2.
+
+   Set dc = 0 and all of it collapses: hyp(R,R) = 2R/√2 = R√2, the square
+   corner's single hip. Which is the whole point — R√2 is 1.414× the leg run and
+   395 mm at 7/11, over the code max, and dc > 0 is what pulls it back. */
+function cornerRuns(model){
+  const R=model.R, r=model.r, dc=model.taper.dc, bw=sk(S.stringerStock).w;
+  const mk=(key,label,run,dx,dy,note)=>{
+    const nd = r*run/hyp(r,run);
+    return {key,label,run,dx,dy,note, ratio:run/R, mm:run*MM,
+            notch:nd, throat:bw-nd, minBoard:nd+S.throatMin,
+            fits: bw >= nd+S.throatMin-1e-9,
+            codeOK: run*MM>=CODE.runMin && run*MM<=CODE.runMax};
+  };
+  const rows=[mk("leg", t("Leg step — the normal run"), R, R, 0,
+                 t("square to the leg face, nosing tip to nosing tip"))];
+  if(model.taper.on){
+    rows.push(mk("hip", t("Corner hips H1 H2 — {0}° in plan", dec(model.taper.sawDeg.toFixed(1))),
+      hyp(R-dc,R), R-dc, R, t("along the joint line: the ring grows {0} in x and {1} in y", fmtIn(R-dc), fmtIn(R))));
+    rows.push(mk("face", t("Corner face — the step depth at the corner"), model.taper.g, null, null,
+      t("square to the 45° face: consecutive face lines x+y=S are {0} apart in S, and ÷√2 gives the perpendicular gap", fmtIn(2*R-dc))));
+    rows.push(mk("sqhip", t("(a square corner's single 45° hip, for comparison)"), R*Math.SQRT2, R, R,
+      t("the same formulas at clip growth 0 — hyp(R,R) = 2R/√2 = R√2")));
+  } else {
+    rows.push(mk("sqhip", t("Hip H — 45° in plan"), R*Math.SQRT2, R, R,
+      t("along the diagonal: the ring grows {0} in x AND {0} in y, so the hip covers hyp of the two", fmtIn(R))));
+  }
+  return rows;
+}
+function cornerRunsHTML(model){
+  const rows=cornerRuns(model);
+  /* Notch and throat only mean something for stringers; a box frame has neither. */
+  const str = S.method==="stringers";
+  let h='<h3>'+t("Runs at the corner — where each number comes from")+'</h3>'
+    +'<div class="note">'+t("Three different runs live at a corner, measured along three different directions, and all of them come out of the same ring growth: the ring advances R square to the leg face, and R − dc along it once the clip is eating in. Set the clip growth to 0 and every one of them collapses to R×√2 — the square corner's single hip. That is exactly what a taper is for.")+'</div>'
+    +'<table class="cuts"><thead><tr><th>'+t("What")+'</th><th>'+t("Formula")+'</th><th>'+t("Run")+'</th><th>×R</th>'
+    +(str?'<th>'+t("Notch")+'</th><th>'+t("Throat in a {0}", S.stringerStock)+'</th>':'')
+    +'<th>'+t("Measured how")+'</th></tr></thead><tbody>';
+  const FORM={leg:"R", hip:"hyp(R − dc, R)", face:"(2R − dc) ÷ √2", sqhip:"R × √2"};
+  for(const x of rows){
+    h+="<tr><td>"+x.label+"</td><td>"+FORM[x.key]+"</td>"
+      +"<td>"+LD(x.run)+" <span class='dec'>"+dec(Math.round(x.mm))+" mm</span>"
+        +(x.codeOK?"":' <span class="pill rip">'+t("outside code")+"</span>")+"</td>"
+      +"<td>×"+dec(x.ratio.toFixed(3))+"</td>"
+      +(str?"<td>"+fmtIn(x.notch)+"</td>"
+        +"<td>"+fmtIn(x.throat)+(x.fits?' <span class="pill ok">'+t("ok")+"</span>":' <span class="pill rip">'+t("needs {0}", fmtIn(x.minBoard))+"</span>")+"</td>":"")
+      +'<td class="tl">'+x.note+"</td></tr>";
+  }
+  return h+"</tbody></table>";
+}
+
 /* Trade names, and why a corner stair has three kinds: the stringers that reach
    the platform run the whole flight (COMMON); the miter cuts the ones nearer
    the corner short, so they carry fewer notches (JACK); the diagonal at the
@@ -3700,6 +3792,7 @@ function renderFramingPanel(model){
       + '<div class="note">'+t("Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.")+"</div>"
       + renderBoxSheets(model);
   }
+  h += cornerRunsHTML(model);
   if(S.faceX0==="open"){
     const si = skirtInfo(model);
     h += "<h3>"+t("Skirt (open X=0 face)")+"</h3><div class=\"kv\"><dt>"+t("Raking length")+"</dt><dd>"+LD(si.rake)+"</dd>"
@@ -3744,6 +3837,20 @@ function renderStepsPanel(model){
   if(tp.on) h += '<div class="msg i"><b>'+t("Tapered corner.")+'</b> '
     +t("Every corner cut is {0}° off square, not 45° — the two faces meet at 135°. The clip takes {1} more off each step, so the corner face grows {2} → {3} down the stair, and the going across it is {4}.",
        dec(tp.sawDeg.toFixed(1)), LD(tp.dc), L(model.clip(1)*Math.SQRT2), L(model.clip(model.N-1)*Math.SQRT2), LD(tp.g))+'</div>';
+  /* Q: is the joint ANGLE in the length? Yes — it is the whole reason there are
+     two numbers per board. Spell out the rule so the table is readable. */
+  {
+    const w=sk(S.treadStock).w, rt=sk(S.riserStock).t;
+    h += '<div class="note"><b>'+t("Long point vs short point.")+'</b> '
+      + t("Every length below is the LONG point — the longest corner of the board, which is what you cut to and what the cut list buys. The short point is the other corner of the same mitered end, and the gap between them is set by the joint ANGLE, not by the length:")
+      + " <b>"+t("board width × {0} = {1} × {2} = {3}", dec(tp.m.toFixed(4)), fmtIn(w), dec(tp.m.toFixed(4)), fmtIn(w*tp.m))+"</b>. "
+      + (tp.on
+          ? t("At {0}° that is {1} on a {2} board, where a square corner's 45° miter would eat the full {3}. The corner-face boards are mitered at BOTH ends, so they lose twice: {4}.",
+              dec(tp.sawDeg.toFixed(1)), fmtIn(w*tp.m), S.treadStock, fmtIn(w), fmtIn(2*w*tp.diagSet))
+          : t("A 45° miter has slope 1, so the two points differ by the full board width — the classic rule."))
+      + " " + t("Riser boards use their THICKNESS instead of their width, so they lose only {0}.", fmtIn(rt*tp.m))
+      + '</div>';
+  }
   if(S.riserStyle==="closed"){
     const rb = riserBoards(model);
     h += "<h3>"+t("Riser boards ({0})", rb.rows.length)+"</h3><table><thead><tr><th>"+t("Riser k")+"</th><th>"+t("Height")+"</th><th>"+t("Front long/short")+"</th><th>"+t("Side long/short")+"</th>"+(tp.on?"<th>"+t("Corner long/short")+"</th>":"")+"</tr></thead><tbody>";
@@ -4596,6 +4703,61 @@ function runTests(){
         Math.abs(cs.notchDepth-stringersForLeg("front",m1).notchDepth)<1e-9 &&
         Math.abs(cs.throat-stringersForLeg("front",m1).throat)<1e-9,
         cs.notchDepth+" / "+cs.throat);
+      /* ---- the joint ANGLE is what puts two numbers on every mitered board --- */
+      {
+        const w=sk(S.treadStock).w, rt=sk(S.riserStock).t;
+        const lb=treadLegBoards("front",2,m1,"miter").boards[0];
+        assert("a leg board's long point beats its short point by width × the joint slope",
+          Math.abs((lb.long-lb.short)-w*tp.m)<1e-9, (lb.long-lb.short)+" vs "+w*tp.m);
+        const dg2=treadDiagBoards(2,m1).boards[0];
+        assert("a corner-face board is mitered BOTH ends, so it loses twice the setback",
+          Math.abs((dg2.long-dg2.short)-2*dg2.w*tp.diagSet)<1e-9,
+          (dg2.long-dg2.short)+" vs "+2*dg2.w*tp.diagSet);
+        const rr=riserBoards(m1).rows[2];
+        assert("a riser loses its THICKNESS × the slope, not its width",
+          Math.abs((rr.front.long-rr.front.short)-rt*tp.m)<1e-9 &&
+          Math.abs((rr.diag.long-rr.diag.short)-2*rt*tp.diagSet)<1e-9,
+          (rr.front.long-rr.front.short)+" / "+(rr.diag.long-rr.diag.short));
+        assert("the cut list buys the LONG point, never the short one",
+          collectPieces(m1).some(p=>/Tread L2 front bd1/.test(p.role) && Math.abs(p.len-lb.long)<1e-9));
+        /* and the 45° case must still be the classic full-board-width rule */
+        const keepSh=S.cornerShape; S.cornerShape="square";
+        const mq=computeModel(), lq=treadLegBoards("front",2,mq,"miter").boards[0];
+        assert("on a 45° miter the two points differ by the full board width",
+          Math.abs((lq.long-lq.short)-w)<1e-9 && mq.taper.m===1, lq.long-lq.short);
+        S.cornerShape=keepSh;
+      }
+
+      /* ---- every run at the corner, from the same ring growth ---- */
+      {
+        const rws=cornerRuns(m1), by=k=>rws.find(x=>x.key===k);
+        assert("the leg run is R, measured square to the leg face",
+          Math.abs(by("leg").run-m1.R)<1e-9);
+        assert("the hip run is hyp(R − dc, R) — the ring's x and y growth combined",
+          Math.abs(by("hip").run-hyp(m1.R-tp.dc,m1.R))<1e-9 &&
+          Math.abs(by("hip").dx-(m1.R-tp.dc))<1e-9 && Math.abs(by("hip").dy-m1.R)<1e-9,
+          by("hip").run);
+        /* the face going must equal the perpendicular gap MEASURED off the
+           actual face lines, not just the formula restated */
+        const Sk=k=>m1.Wx+m1.Wy+2*k*m1.R-m1.clip(k);
+        assert("the face going is the perpendicular gap between consecutive x+y=S lines",
+          Math.abs(by("face").run-(Sk(2)-Sk(1))/Math.SQRT2)<1e-9 &&
+          Math.abs(by("face").run-(2*m1.R-tp.dc)/Math.SQRT2)<1e-9,
+          by("face").run+" vs "+((Sk(2)-Sk(1))/Math.SQRT2));
+        assert("at clip growth 0 the hip run, the face going and R√2 are all the same number",
+          Math.abs(hyp(m1.R,m1.R)-(2*m1.R)/Math.SQRT2)<1e-9 &&
+          Math.abs(hyp(m1.R,m1.R)-m1.R*Math.SQRT2)<1e-9,
+          hyp(m1.R,m1.R));
+        assert("every run's notch depth follows r × run ÷ hyp(r, run)",
+          rws.every(x=>Math.abs(x.notch-m1.r*x.run/hyp(m1.r,x.run))<1e-9));
+        assert("the table is rendered in both framing methods", (()=>{
+          const km=S.method; let ok=true;
+          for(const me of ["boxes","stringers"]){ S.method=me;
+            const html=cornerRunsHTML(computeModel());
+            if(!/hyp\(R − dc, R\)/.test(html) || /NaN|undefined/.test(html)) ok=false; }
+          S.method=km; return ok; })());
+      }
+
       /* ids must read 1..n with no gaps — "C2 but no C1" is just confusing */
       assert("corner face stringer ids are contiguous from 1",
         cs.list.every((x,i)=>x.id==="C"+(i+1)),

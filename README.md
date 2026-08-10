@@ -452,7 +452,49 @@ A tapered corner has no 90° point to hip, so the hip simply **does not exist**.
 * `Corner tread joint` (miter / through / compare) is hidden — a tapered corner has no square butt to
   run a board through, so the joint is always the mitered one, at the taper's own angle.
 
-### A tapered corner has TWO hips
+### Three runs at a corner, one ring growth
+
+A corner has three different "runs" and they are measured along three different **directions**. All
+three fall out of the same ring growth — the ring advances `R` square to the leg face, and `R − dc`
+*along* it once the clip is eating in:
+
+| | Formula | At 7/11 | ×R | Measured |
+|---|---|---|---|---|
+| Leg step | `R` | 11" (279 mm) | ×1.000 | square to the leg face, nosing to nosing |
+| Corner hips `H1 H2` | `hyp(R − dc, R)` | 11-15/16" (302 mm) | ×1.082 | along the joint line |
+| Corner **face** | `(2R − dc) ÷ √2` | 11" (279 mm) | ×1.000 | square to the 45° face |
+| *Square corner's hip* | `R × √2` | *15-9/16" (395 mm)* | *×1.414* | *along the diagonal* |
+
+The face one comes from the face lines themselves: consecutive faces are `x + y = S_k` with
+`S_k = Wx + Wy + 2kR − c_k`, so consecutive `S` differ by `2R − dc`, and a gap of `ΔS` between two lines
+of slope −1 is `ΔS/√2`. A test checks the reported number against the gap **measured off those lines**,
+not just the formula restated.
+
+**Set `dc = 0` and all of it collapses:** `hyp(R,R) = 2R/√2 = R√2`. The square corner's single hip is the
+same two formulas at zero clip growth — which is the whole argument for the taper, because `R√2` is
+1.414× the leg run and 395 mm at 7/11, over the 355 mm code max.
+
+Notch depth for any of them is `r × run ÷ hyp(r, run)`, which is why a longer run bites deeper and is
+what decides whether the board comes out of a 2x12. The Framing tab shows this table with your numbers.
+
+### Long point vs short point — the joint angle is in the length
+
+Every length the tool reports is the **long point**, the longest corner of the board, and that is what
+the cut list buys. The short point is the other corner of the same mitered end, and the gap between them
+is set by the joint **angle**, not by the length:
+
+```
+long − short = board width × m          m = (R − dc)/R = the joint slope
+```
+
+| Joint | `m` | On a 5-1/2" board | On a 1" riser |
+|---|---|---|---|
+| 45° (square corner) | 1 | **5-1/2"** — the full board width, the classic rule | 1" |
+| 22.5° (matched taper) | 0.4142 | **2-1/4"** | 7/16" |
+
+The **corner-face** boards are mitered at *both* ends, so they lose twice — `2 × w × 0.4142` = 4-9/16"
+on a 5-1/2" board. Riser boards use their **thickness** rather than their width, so they lose far less.
+Tests pin all four of those relations, including that the 45° case still gives exactly the board width.
 
 Ring `k`'s joint line — where the leg tread boards meet the corner ones — runs from
 `(Wx+(k−1)R−c_{k−1}, Wy+(k−1)R)` to `(Wx+kR−c_k, Wy+kR)`. Its direction is `(R−dc, R)` for **every** `k`,
