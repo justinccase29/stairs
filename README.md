@@ -315,7 +315,8 @@ the corner carry fewer notches**, which is what makes the pyramid work. Three ki
 |---|---|---|---|
 | **Common** | `F1…`, `S1…` | reaches the platform, runs the whole flight | the connection type you picked (below) |
 | **Jack** | `F6`, `S3`… | the 45° miter cuts it short, so it starts partway down | plain plumb cut against the framing of the step above — needs a cleat, hanger or blocking there; the connection type does **not** apply to it |
-| **Hip** | `H` | the diagonal at the outside corner, run `R√2` | same as a common |
+| **Hip** | `H` | the diagonal at a **square** corner, run `R√2` | same as a common |
+| **Corner** | `C1…` | perpendicular to a **tapered** corner's face, run `g`. Replaces the hip — there is no 90° point to hip | same as a common |
 
 **Every stringer is identified.** `F1…Fn` on the front leg, `S1…Sn` on the side leg, numbered outward
 from the house wall, `H` for the hip. The same ID is tagged on the **plan view**, heads its **sheet and
@@ -391,6 +392,64 @@ rather than under a tread board, so a different decking thickness makes it a dif
 **The platform is the top tread.** Its decking overhangs the two faces that have steps below them by
 the tread nosing, exactly like every other step. `Platform width/depth` are **frame** dimensions; the
 finished size is `frame + nosing` on those two faces, and the decking boards are cut to match.
+
+## Tapered corner steps
+
+`Corner step shape` switches the corner between **square** (the 90° corner, carried on a hip stringer or
+mitered rims) and **tapered** — a 45° clip that *widens* as the stair descends. The platform is
+untouched either way: its corner stays a square point, and it is the apex the taper opens out from.
+
+The whole thing is **one parameter**, `dc` — how much more the clip takes off each step. Two numbers
+fall out of it and nothing else needs a special case:
+
+```
+joint slope     m = (R − dc)/R        dx per dy along the tread/rim joint
+diagonal going  g = (2R − dc)/√2      depth of the corner step, face to face
+```
+
+`dc = 0` is the square corner: `c_k ≡ 0`, `m = 1`, 45° miters, no diagonal face at all. So every
+formula in the tool is written **once**, with the square corner as `dc = 0` — there is no parallel code
+path to drift out of step, and a test asserts the tapered code reproduces the old square numbers exactly.
+
+### Why "match the legs' going" is the setting worth having
+
+| `dc` | Corner face, 3 steps at R = 11" | Going across it |
+|---|---|---|
+| 0 — constant clip | 17", 17", 17" | 15-9/16" (395 mm — **over** the 355 mm max) |
+| `R(2−√2)` ≈ 0.586R | 9-1/8", 18-1/4", 27-5/16" | **11"** — same as the legs |
+| R | grows with the ring only | 7-3/4" (shallower than the legs) |
+
+At `dc = R(2−√2)` four things line up at once, and none of them are coincidences:
+
+* the corner step is **exactly as deep** as the legs, so it is not a different depth underfoot;
+* the corner treads use the **same board layout** as the legs (`TbDiag = Tb`), same rip, same widths;
+* the joint lands on the **true bisector** of the 135° corner, so every corner cut is a single
+  **22.5°** setting — the octagon detent on any mitre saw, not a compound guess;
+* the corner stringers become the **same board as a common leg stringer** — same notch, same throat.
+
+That last one is the real prize. The square corner's hip needs a run of `R√2` = 15-9/16", which bites so
+deep it often will not come out of a 2x12 at all — the tool currently errors on it at steeper pitches.
+A tapered corner has no 90° point to hip, so the hip simply **does not exist**.
+
+### What it changes elsewhere
+
+* **Three faces per ring**, so a third riser board (mitered *both* ends) and a third band of tread
+  boards, running parallel to the diagonal. They are trapezoids, because the two joint lines diverge.
+* **Ring 1's corner is a triangle** — its inner edge is the platform's square point, so the innermost
+  piece tapers to nothing and is flagged as a triangle rather than listed as a board.
+* **Both legs get shorter.** A leg's outer end now advances `R − dc` per step, not `R`, which also means
+  a leg stringer at a given position starts one level later than it used to.
+* **Corner stringers** (`C1…`) run perpendicular to the face — along the old hip direction — spaced out
+  **from the centreline**, never across the face. That matters: the centreline is the only line that
+  reaches the top step, and spacing across the face gives an even count on some widths and leaves the
+  apex carrying nothing. A test checks a stringer sits on the centreline at every face width.
+* The tool reports the **worst clear span** the corner treads cross and warns if it exceeds the tread
+  stock's span.
+* Code is re-checked on the diagonal: `g` against the run min/max, and `g + nosing` against the tread
+  depth minimum. It also warns if the clip has eaten so far into the legs that little straight run is
+  left, and errors if it has eaten them entirely.
+* `Corner tread joint` (miter / through / compare) is hidden — a tapered corner has no square butt to
+  run a board through, so the joint is always the mitered one, at the taper's own angle.
 
 ## Stair connection at the top — do I need a ledger?
 

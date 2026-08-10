@@ -546,6 +546,71 @@ const FR = {
     "Les pattes font {0} de haut et seulement {1} d'épaisseur — une planche sur chant aussi élancée exige un doublage en L aux coins et un contreventement diagonal. Choisir du 4x4 pour les pattes règle le problème.",
   "Floating platform legs are {0} tall out of {1}, which is a plank on edge at that height — double them into an L at the corners and brace them diagonally, or set the leg stock to 4x4.":
     "Les pattes de la plateforme flottante font {0} de haut en {1}, ce qui reste une planche sur chant à cette hauteur — doublez-les en L aux coins et contreventez en diagonale, ou choisissez du 4x4 pour les pattes.",
+  /* --- tapered corner --- */
+  "Corner step shape":"Forme du coin des marches",
+  "Square — 90° corner, mitered":"Carré — coin à 90°, à onglet",
+  "Tapered — 45° clip that widens":"Effilé — pan coupé à 45° qui s'élargit",
+  "Square keeps the 90° corner and carries it on a hip stringer / mitered rims. Tapered clips the corner at 45°: the platform stays a square point and each step cuts more off, so the corner face grows down the stair. The platform itself is unchanged either way.":
+    "Carré conserve le coin à 90° porté par un limon d'arête / des bordures à onglet. Effilé coupe le coin à 45° : la plateforme reste un point carré et chaque marche en retire davantage, si bien que le pan du coin s'élargit vers le bas. La plateforme elle-même ne change pas dans les deux cas.",
+  "How much taper":"Ampleur de l'effilement",
+  "Match the legs' going":"Égaler le giron des ailes",
+  "Set the clip growth per step":"Fixer l'élargissement par marche",
+  "Matching makes the going across the diagonal equal to the unit run, which is the only setting where the corner step is the same depth as the rest of the stair, the corner tread boards are the same layout as the legs, and the corner stringers are identical to the common ones. It fixes the clip growth at R×(2−√2).":
+    "Égaler rend le giron en travers de la diagonale égal au giron courant : c'est le seul réglage où la marche du coin a la même profondeur que le reste de l'escalier, où les planches du coin suivent la même disposition que les ailes, et où les limons de coin sont identiques aux limons communs. L'élargissement est alors fixé à R×(2−√2).",
+  "Clip grows per step":"Élargissement par marche",
+  "How much more the 45° clip takes off each step down. 0 gives the same clip on every step and a diagonal 1.41× deeper than the legs; anything up to the unit run is allowed, and the going across the diagonal comes out at (2R − this) ÷ √2.":
+    "De combien le pan coupé à 45° retire davantage à chaque marche vers le bas. 0 donne le même pan sur toutes les marches et une diagonale 1,41× plus profonde que les ailes ; tout jusqu'au giron est permis, et le giron en travers de la diagonale vaut (2R − ceci) ÷ √2.",
+  "{0}° joint line":"ligne de joint à {0}°",
+  "corner stringers":"limons de coin", "corner stringers (C…)":"limons de coin (C…)",
+  "Corner stringers (tapered face)":"Limons de coin (pan effilé)",
+  "Off the centreline":"Écart de l'axe", "Run per step":"Giron par marche",
+  "same as the legs":"identique aux ailes", "Widest face":"Pan le plus large",
+  "{0} on the bottom step, spaced {1} o.c.":"{0} sur la marche du bas, à {1} c/c",
+  "below min {0}":"sous le minimum de {0}",
+  "No hip stringer to worry about.":"Aucun limon d'arête à gérer.",
+  "The tapered corner has no 90° point, so the face is carried by corner stringers running perpendicular to it — and because the diagonal going is the same {0} as the legs, they are the SAME board as a common leg stringer: notch {1} deep, {2} of throat. The square corner's hip needs a run of R×√2 = {3} and often will not come out of a {4} at all.":
+    "Le coin effilé n'a pas de pointe à 90° : le pan est porté par des limons de coin perpendiculaires — et comme le giron de la diagonale vaut les mêmes {0} que les ailes, ce sont les MÊMES planches qu'un limon commun : entaille de {1}, âme de {2}. L'arête du coin carré exige un giron de R×√2 = {3} et ne sort souvent pas d'un {4}.",
+  "With a tapered corner there is no hip: the flat face gets CORNER stringers, C1… across it, numbered from one end. The same ID is on the plan view, on its sheet and in the cut list.":
+    "Avec un coin effilé il n'y a pas d'arête : le pan plat reçoit des limons de COIN, C1… en travers, numérotés depuis une extrémité. Le même ID figure sur la vue en plan, sur sa fiche et dans la liste de coupes.",
+  "corner stringer, 45° plan bevels":"limon de coin, biseaux à 45° en plan",
+  "{0} · {1} (levels {2}–{3}) · run {4} across the corner · rise {5} · marks every {6} · board ≥ {7}":
+    "{0} · {1} (niveaux {2} à {3}) · giron {4} en travers du coin · hauteur {5} · repère chaque {6} · planche ≥ {7}",
+  "Tapered corner.":"Coin effilé.",
+  "The platform keeps its square corner — it is the apex. Each step clips {0} more off at 45°, so the corner face opens from {1} on the top step to {2} on the bottom one. Every corner cut is {3}° off square (the two faces meet at 135°), not 45°.":
+    "La plateforme garde son coin carré — c'est le sommet. Chaque marche retire {0} de plus à 45°, si bien que le pan du coin s'ouvre de {1} sur la marche du haut à {2} sur celle du bas. Chaque coupe de coin est à {3}° de l'équerre (les deux pans se rejoignent à 135°), et non à 45°.",
+  "The going across it is the same {0} as the legs, so the corner treads use the same board layout and the corner stringers are the same board as a common one — no hip.":
+    "Le giron en travers vaut les mêmes {0} que les ailes : les marches du coin suivent la même disposition et les limons de coin sont les mêmes planches qu'un limon commun — pas d'arête.",
+  "Every corner cut is {0}° off square, not 45° — the two faces meet at 135°. The clip takes {1} more off each step, so the corner face grows {2} → {3} down the stair, and the going across it is {4}.":
+    "Chaque coupe de coin est à {0}° de l'équerre, non à 45° — les deux pans se rejoignent à 135°. Le pan retire {1} de plus par marche : le coin passe de {2} à {3} vers le bas, et le giron en travers vaut {4}.",
+  "Corner face on the bottom step":"Pan du coin sur la marche du bas",
+  "Going across the corner":"Giron en travers du coin",
+  "Corner cut, off square":"Coupe de coin, hors équerre",
+  "Corner long/short":"Coin long/court",
+  "— the platform corner is a point":"— le coin de la plateforme est un point",
+  "corner face — {0} bd, {1} deep, face {2} → {3}":"pan du coin — {0} planches, {1} de profondeur, pan {2} → {3}",
+  "triangle":"triangle",
+  "Tread L{0} corner bd{1}":"Marche N{0} coin pl{1}",
+  "Riser {0} corner":"Contremarche {0} coin",
+  "{0} both ends — triangle":"{0} aux deux bouts — triangle",
+  "offset {0}, short point {1}":"décalage {0}, point court {1}",
+  "short point {0}":"point court {0}",
+  "{0} — corner stringer, {1}":"{0} — limon de coin, {1}",
+  "{0} off the centreline":"{0} de l'axe",
+  "Box {0} corner outer rim":"Caisson {0} bordure extérieure du coin",
+  "Box {0} corner inner rim":"Caisson {0} bordure intérieure du coin",
+  "Box {0} corner joist":"Caisson {0} solive du coin",
+  "The corner step is {0} deep across the diagonal ({1} mm), outside the {2}–{3} mm the code allows for a run. Set the taper to match the legs' going, or change the clip growth.":
+    "La marche du coin a {0} de profondeur en travers de la diagonale ({1} mm), hors de la plage de {2} à {3} mm permise par le code pour un giron. Réglez l'effilement pour égaler le giron des ailes, ou changez l'élargissement.",
+  "The corner step is {0} deep where the legs are {1} — legal, but it is a different depth underfoot at the corner, and its tread boards need their own layout. Matching the legs' going removes both.":
+    "La marche du coin a {0} de profondeur alors que les ailes en ont {1} — conforme, mais c'est une profondeur différente sous le pied au coin, et ses planches exigent leur propre disposition. Égaler le giron des ailes élimine les deux.",
+  "Walking depth across the corner is {0} ({1} mm), below the {2} mm minimum.":
+    "La profondeur de marche en travers du coin est de {0} ({1} mm), sous le minimum de {2} mm.",
+  "The clip has eaten the legs: by the bottom step it takes off {0}, more than the leg is long. Reduce the clip growth, or use fewer risers.":
+    "Le pan coupé a mangé les ailes : à la marche du bas il retire {0}, plus que la longueur de l'aile. Réduisez l'élargissement ou utilisez moins de contremarches.",
+  "By the bottom step the clip leaves only {0} of straight leg ({1} mm) before the corner starts, under the {2} mm minimum stair width — the corner is most of the step down there.":
+    "À la marche du bas, le pan ne laisse que {0} d'aile droite ({1} mm) avant le début du coin, sous la largeur minimale de {2} mm — en bas, le coin représente presque toute la marche.",
+  "The corner stringers will not come out of a {0}: the notch bites {1} deep and leaves {2} of throat, so they need a board at least {3} wide.":
+    "Les limons de coin ne sortiront pas d'un {0} : l'entaille mord {1} de profondeur et ne laisse que {2} d'âme ; il faut une planche d'au moins {3} de largeur.",
   /* --- box frame drawings --- */
   "Box frames — one drawing per level":"Caissons — un dessin par niveau",
   "Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.":
@@ -870,6 +935,7 @@ const DEFAULTS = {
   platX:60, platY:48, faceX0:"open", platSurface:"5/4x6 PT", platFrame:"2x6", legStock:"4x4",
   platJoistDir:"y", includePlatform:true,
   method:"boxes", cornerStyle:"miter", throughLeg:"front",
+  cornerShape:"square", taperMode:"match", taperGrow:0,
   treadStock:"2x6", treadGap:0.25, riserStock:"5/4x6 PT", riserFit:"captured",
   riserStyle:"closed", frameStock:"2x6", stringerStock:"2x12", skirtStock:"2x10",
   throatMin:5, stockLen:"96,120,144,192", kerf:0.125, minOffcut:12, price:HD_GREENFIELD_PARK
@@ -910,8 +976,17 @@ const FIELDS = [
   {k:"platJoistDir", t:"sel", l:"Platform joists run", o:[["y","Out from the wall (Y)"],["x","Along the wall (X)"]], when:s=>s.includePlatform},
   {h:"Construction"},
   {k:"method", t:"sel", l:"Step framing", o:[["boxes","Stacked box frames"],["stringers","Cut stringers + hip stringer"]]},
-  {k:"cornerStyle", t:"sel", l:"Corner tread joint", o:[["miter","45° mitered"],["through","One leg runs through"],["compare","Compare both (miter used for cut list)"]]},
-  {k:"throughLeg", t:"sel", l:"Through leg", o:[["front","Front boards run through"],["side","Side boards run through"]], when:s=>s.cornerStyle!=="miter"},
+  {k:"cornerShape", t:"sel", l:"Corner step shape",
+   o:[["square","Square — 90° corner, mitered"],["taper","Tapered — 45° clip that widens"]],
+   hint:"Square keeps the 90° corner and carries it on a hip stringer / mitered rims. Tapered clips the corner at 45°: the platform stays a square point and each step cuts more off, so the corner face grows down the stair. The platform itself is unchanged either way."},
+  {k:"taperMode", t:"sel", l:"How much taper", when:s=>s.cornerShape==="taper",
+   o:[["match","Match the legs' going"],["custom","Set the clip growth per step"]],
+   hint:"Matching makes the going across the diagonal equal to the unit run, which is the only setting where the corner step is the same depth as the rest of the stair, the corner tread boards are the same layout as the legs, and the corner stringers are identical to the common ones. It fixes the clip growth at R×(2−√2)."},
+  {k:"taperGrow", t:"len", l:"Clip grows per step", when:s=>s.cornerShape==="taper"&&s.taperMode==="custom",
+   hint:"How much more the 45° clip takes off each step down. 0 gives the same clip on every step and a diagonal 1.41× deeper than the legs; anything up to the unit run is allowed, and the going across the diagonal comes out at (2R − this) ÷ √2."},
+  {k:"cornerStyle", t:"sel", l:"Corner tread joint", when:s=>s.cornerShape!=="taper",
+   o:[["miter","45° mitered"],["through","One leg runs through"],["compare","Compare both (miter used for cut list)"]]},
+  {k:"throughLeg", t:"sel", l:"Through leg", o:[["front","Front boards run through"],["side","Side boards run through"]], when:s=>s.cornerShape!=="taper"&&s.cornerStyle!=="miter"},
   {k:"riserStyle", t:"sel", l:"Risers", o:[["closed","Closed (riser boards)"],["open","Open"]]},
   {k:"riserFit", t:"sel", l:"Riser board fit", o:[["captured","Captured between treads"],["full","Laps the tread edge"]], when:s=>s.riserStyle==="closed"},
   {h:"Materials"},
@@ -1271,12 +1346,39 @@ function validate(model){
     const stv = stringersForLeg("front", model), hipv = hipStringer(model);
     if(!stv.fitsStock)
       warnings.push({level:"error", msg:t("Leg stringers need a board at least {0} wide (notch {1} + throat {2}); a {3} is only {4}.", fmtIn(stv.minWidth), fmtIn(stv.notchDepth), fmtIn(S.throatMin), S.stringerStock, fmtIn(stv.stock.w))});
-    if(!hipv.fitsStock)
+    /* a tapered corner has no hip — its face is carried by corner stringers,
+       checked separately below */
+    if(!model.taper.on && !hipv.fitsStock)
       warnings.push({level:"error", msg:t("The hip stringer needs a board at least {0} wide — its run is R×√2 = {1}, so the notch is deeper. A {2} leaves only {3} of throat.", fmtIn(hipv.minWidth), L(hipv.run), S.stringerStock, fmtIn(hipv.throat))});
   } else if(model.base>0){
     const bb = boxesForLevel(model, model.N-1);
     if(!bb.rimStockOK)
       warnings.push({level:"error", msg:t("Bearing on the deck structure makes the bottom box rim {0}, deeper than a {1} ({2}). Use deeper stock for that box.", LD(bb.rimH), S.frameStock, fmtIn(sk(S.frameStock).w))});
+  }
+  /* ---- the tapered corner has its own going, and its own way to go wrong ---- */
+  if(model.taper.on){
+    const tp=model.taper, gmm=tp.g*MM, wmm=(tp.g+model.nose)*MM;
+    if(gmm<CODE.runMin || gmm>CODE.runMax)
+      warnings.push({level:"error", msg:t("The corner step is {0} deep across the diagonal ({1} mm), outside the {2}–{3} mm the code allows for a run. Set the taper to match the legs' going, or change the clip growth.",
+        LD(tp.g), dec(Math.round(gmm)), CODE.runMin, CODE.runMax)});
+    else if(Math.abs(tp.g-model.R)>0.0626)
+      warnings.push({level:"warn", msg:t("The corner step is {0} deep where the legs are {1} — legal, but it is a different depth underfoot at the corner, and its tread boards need their own layout. Matching the legs' going removes both.", LD(tp.g), LD(model.R))});
+    if(wmm<CODE.treadDepthMin)
+      warnings.push({level:"error", msg:t("Walking depth across the corner is {0} ({1} mm), below the {2} mm minimum.", LD(tp.g+model.nose), dec(Math.round(wmm)), CODE.treadDepthMin)});
+    /* the clip must not eat the legs away */
+    const legEnd=k=>Math.min(model.Wx,model.Wy)+k*model.R-model.clip(k);
+    const bottomLeg=legEnd(model.N-1);
+    if(bottomLeg<=0)
+      warnings.push({level:"error", msg:t("The clip has eaten the legs: by the bottom step it takes off {0}, more than the leg is long. Reduce the clip growth, or use fewer risers.", LD(model.clip(model.N-1)))});
+    else if(bottomLeg<CODE.widthMin/MM)
+      warnings.push({level:"warn", msg:t("By the bottom step the clip leaves only {0} of straight leg ({1} mm) before the corner starts, under the {2} mm minimum stair width — the corner is most of the step down there.", LD(bottomLeg), dec(Math.round(bottomLeg*MM)), CODE.widthMin)});
+    if(S.method==="stringers"){
+      const cs=cornerStringers(model);
+      if(cs && !cs.fitsStock)
+        warnings.push({level:"error", msg:t("The corner stringers will not come out of a {0}: the notch bites {1} deep and leaves {2} of throat, so they need a board at least {3} wide.", S.stringerStock, fmtIn(cs.notchDepth), fmtIn(cs.throat), fmtIn(cs.minWidth))});
+      if(cs && !cs.spansOK)
+        warnings.push({level:"warn", msg:t("On the bottom step the corner treads have to cross {0} between supports, more than the {1} a {2} can span. Add a stringer across the corner face, or use tread stock with a longer span.", LD(cs.worstSpan), fmtIn(cs.spanLimit), S.treadStock)});
+    }
   }
   if(S.includePlatform){
     const pfv = platformModel(model);
@@ -1301,6 +1403,39 @@ function validate(model){
    from wall, Y). Steps cascade in +y (front face) and +x (side face),
    wrapping the outside corner at (platX,platY) on a 45 degree miter.
    Level k = 1 (top) .. N-1 (bottom). z_k = H - k*r, always from exact r. */
+/* ---------- 11b. the corner: square, or a 45° clip that widens -------------
+   The platform keeps its square corner — it is the apex. Ring k clips that
+   corner back by `c_k = k·dc` along each leg, so the flat 45° face grows as the
+   stair descends. Two numbers fall out of dc and nothing else needs a branch:
+
+     joint slope   m = (R − dc)/R      dx per dy along the tread/rim joint
+     diagonal going g = (2R − dc)/√2   depth of the corner step, face to face
+
+   dc = 0 is the square corner the tool has always drawn: c_k ≡ 0, m = 1, 45°
+   miters, no diagonal face at all. So every formula below is written once, with
+   the square case as dc = 0 — no parallel code path to drift out of step.
+
+   dc = R(2−√2) ≈ 0.586R is the interesting one: it makes g = R, so the corner
+   step is exactly as deep as the legs, its tread boards use the same layout,
+   the joint lands on the true bisector of the 135° corner (a 22.5° saw setting,
+   the octagon detent), and the corner stringers become identical to the common
+   ones — the R√2 hip that will not come out of a 2x12 simply disappears. */
+function cornerTaper(R){
+  if(S.cornerShape!=="taper")
+    return {on:false, dc:0, m:1, g:R*Math.SQRT2, sawDeg:45, diagSet:0};
+  const auto = R*(2-Math.SQRT2);
+  /* dc must stay under R: at R the clip eats outward as fast as the ring grows
+     and the legs stop getting longer; past it the corner swallows them. */
+  const dc = S.taperMode==="custom" ? Math.max(0, Math.min(S.taperGrow, R-1/16)) : auto;
+  const m = (R-dc)/R;
+  /* Cut angle for a board running ALONG the diagonal. With dc = auto the joint
+     bisects the 135° corner and this equals m, but a custom clip puts the joint
+     off the bisector and the two boards take different angles. */
+  const jx=R-dc, jy=R, cd=Math.abs(jx-jy)/(Math.SQRT2*hyp(jx,jy));
+  return {on:true, dc, m, g:(2*R-dc)/Math.SQRT2, auto,
+          sawDeg:Math.atan(m)*180/Math.PI,
+          diagSet: cd>=1 ? 0 : cd/Math.sqrt(1-cd*cd)};
+}
 function computeModel(){
   const R=S.run, nose=S.nosing, N=S.risers, H=S.totalRise;
   const r = H/N;
@@ -1322,8 +1457,14 @@ function computeModel(){
      touch r, H or any tread height: the rise stays finished-to-finished, and
      only the framing that reaches down to bearing gets longer. */
   const base = S.bottomBearing==="structure" ? Math.max(0, S.deckBoardT) : 0;
+  const taper = cornerTaper(R);
   return {R,nose,N,H,r,Wx,Wy,levels,footX,footY,base,deckT:Math.max(0,S.deckBoardT),
-          riserT, Tb, Twalk, platFinX:Wx+riserT+nose, platFinY:Wy+riserT+nose};
+          riserT, Tb, Twalk, platFinX:Wx+riserT+nose, platFinY:Wy+riserT+nose,
+          /* clip taken off the corner at ring k — 0 at the platform, which is
+             why the platform stays a square point whatever the taper */
+          taper, clip:k=>k*taper.dc,
+          TbDiag: taper.g + riserT + nose,      // board depth across the corner face
+          TwalkDiag: taper.g + nose};
 }
 
 /* One tread leg, one level. style: "miter" (mitered outside corner, boards
@@ -1337,14 +1478,43 @@ function treadLegBoards(legName, k, model, style){
   const offs = treadBoardOffsets(model);          // [0] = the nosing board
   const boards = [];
   if(style==="miter"){
+    /* The joint with the corner starts at the ring's inner corner LESS whatever
+       the taper clipped off there, and runs outward at slope m. Square corner:
+       clip 0, m 1, so this is the old x = Wx + (y − Wy) miter exactly. */
+    const base = Wb+(k-1)*R - model.clip(k-1), m = model.taper.m;
     offs.forEach((b,i)=>boards.push({j:i+1, o:b.o, w:b.w,
-      long:Wb+(k-1)*R+b.o+b.w, short:Wb+(k-1)*R+b.o}));
+      long:base+(b.o+b.w)*m, short:base+b.o*m}));
   } else {                                        // through-leg / butt style
     const isThrough = S.throughLeg===legName;
     const len = isThrough ? (Wb+k*R+model.riserT+nose) : (Wb+(k-1)*R);
     offs.forEach((b,i)=>boards.push({j:i+1, o:b.o, w:b.w, long:len, short:len}));
   }
   return {fit, boards, T, style, Wb, legName, k};
+}
+
+/* The tapered corner's own face, one level. Boards run PARALLEL to the 45°
+   diagonal, so they are trapezoids: the face grows from c_(k-1)·√2 at its inner
+   edge to c_k·√2 at its outer, and the two joint lines diverge linearly across
+   the depth. Ring 1 is the special one — its inner edge is the platform's
+   square corner, a point, so that face is a triangle and the innermost piece
+   tapers to nothing. Mitered both ends. */
+function treadDiagBoards(k, model){
+  if(!model.taper.on) return null;
+  const T=model.TbDiag, g=model.taper.g, dc=model.taper.dc;
+  const offs=treadBoardOffsets(model, T);
+  const cIn=model.clip(k-1), rate=g>0 ? dc/g : 0;
+  const faceAt=o=>Math.SQRT2*(cIn + o*rate);
+  const boards=[];
+  offs.forEach((b,i)=>{
+    const short=faceAt(b.o), long=faceAt(b.o+b.w);
+    /* the apex piece on ring 1 is a triangle; anything under a saw-blade's
+       worth of length is not a board, it is the point of the corner */
+    if(long<0.25) return;
+    boards.push({j:boards.length+1, o:b.o, w:b.w, short:Math.max(0,short), long,
+                 triangle: short<0.0626});
+  });
+  return {boards, T, fit:treadBoardWidths(model,T).fit,
+          faceInner:cIn*Math.SQRT2, faceOuter:model.clip(k)*Math.SQRT2, k};
 }
 
 /* Pure geometric leg trapezoid area (no board/gap rounding) — used by the
@@ -1370,15 +1540,26 @@ function riserBoards(model){
   const rh1 = S.riserFit==="captured"
     ? (model.r - (S.includePlatform ? sk(S.platSurface).t : sk(S.treadStock).t)) : model.r;
   const rows = [];
+  const m=model.taper.m, ds=model.taper.diagSet;
   for(let k=1;k<=model.N;k++){
-    const frontLong = model.Wx+(k-1)*model.R, sideLong = model.Wy+(k-1)*model.R;
+    /* Riser k stands on the INNER edge of ring k, which is ring k−1's outer
+       edge — so it is clipped by c_(k-1), and riser 1 is the platform's own
+       square corner (clip 0), which is why the platform stays 90°. */
+    const c=model.clip(k-1);
+    const frontLong = model.Wx+(k-1)*model.R - c, sideLong = model.Wy+(k-1)*model.R - c;
+    const diagLong = c*Math.SQRT2;
     rows.push({
       k, height: k===1 ? rh1 : rh,
-      front:{long:frontLong, short:frontLong-t},
-      side:{long:sideLong, short:sideLong-t}
+      /* setback long→short is t·m: t on a 45° miter, 0.414t on the taper's
+         22.5° one — the joint is shallower so it eats less of the board */
+      front:{long:frontLong, short:frontLong-t*m},
+      side:{long:sideLong, short:sideLong-t*m},
+      /* the corner face, mitered at BOTH ends. Zero on riser 1 by definition. */
+      diag: model.taper.on && diagLong>0.0626
+        ? {long:diagLong, short:Math.max(0, diagLong-2*t*ds)} : null
     });
   }
-  return {rows, height:rh, height1:rh1, t};
+  return {rows, height:rh, height1:rh1, t, taper:model.taper};
 }
 
 /* Corner-style comparison: total board count / length / area per level,
@@ -1494,12 +1675,15 @@ function stringersForLeg(legName, model){
   const Wb = legName==="front" ? model.Wx : model.Wy;
   const R=model.R, N=model.N, r=model.r;
   const stock = sk(S.stringerStock);
-  const total = Wb+(N-1)*R;
+  const total = Wb+(N-1)*(R-cornerTaper(R).dc);
   /* Spacing is governed by what the TREADS can span between supports, not by
      the stringer's own span — 5/4x6 treads need 16" o.c. even though the 2x12
      carrying them is good for 24". */
   const spanLimit = sk(S.treadStock).span || 24;
   const positions = stringerPositions(total, spanLimit);
+  /* A tapered corner eats into the legs, so a leg's outer end advances by
+     R − dc per step, not R. Everything else about a leg stringer is unchanged. */
+  const legGrow = R - model.taper.dc;
   const Ls = hyp(r,R);
   const notchDepth = r*R/Ls;
   const throat = stock.w - notchDepth;
@@ -1513,7 +1697,7 @@ function stringersForLeg(legName, model){
      which board on the pile goes where. The hip is H. */
   const tag = legName==="front" ? "F" : "S";
   const list = positions.map((p,i)=>{
-    let kmin = Math.max(1, Math.ceil((p-Wb)/R)+1);
+    let kmin = Math.max(1, Math.ceil((p-Wb)/legGrow)+1);
     if(kmin>N) kmin = N;
     const c = Math.max(0, N-kmin);
     /* only the stringers that actually reach the platform get the flush tab */
@@ -1551,6 +1735,65 @@ function hipStringer(model){
           topRun, topLift, minWidth, fitsStock: stock.w >= minWidth - 1e-9};
 }
 
+/* ---------- 13b. corner stringers, tapered corner -------------------------
+   A tapered corner has no 90° point to hip, so there is no hip stringer. The
+   flat 45° face is carried by stringers running perpendicular to it — along the
+   old hip direction — spaced ACROSS the face. Their run per step is the
+   diagonal going g, so when g = R they are literally the same board as a common
+   leg stringer: same notches, same throat, same length. That is the taper's
+   biggest practical payoff, because the hip's run of R√2 bites so deep it often
+   will not come out of a 2x12 at all.
+
+   The face is only c_k·√2 wide at ring k, so a stringer offset p from the
+   centreline cannot start until the face has grown past it — the same jack
+   logic as the legs, in the other direction. */
+function cornerStringers(model){
+  if(!model.taper.on) return null;
+  const {R,r,N}=model, dc=model.taper.dc, g=model.taper.g;
+  const stock=sk(S.stringerStock);
+  const Ls=hyp(r,g), notchDepth=r*g/Ls, throat=stock.w-notchDepth;
+  const minWidth=notchDepth+S.throatMin;
+  const drop=Math.max(0, r-sk(S.treadStock).t)+model.base;
+  const cn=connectionInfo(model);
+  const spanLimit=sk(S.treadStock).span||24;
+  const faceMax=model.clip(N-1)*Math.SQRT2;            // the bottom step's face
+  const stockLens=parseStockLens();
+  const half=faceMax/2;
+  /* SPACE THEM OUT FROM THE CENTRELINE, not across the face. The apex of the
+     corner sits on the centreline and it is the ONLY place a stringer can reach
+     the top step, so there has to be one there — laying positions across the
+     face the way the legs do gives an even count on some widths and leaves that
+     apex carrying nothing. */
+  const perSide=Math.max(1, Math.ceil(half/spanLimit));
+  const step=half/perSide;
+  const laterals=[]; for(let i=-perSide;i<=perSide;i++) laterals.push(i*step);
+  const list=laterals.map((lat,i)=>{
+    const p=Math.abs(lat);
+    /* full depth at p needs ring k−1's face to reach p too */
+    let kmin = dc>0 ? Math.max(1, Math.ceil(2*p/(dc*Math.SQRT2))+1) : 1;
+    if(kmin>N) kmin=N;
+    const c=Math.max(0,N-kmin);
+    /* the centre one meets the platform's corner POINT, so its tab runs in
+       diagonally — tab·√2 along its own axis, exactly as the old hip did */
+    const topRun=(kmin===1) ? cn.tab*Math.SQRT2 : 0;
+    const topLift=topRun>0 ? cn.lift : 0;
+    const reqLen=c>0 ? projectStringerLength(c,r,g,Ls,drop,topRun,topLift) : 0;
+    return {id:"C"+(i+1), pos:lat+half, lateral:lat, kmin, c, reqLen,
+            boardLen: c>0 ? pickStockLen(reqLen, stockLens) : null, topRun, topLift};
+  }).filter(s=>s.c>0);
+  /* Worst clear span the corner treads have to cross on the WIDEST face: the
+     outermost pair land right on the face's edge, where the leg framing takes
+     over, so they carry nothing and drop out — leaving the treads to span from
+     the last surviving stringer out to that joint. */
+  const lats=list.map(s=>s.lateral).sort((a,b)=>a-b);
+  let worst = lats.length ? Math.max(half-lats[lats.length-1], half+lats[0]) : faceMax;
+  for(let i=1;i<lats.length;i++) worst=Math.max(worst, lats[i]-lats[i-1]);
+  return {run:g, rise:r, Ls, notchDepth, throat, minWidth, stock, drop, list,
+          faceMax, spanLimit, sameAsLegs: Math.abs(g-R)<1e-9,
+          spacing: step, worstSpan: worst, spansOK: worst <= spanLimit+1e-9,
+          fitsStock: stock.w >= minWidth - 1e-9};
+}
+
 /* ---------- 14. box frames ------------------------------------------------
    One L-shaped box per level k, rim height = r - tread thickness. Load path:
    box k's outer rim bears on box k+1's tread boards directly over box k+1's
@@ -1567,14 +1810,28 @@ function boxesForLevel(model,k){
   const spacing = sk(S.treadStock).span || 24;
   const legs = ["front","side"].map(legName=>{
     const Wb = legName==="front" ? model.Wx : model.Wy;
-    const outer = Wb+k*R, inner = Wb+(k-1)*R;
+    /* a tapered corner shortens both leg rims — they now stop at the joint with
+       the diagonal instead of running out to a 90° point */
+    const outer = Wb+k*R - model.clip(k), inner = Wb+(k-1)*R - model.clip(k-1);
     const joistLen = Math.max(0, R-2*rimStock.t);
     /* ceil, not floor: floor(71/24)+1 = 3 joists leaves 35" clear on a 24"
        span. ceil(71/24)+1 = 5 gives 17-3/4" clear. */
     const joistCount = Math.max(2, Math.ceil(outer/spacing)+1);
     return {legName, outer, inner, joistLen, joistCount, joistSpacing: outer/Math.max(1,joistCount-1)};
   });
-  return {k, rimH, isBottom, legs, rimFit: fitBoards(rimH, rimStock.w, 0),
+  /* Tapered corner: the diagonal face is a third band with its own rims and its
+     own joists, perpendicular to the 45° face. Ring 1's inner rim has zero
+     length (the platform corner is a point), so that band is a triangle and
+     gets an outer rim and joists only. */
+  const dg = model.taper.on ? (()=>{
+    const outer=model.clip(k)*Math.SQRT2, inner=model.clip(k-1)*Math.SQRT2;
+    const joistLen=Math.max(0, model.taper.g-2*rimStock.t);
+    const joistCount=Math.max(2, Math.ceil(outer/spacing)+1);
+    return {outer, inner, joistLen, joistCount,
+            joistSpacing: outer/Math.max(1,joistCount-1),
+            triangle: inner<0.0626};
+  })() : null;
+  return {k, rimH, isBottom, legs, diag:dg, rimFit: fitBoards(rimH, rimStock.w, 0),
           rimStockOK: rimStock.w >= rimH - 1e-9};
 }
 /* The inner rim runs the whole length of BOTH legs, so it needs a block at
@@ -1668,21 +1925,32 @@ function skirtInfo(model){
 /* ---------- 16. piece collection ----------------------------------------- */
 function collectPieces(model){
   const pieces = [];
-  const style = S.cornerStyle==="through" ? "through" : "miter";  // compare uses miter for the cut list
+  /* A tapered corner has no square butt to run through, so the joint is always
+     the mitered one — at the taper's own angle, not 45°. */
+  const style = (model.taper.on || S.cornerStyle!=="through") ? "miter" : "through";
+  const cornerAng = dec(model.taper.sawDeg.toFixed(1))+"°";
   for(const lvl of model.levels){
     for(const legName of ["front","side"]){
       const tb = treadLegBoards(legName, lvl.k, model, style);
       for(const b of tb.boards){
         pieces.push({role:t("Tread L{0} {1} bd{2}", lvl.k, t(legName), b.j), stock:S.treadStock, len:b.long, qty:1,
-          angle: style==="miter" ? "45°/90°" : "90°/90°", note:t("offset {0}", fmtIn(b.o))});
+          angle: style==="miter" ? cornerAng+"/90°" : "90°/90°", note:t("offset {0}", fmtIn(b.o))});
       }
+    }
+    const dg = treadDiagBoards(lvl.k, model);
+    if(dg) for(const b of dg.boards){
+      pieces.push({role:t("Tread L{0} corner bd{1}", lvl.k, b.j), stock:S.treadStock, len:b.long, qty:1,
+        angle: b.triangle ? t("{0} both ends — triangle", cornerAng) : cornerAng+"/"+cornerAng,
+        note:t("offset {0}, short point {1}", fmtIn(b.o), fmtIn(b.short))});
     }
   }
   if(S.riserStyle==="closed"){
     const rb = riserBoards(model);
     for(const row of rb.rows){
-      pieces.push({role:t("Riser {0} {1}", row.k, t("front")), stock:S.riserStock, len:row.front.long, qty:1, angle:"45°/90°"});
-      pieces.push({role:t("Riser {0} {1}", row.k, t("side")), stock:S.riserStock, len:row.side.long, qty:1, angle:"45°/90°"});
+      pieces.push({role:t("Riser {0} {1}", row.k, t("front")), stock:S.riserStock, len:row.front.long, qty:1, angle:cornerAng+"/90°"});
+      pieces.push({role:t("Riser {0} {1}", row.k, t("side")), stock:S.riserStock, len:row.side.long, qty:1, angle:cornerAng+"/90°"});
+      if(row.diag) pieces.push({role:t("Riser {0} corner", row.k), stock:S.riserStock, len:row.diag.long, qty:1,
+        angle:cornerAng+"/"+cornerAng, note:t("short point {0}", fmtIn(row.diag.short))});
     }
   }
   if(S.method==="stringers"){
@@ -1697,19 +1965,36 @@ function collectPieces(model){
           angle:t("layout marks"), note:t("at {0}", fmtIn(s.pos))+(s.boardLen?"":t(" — needs splice"))});
       }
     }
-    const hip = hipStringer(model);
-    pieces.push({role:t("H — hip stringer, {0}", notchCount(hip.c)), stock:S.stringerStock, len:hip.reqLen, qty:1,
-      angle:t("45° plan bevel"), note: hip.boardLen?"":t("needs splice")});
+    const cs = cornerStringers(model);
+    if(cs){
+      /* no 90° point to hip — the flat face gets its own stringers instead */
+      for(const s of cs.list)
+        pieces.push({role:t("{0} — corner stringer, {1}", s.id, notchCount(s.c)), stock:S.stringerStock,
+          len:s.reqLen, qty:1, angle:t("45° plan bevel"),
+          note:t("{0} off the centreline", fmtIn(Math.abs(s.lateral)))+(s.boardLen?"":t(" — needs splice"))});
+    } else {
+      const hip = hipStringer(model);
+      pieces.push({role:t("H — hip stringer, {0}", notchCount(hip.c)), stock:S.stringerStock, len:hip.reqLen, qty:1,
+        angle:t("45° plan bevel"), note: hip.boardLen?"":t("needs splice")});
+    }
   } else {
     for(const lvl of model.levels){
       const bx = boxesForLevel(model, lvl.k);
       const rimNote = t("rim height {0}", fmtIn(bx.rimH))+(bx.isBottom&&model.base>0?t(" (deeper — bears on the deck structure)"):"");
       for(const leg of bx.legs){
-        pieces.push({role:t("Box {0} {1} outer rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.outer, qty:1, angle:"45°", note:rimNote});
-        pieces.push({role:t("Box {0} {1} inner rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.inner, qty:1, angle:"45°", note:rimNote});
+        pieces.push({role:t("Box {0} {1} outer rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.outer, qty:1, angle:cornerAng, note:rimNote});
+        pieces.push({role:t("Box {0} {1} inner rim", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.inner, qty:1, angle:cornerAng, note:rimNote});
         pieces.push({role:t("Box {0} {1} joist", lvl.k, t(leg.legName)), stock:S.frameStock, len:leg.joistLen, qty:leg.joistCount, angle:"90°"});
       }
-      pieces.push({role:t("Box {0} corner block", lvl.k), stock:S.frameStock, len:hyp(sk(S.frameStock).w,sk(S.frameStock).w), qty:1, angle:"45°"});
+      if(bx.diag){
+        /* the tapered corner's own band: rims along the 45° face, joists across */
+        pieces.push({role:t("Box {0} corner outer rim", lvl.k), stock:S.frameStock, len:bx.diag.outer, qty:1, angle:cornerAng+"/"+cornerAng, note:rimNote});
+        if(!bx.diag.triangle)
+          pieces.push({role:t("Box {0} corner inner rim", lvl.k), stock:S.frameStock, len:bx.diag.inner, qty:1, angle:cornerAng+"/"+cornerAng, note:rimNote});
+        pieces.push({role:t("Box {0} corner joist", lvl.k), stock:S.frameStock, len:bx.diag.joistLen, qty:bx.diag.joistCount, angle:"90°"});
+      } else {
+        pieces.push({role:t("Box {0} corner block", lvl.k), stock:S.frameStock, len:hyp(sk(S.frameStock).w,sk(S.frameStock).w), qty:1, angle:"45°"});
+      }
     }
     for(const blk of boxSupportBlocks(model)){
       pieces.push({role:t("Support block (box {0} {1})", blk.k, t(blk.legName)), stock:S.frameStock,
@@ -1930,8 +2215,10 @@ function materialsLegend(){
    edge ON the nosing tip, and any odd piece is ripped at the BACK, where the
    riser board covers it. Overshooting backwards is not an option — behind the
    tread's back edge sits the frame of the level above. */
-function treadBoardWidths(model){
-  const stock=sk(S.treadStock), gap=S.treadGap, T=model.Tb, w=stock.w;
+/* depth defaults to the leg tread depth; the tapered corner face has its own
+   (shallower or deeper) depth and reuses the identical fit logic */
+function treadBoardWidths(model, depth){
+  const stock=sk(S.treadStock), gap=S.treadGap, T=(depth!=null?depth:model.Tb), w=stock.w;
   const fit=fitBoards(T, w, gap);                    // kept for the alternatives readout
   const nFull=Math.max(1, Math.floor((T+gap)/(w+gap)));
   const covered=nFull*w+(nFull-1)*gap, rem=T-covered;
@@ -1943,9 +2230,10 @@ function treadBoardWidths(model){
 }
 /* Front-anchored offsets, measured from the tread's back edge datum.
    Index 0 is the nosing board. */
-function treadBoardOffsets(model){
-  const {widths, effGap}=treadBoardWidths(model);
-  const out=[]; let front=model.Tb;
+function treadBoardOffsets(model, depth){
+  const T=(depth!=null?depth:model.Tb);
+  const {widths, effGap}=treadBoardWidths(model, T);
+  const out=[]; let front=T;
   for(const w of widths){ const back=front-w; out.push({o:back, w}); front=back-effGap; }
   return out;
 }
@@ -2055,9 +2343,11 @@ function renderTerminologySVG(model){
    mitered end, framing below shown as hidden (dashed) lines. */
 function renderPlanSVG(model){
   const {Wx,Wy,R,nose,N,footX,footY}=model;
-  const style = S.cornerStyle==="through" ? "through" : "miter";
+  const tp=model.taper;
+  const style = (tp.on || S.cornerStyle!=="through") ? "miter" : "through";
   const capBottom=t("front leg — steps descend this way (+Y)");
-  const rightLabels=[t("side leg (+X)"), t("45° miter line"), t("hip stringer")];
+  const jointLbl = tp.on ? t("{0}° joint line", dec(tp.sawDeg.toFixed(1))) : t("45° miter line");
+  const rightLabels=[t("side leg (+X)"), jointLbl, tp.on?t("corner stringers"):t("hip stringer")];
   const mL=52, mT=40, mB=52;
   const mR=Math.max(76, Math.max(...rightLabels.map(s=>estTextW(s,9)))+24);
   const scale=Math.min(7.5, 690/Math.max(footX+5,1));
@@ -2090,11 +2380,43 @@ function renderPlanSVG(model){
         }
       }
     }
-    /* Miter line and level tag are deferred to a top layer — the next ring's
-       tread boards are drawn after this one and would cover them. */
-    const ix=Wx+(k-1)*R, iy=Wy+(k-1)*R, ox=Wx+k*R+model.riserT+nose, oy=Wy+k*R+model.riserT+nose;
-    if(style==="miter") topLayer+=svgLine(X(ix),Y(iy),X(ox),Y(oy),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
-    topLayer+=svgText(X(ox)-6,Y(oy)-6,levelTag(model,k),TAGSTYLE+' text-anchor="end"');
+    /* The tapered corner's own face: boards parallel to the 45° diagonal, so
+       each is a trapezoid between the two diverging joint lines. Centred on the
+       old hip line, which is still the axis of symmetry. */
+    const dg=treadDiagBoards(k,model);
+    if(dg){
+      const Sin=Wx+Wy+2*(k-1)*R-model.clip(k-1);
+      const edge=(o,len)=>{                     // the two ends of the board edge at offset o
+        const u=(Sin+o*Math.SQRT2-Wx-Wy)/2, h=len/(2*Math.SQRT2);
+        return [[Wx+u+h, Wy+u-h],[Wx+u-h, Wy+u+h]];
+      };
+      for(const b of dg.boards){
+        const [a1,a2]=edge(b.o,b.short), [c1,c2]=edge(b.o+b.w,b.long);
+        s+=svgPoly([[X(a1[0]),Y(a1[1])],[X(c1[0]),Y(c1[1])],[X(c2[0]),Y(c2[1])],[X(a2[0]),Y(a2[1])]],MAT.tread);
+      }
+    }
+    /* Joint lines and the level tag go to a top layer — the next ring's tread
+       boards are drawn after this one and would cover them. */
+    const iy=Wy+(k-1)*R, ix=Wx+(k-1)*R, cPrev=model.clip(k-1), Tb=model.Tb, m=tp.m;
+    if(style==="miter"){
+      const J='stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"';
+      /* front↔corner, then side↔corner. Square corner: cPrev 0 and m 1, so both
+         collapse onto the one 45° miter the tool always drew. */
+      topLayer+=svgLine(X(ix-cPrev),Y(iy),X(ix-cPrev+Tb*m),Y(iy+Tb),J);
+      if(tp.on) topLayer+=svgLine(X(ix),Y(iy-cPrev),X(ix+Tb),Y(iy-cPrev+Tb*m),J);
+    }
+    /* Tag placement. Square corner: just inside the ring's outer point. Tapered:
+       on the corner face itself, which is the distinctive part of the ring and
+       is well clear of the leg ends where the stringer ids live — at N=9 the
+       bottom level tag and the last leg id land on the same line otherwise. */
+    if(tp.on){
+      /* mid-way along the front leg: clear of the leg ends where the F ids sit
+         and clear of the hip line where the C ids sit, and the rings are one
+         full run apart in y so the tags never crowd each other */
+      topLayer+=svgText(X((ix-cPrev+Tb*m)*0.5),Y(iy+Tb)-5,levelTag(model,k),TAGSTYLE+' text-anchor="middle"');
+    } else {
+      topLayer+=svgText(X(ix+Tb)-6,Y(iy+Tb)-6,levelTag(model,k),TAGSTYLE+' text-anchor="end"');
+    }
   }
   /* Platform decking last, so its nosing overhangs level 1's tread the same way
      every tread overhangs the one below it. Frame is Wx × Wy; decking is +nosing
@@ -2113,7 +2435,7 @@ function renderPlanSVG(model){
   s+=svgText(X(Math.min(Wx,fX)/2),Y(Wy/2),
     model.nose>0.01 ? t("platform {0} × {1} finished", L(fX), L(fY)) : t("platform {0} × {1}", L(fX), L(fY)),
     'font-size="10" fill="#33556e" text-anchor="middle"');
-  if(style==="miter") s+=svgText(X(footX)+6,Y(footY)-2,t("45° miter line"),'font-size="9" fill="#8c3b3b"');
+  if(style==="miter") s+=svgText(X(footX)+6,Y(footY)-2,jointLbl,'font-size="9" fill="#8c3b3b"');
   // framing below, hidden-line dashed
   const dash='stroke="#4c6076" stroke-width=".8" stroke-dasharray="3 2.5"';
   if(S.method==="boxes"){
@@ -2150,9 +2472,25 @@ function renderPlanSVG(model){
         }
       }
     }
-    s+=svgLine(X(Wx),Y(Wy),X(footX),Y(footY),'stroke="#4c6076" stroke-width="1.6" stroke-dasharray="6 3"');
-    topLayer+=svgText(X((Wx+footX)/2)+4,Y((Wy+footY)/2)-4,"H",STRTAG);
-    s+=svgText(X(footX)+6,Y(footY)+12,t("hip stringer (H)"),'font-size="9" fill="#4c6076"');
+    const cs=cornerStringers(model);
+    if(cs){
+      /* No 90° point, so no hip. Each corner stringer runs along the old hip
+         DIRECTION, offset sideways across the face, starting where the face has
+         grown wide enough to reach it. */
+      const reach=(model.N-1)*R+model.riserT+nose;
+      for(const g of cs.list){
+        const h=g.lateral/Math.SQRT2;                       // sideways offset in x,y
+        const u0=(g.kmin-1)*R;
+        s+=svgLine(X(Wx+u0+h),Y(Wy+u0-h),X(Wx+reach+h),Y(Wy+reach-h),
+          'stroke="#4c6076" stroke-width="1.4" stroke-dasharray="6 3"');
+        topLayer+=svgText(X(Wx+(u0+reach)/2+h)+4,Y(Wy+(u0+reach)/2-h)-4,g.id,STRTAG);
+      }
+      s+=svgText(X(footX)+6,Y(footY)+12,t("corner stringers (C…)"),'font-size="9" fill="#4c6076"');
+    } else {
+      s+=svgLine(X(Wx),Y(Wy),X(footX),Y(footY),'stroke="#4c6076" stroke-width="1.6" stroke-dasharray="6 3"');
+      topLayer+=svgText(X((Wx+footX)/2)+4,Y((Wy+footY)/2)-4,"H",STRTAG);
+      s+=svgText(X(footX)+6,Y(footY)+12,t("hip stringer (H)"),'font-size="9" fill="#4c6076"');
+    }
   }
   s+=svgText(mL,Y(footY)+34,capBottom,'font-size="9" fill="#667"');
   // kept high on the right so it clears the overall depth dimension at mid-height
@@ -2698,14 +3036,31 @@ function boxFramePlanSVG(model,k){
     joists.push([[Xi+tk,y],[Xo-tk,y],[Xo-tk,y+tk],[Xi+tk,y+tk]]);
   }
   for(const j of joists) s+=poly(j,MAT.joist);
-  // rims, mitered at both corners
-  s+=poly([[0,Yo-tk],[Xo-tk,Yo-tk],[Xo,Yo],[0,Yo]],MAT.rim);            // front outer
-  s+=poly([[Xo-tk,0],[Xo,0],[Xo,Yo],[Xo-tk,Yo-tk]],MAT.rim);            // side outer
-  s+=poly([[0,Yi],[Xi,Yi],[Xi+tk,Yi+tk],[0,Yi+tk]],MAT.rim);            // front inner
-  s+=poly([[Xi,0],[Xi+tk,0],[Xi+tk,Yi+tk],[Xi,Yi]],MAT.rim);            // side inner
-  // corner block on the miter
-  s+=poly([[Xi+tk,Yi+tk],[Xi+tk+tk*2,Yi+tk],[Xi+tk,Yi+tk+tk*2]],MAT.block);
-  s+=svgLine(X(Xi),Y(Yi),X(Xo),Y(Yo),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
+  /* Rims. With a taper the legs stop short of the point and a third pair of
+     rims closes the 45° face; with a square corner cO/cI are 0 and this reduces
+     to the two mitered L rims the tool has always drawn. */
+  const cO=model.clip(k), cI=model.clip(k-1), m=model.taper.m;
+  s+=poly([[0,Yo-tk],[Xo-cO-tk*m,Yo-tk],[Xo-cO,Yo],[0,Yo]],MAT.rim);          // front outer
+  s+=poly([[Xo-tk,0],[Xo,0],[Xo,Yo-cO],[Xo-tk,Yo-cO-tk*m]],MAT.rim);          // side outer
+  s+=poly([[0,Yi],[Xi-cI,Yi],[Xi-cI+tk*m,Yi+tk],[0,Yi+tk]],MAT.rim);          // front inner
+  s+=poly([[Xi,0],[Xi+tk,0],[Xi+tk,Yi-cI+tk*m],[Xi,Yi-cI]],MAT.rim);          // side inner
+  if(bx.diag){
+    // the corner face's own rims, along the 45° diagonal
+    const band=(c,off)=>{                    // rim just inside the face line at clip c
+      const p1=[Xo-c-0*off, Yo], p2=[Xo, Yo-c];      // the face itself
+      const n=off/Math.SQRT2;                        // inward normal step
+      return [[p1[0]-n,p1[1]-n],[p2[0]-n,p2[1]-n],[p2[0]-n-tk/Math.SQRT2,p2[1]-n-tk/Math.SQRT2],
+              [p1[0]-n-tk/Math.SQRT2,p1[1]-n-tk/Math.SQRT2]];
+    };
+    s+=poly(band(cO,0),MAT.rim);                                  // corner outer rim
+    if(!bx.diag.triangle) s+=poly([[Xi-cI,Yi],[Xi,Yi-cI],
+      [Xi+tk/Math.SQRT2,Yi-cI+tk/Math.SQRT2],[Xi-cI+tk/Math.SQRT2,Yi+tk/Math.SQRT2]],MAT.rim);
+  } else {
+    // corner block on the miter
+    s+=poly([[Xi+tk,Yi+tk],[Xi+tk+tk*2,Yi+tk],[Xi+tk,Yi+tk+tk*2]],MAT.block);
+  }
+  s+=svgLine(X(Xi-cI),Y(Yi),X(Xo-cO),Y(Yo),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
+  if(bx.diag) s+=svgLine(X(Xi),Y(Yi-cI),X(Xo),Y(Yo-cO),'stroke="#8c3b3b" stroke-width="1.1" stroke-dasharray="5 3"');
   /* Callouts down the right gutter, in reading order top to bottom — which is
      also the order you meet the boards walking down the stair. */
   const gx=X(Xo)+10;
@@ -2762,6 +3117,30 @@ function renderStringerSheets(model){
             kmin:g.kmin, name:ids+" · "+stringerRole(legName, g.kmin)})
         +"</div>";
     }
+  }
+  const cs=cornerStringers(model);
+  if(cs){
+    /* one sheet per distinct corner stringer, exactly like the legs */
+    const seen=new Set();
+    for(const g of cs.list){
+      if(seen.has(g.c)) continue;
+      seen.add(g.c);
+      const same=cs.list.filter(x=>x.c===g.c), ids=idRange(same.map(x=>x.id)), qty=same.length;
+      const title=t("{0} · {1} (levels {2}–{3}) · run {4} across the corner · rise {5} · marks every {6} · board ≥ {7}",
+          ids, notchCount(g.c), g.kmin, model.N, L(cs.run), L(model.r), L(cs.Ls), L(g.reqLen))
+        +(g.boardLen ? t(" — cut from {0}", L(g.boardLen)) : t(" — NEEDS A SPLICE"));
+      const perBoard=g.boardLen ? Math.max(1, Math.floor((g.boardLen+S.kerf)/(g.reqLen+S.kerf))) : 1;
+      h+='<div class="sheet"><h4>'+t("{0} — on the board: {1} needed, {2} per board, {3} board(s)", ids, qty, Math.min(perBoard,qty), Math.ceil(qty/perBoard))+"</h4>"
+        +'<div class="svgwrap">'+stringerStockSVG(g.c,model.r,cs.run,cs.drop,bw,g.boardLen,title,Math.min(perBoard,qty),g.topRun,g.topLift)+"</div>"
+        +'<h4>'+t("Finished profile")+"</h4>"
+        +'<div class="svgwrap">'+stringerProfileSVG(g.c,model.r,cs.run,cs.drop,bw,title,g.topRun,g.topLift)+"</div>"
+        +cutScheduleHTML(model, {c:g.c, r:model.r, R:cs.run, Ls:cs.Ls, drop:cs.drop, bw,
+            topRun:g.topRun, topLift:g.topLift, reqLen:g.reqLen, boardLen:g.boardLen,
+            notchDepth:cs.notchDepth, throat:cs.throat, minWidth:cs.minWidth, qty,
+            kmin:g.kmin, name:ids+" · "+t("corner stringer, 45° plan bevels")})
+        +"</div>";
+    }
+    return h;
   }
   const hip=hipStringer(model);
   const hipTitle=t("H · HIP stringer · run {0} (R×√2) · {1} · marks every {2} · board ≥ {3} · throat {4}",
@@ -2830,6 +3209,17 @@ function renderSummaryPanel(model){
       +(model.base>0?t("Framing bears on the deck structure"):t("Framing bears on the decking"))+'</span></div>'
     +'<div><b>'+L(model.platFinX)+' × '+L(model.platFinY)+'</b><span>'
       +t("Platform, finished (frame {0} × {1})", L(model.Wx), L(model.Wy))+'</span></div>'
+    +(model.taper.on
+      ? '<div><b>'+L(model.clip(model.N-1)*Math.SQRT2)+'</b><span>'+t("Corner face on the bottom step")+'</span></div>'
+       +'<div><b>'+LD(model.taper.g)+'</b><span>'+t("Going across the corner")+'</span></div>'
+       +'<div><b>'+dec(model.taper.sawDeg.toFixed(1))+'°</b><span>'+t("Corner cut, off square")+'</span></div>'
+      : '')
+    +'</div>';
+  if(model.taper.on) h += '<div class="msg i"><b>'+t("Tapered corner.")+'</b> '
+    +t("The platform keeps its square corner — it is the apex. Each step clips {0} more off at 45°, so the corner face opens from {1} on the top step to {2} on the bottom one. Every corner cut is {3}° off square (the two faces meet at 135°), not 45°.",
+       LD(model.taper.dc), L(model.clip(1)*Math.SQRT2), L(model.clip(model.N-1)*Math.SQRT2), dec(model.taper.sawDeg.toFixed(1)))
+    +(Math.abs(model.taper.g-model.R)<1e-9
+       ? " "+t("The going across it is the same {0} as the legs, so the corner treads use the same board layout and the corner stringers are the same board as a common one — no hip.", LD(model.R)) : "")
     +'</div>';
   h += '<h3>'+t("Board fit — do I have to cut boards?")+'</h3>';
   h += treadLayoutHTML(model, treadFit);
@@ -2932,14 +3322,23 @@ function renderFramingPanel(model){
       +'<dt>'+t("Longest stringer")+'</dt><dd>'+t("{0} — longest stock you buy is {1}", L(Math.max(...st0.list.map(x=>x.reqLen),0)), L(Math.max(...parseStockLens(),0)))+'</dd>'
       +'<dt>'+t("Spacing")+'</dt><dd>'+t("{0} o.c., limited to {1} by the {2} treads", fmtIn(st0.spacing), fmtIn(st0.spanLimit), S.treadStock)+'</dd>'
       +'</div>';
-    const hip0 = hipStringer(model);
-    if(!hip0.fitsStock)
-      h += '<div class="msg e"><b>'+t("The hip will not come out of a {0}.", S.stringerStock)+'</b> '
-        +t("Its run is R×√2 = {0}, so the notch bites {1} deep and leaves only {2} of throat. It needs a board at least {3} wide. Options: double the hip, use an LVL or a wider board there, drop the throat minimum, or reduce the run.",
-           L(hip0.run), fmtIn(hip0.notchDepth), fmtIn(hip0.throat), fmtIn(hip0.minWidth))+'</div>';
+    const cs0 = cornerStringers(model);
+    if(!cs0){
+      const hip0 = hipStringer(model);
+      if(!hip0.fitsStock)
+        h += '<div class="msg e"><b>'+t("The hip will not come out of a {0}.", S.stringerStock)+'</b> '
+          +t("Its run is R×√2 = {0}, so the notch bites {1} deep and leaves only {2} of throat. It needs a board at least {3} wide. Options: double the hip, use an LVL or a wider board there, drop the throat minimum, or reduce the run.",
+             L(hip0.run), fmtIn(hip0.notchDepth), fmtIn(hip0.throat), fmtIn(hip0.minWidth))+'</div>';
+    } else if(cs0.sameAsLegs){
+      h += '<div class="msg i"><b>'+t("No hip stringer to worry about.")+'</b> '
+        +t("The tapered corner has no 90° point, so the face is carried by corner stringers running perpendicular to it — and because the diagonal going is the same {0} as the legs, they are the SAME board as a common leg stringer: notch {1} deep, {2} of throat. The square corner's hip needs a run of R×√2 = {3} and often will not come out of a {4} at all.",
+           LD(model.R), fmtIn(cs0.notchDepth), fmtIn(cs0.throat), L(model.R*Math.SQRT2), S.stringerStock)+'</div>';
+    }
     h += '<div class="note">'
       +t("Three kinds of board. A COMMON stringer reaches the platform and runs the whole flight. A JACK stringer is one the 45° miter cuts short, so it starts partway down and carries fewer notches — its top end is a plain plumb cut against nothing, it lands on the tread of the step above. The HIP is the diagonal at the outside corner; both legs' treads bear on it.")
-      +" "+t("Every stringer has an ID — F1… on the front leg, S1… on the side leg, numbered outward from the house wall, and H for the hip. The same ID is on the plan view, on its sheet and in the cut list.")
+      +" "+(cs0
+        ? t("With a tapered corner there is no hip: the flat face gets CORNER stringers, C1… across it, numbered from one end. The same ID is on the plan view, on its sheet and in the cut list.")
+        : t("Every stringer has an ID — F1… on the front leg, S1… on the side leg, numbered outward from the house wall, and H for the hip. The same ID is on the plan view, on its sheet and in the cut list."))
       +"</div>";
     for(const legName of ["front","side"]){
       const st = stringersForLeg(legName, model);
@@ -2948,10 +3347,22 @@ function renderFramingPanel(model){
       for(const s2 of st.list) h += "<tr><td><b>"+s2.id+"</b></td><td>"+LD(s2.pos)+"</td><td>"+(s2.kmin===1?t("common"):t("jack"))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
       h += "</tbody></table>";
     }
-    const hip = hipStringer(model);
-    h += "<h3>"+t("Hip stringer (corner)")+"</h3><div class=\"kv\"><dt>"+t("Run")+"</dt><dd>"+LD(hip.run)+"</dd><dt>"+t("Rise")+"</dt><dd>"+LD(hip.rise)+"</dd><dt>"+t("Notches")+"</dt><dd>"+hip.c+"</dd>"
-      +"<dt>"+t("Throat")+"</dt><dd>"+fmtIn(hip.throat)+(hip.throat<S.throatMin?' <span class="pill rip">'+t("tight — below min {0}, usually the tightest of all the stringers", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+"</dd>"
-      +"<dt>"+t("Required length")+"</dt><dd>"+LD(hip.reqLen)+"</dd><dt>"+t("Buy length")+"</dt><dd>"+(hip.boardLen?L(hip.boardLen):t("needs splice"))+"</dd></div>";
+    if(cs0){
+      h += "<h3>"+t("Corner stringers (tapered face)")+"</h3>";
+      h += '<table><thead><tr><th>'+t("ID")+'</th><th>'+t("Off the centreline")+'</th><th>'+t("Notches (levels)")+'</th><th>'+t("Required length")+'</th><th>'+t("Buy length")+'</th></tr></thead><tbody>';
+      for(const s2 of cs0.list) h += "<tr><td><b>"+s2.id+"</b></td><td>"+LD(Math.abs(s2.lateral))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
+      h += "</tbody></table>";
+      h += '<div class="kv"><dt>'+t("Run per step")+"</dt><dd>"+LD(cs0.run)
+        +(cs0.sameAsLegs?' <span class="pill ok">'+t("same as the legs")+'</span>':'')+"</dd>"
+        +"<dt>"+t("Notch depth")+"</dt><dd>"+fmtIn(cs0.notchDepth)+"</dd>"
+        +"<dt>"+t("Throat")+"</dt><dd>"+fmtIn(cs0.throat)+(cs0.throat<S.throatMin?' <span class="pill rip">'+t("below min {0}", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+"</dd>"
+        +"<dt>"+t("Widest face")+"</dt><dd>"+t("{0} on the bottom step, spaced {1} o.c.", LD(cs0.faceMax), fmtIn(cs0.spacing))+"</dd></div>";
+    } else {
+      const hip = hipStringer(model);
+      h += "<h3>"+t("Hip stringer (corner)")+"</h3><div class=\"kv\"><dt>"+t("Run")+"</dt><dd>"+LD(hip.run)+"</dd><dt>"+t("Rise")+"</dt><dd>"+LD(hip.rise)+"</dd><dt>"+t("Notches")+"</dt><dd>"+hip.c+"</dd>"
+        +"<dt>"+t("Throat")+"</dt><dd>"+fmtIn(hip.throat)+(hip.throat<S.throatMin?' <span class="pill rip">'+t("tight — below min {0}, usually the tightest of all the stringers", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+"</dd>"
+        +"<dt>"+t("Required length")+"</dt><dd>"+LD(hip.reqLen)+"</dd><dt>"+t("Buy length")+"</dt><dd>"+(hip.boardLen?L(hip.boardLen):t("needs splice"))+"</dd></div>";
+    }
     h += '<div class="note">'
       +t('Layout: step the framing square at rise {0} / run {1}, which puts a mark every {2} along the board edge. The bottom is cut {3} below the last seat — that is the tread thickness{4} ("drop the stringer"). Stringers nearer the corner carry fewer notches; the triangle at the corner is carried by the hip.',
          LD(model.r), LD(model.R), LD(hyp(model.r,model.R)), fmtIn(st0.drop),
@@ -3019,16 +3430,21 @@ function renderFramingPanel(model){
     h += "<div class='note'>"+t("Decking fit")+" "+fitSummaryHTML(t("across {0}", L(pf.deckFillDim)), pf.deckFit)+"</div>";
     h += '<div class="msg w">'+t("Bearing must land over the existing deck's joists/beams, not mid-span on decking. If the frame height exceeds the rim board width, add posts or a stud frame. Check door swing/threshold clearance and slope the platform surface away from the house for drainage.")+'</div>';
   }
-  if(S.cornerStyle==="compare") h += "<h3>"+t("Corner joint comparison")+"</h3>"+renderCompareTable(model);
+  if(S.cornerStyle==="compare" && !model.taper.on) h += "<h3>"+t("Corner joint comparison")+"</h3>"+renderCompareTable(model);
   document.getElementById("panel-framing").innerHTML = h;
 }
 function renderStepsPanel(model){
-  const style = S.cornerStyle==="through" ? "through" : "miter";
+  const tp=model.taper;
+  const style = (tp.on || S.cornerStyle!=="through") ? "miter" : "through";
   let h = levelLegend(model);
+  if(tp.on) h += '<div class="msg i"><b>'+t("Tapered corner.")+'</b> '
+    +t("Every corner cut is {0}° off square, not 45° — the two faces meet at 135°. The clip takes {1} more off each step, so the corner face grows {2} → {3} down the stair, and the going across it is {4}.",
+       dec(tp.sawDeg.toFixed(1)), LD(tp.dc), L(model.clip(1)*Math.SQRT2), L(model.clip(model.N-1)*Math.SQRT2), LD(tp.g))+'</div>';
   if(S.riserStyle==="closed"){
     const rb = riserBoards(model);
-    h += "<h3>"+t("Riser boards ({0})", rb.rows.length)+"</h3><table><thead><tr><th>"+t("Riser k")+"</th><th>"+t("Height")+"</th><th>"+t("Front long/short")+"</th><th>"+t("Side long/short")+"</th></tr></thead><tbody>";
-    for(const row of rb.rows) h += "<tr><td>"+row.k+"</td><td>"+LD(row.height)+"</td><td>"+LD(row.front.long)+" / "+LD(row.front.short)+"</td><td>"+LD(row.side.long)+" / "+LD(row.side.short)+"</td></tr>";
+    h += "<h3>"+t("Riser boards ({0})", rb.rows.length)+"</h3><table><thead><tr><th>"+t("Riser k")+"</th><th>"+t("Height")+"</th><th>"+t("Front long/short")+"</th><th>"+t("Side long/short")+"</th>"+(tp.on?"<th>"+t("Corner long/short")+"</th>":"")+"</tr></thead><tbody>";
+    for(const row of rb.rows) h += "<tr><td>"+row.k+"</td><td>"+LD(row.height)+"</td><td>"+LD(row.front.long)+" / "+LD(row.front.short)+"</td><td>"+LD(row.side.long)+" / "+LD(row.side.short)+"</td>"
+      +(tp.on?"<td>"+(row.diag?LD(row.diag.long)+" / "+LD(row.diag.short):t("— the platform corner is a point"))+"</td>":"")+"</tr>";
     h += "</tbody></table>";
   } else {
     h += '<div class="msg w">'+t("Open risers selected — no riser boards.")
@@ -3041,6 +3457,13 @@ function renderStepsPanel(model){
       const tb = treadLegBoards(legName, lvl.k, model, style);
       h += '<div><h4>'+t("{0} leg — {1} bd, board 1 at the nosing", t(legName), tb.boards.length)+'</h4><table><thead><tr><th>'+t("Bd")+'</th><th>'+t("Long pt")+'</th><th>'+t("Short pt")+'</th><th>'+t("Width")+'</th></tr></thead><tbody>';
       for(const b of tb.boards) h += "<tr><td>"+b.j+"</td><td>"+LD(b.long)+"</td><td>"+LD(b.short)+"</td><td>"+fmtIn(b.w)+"</td></tr>";
+      h += "</tbody></table></div>";
+    }
+    const dg = treadDiagBoards(lvl.k, model);
+    if(dg){
+      h += '<div><h4>'+t("corner face — {0} bd, {1} deep, face {2} → {3}", dg.boards.length, LD(dg.T), L(dg.faceInner), L(dg.faceOuter))
+        +'</h4><table><thead><tr><th>'+t("Bd")+'</th><th>'+t("Long pt")+'</th><th>'+t("Short pt")+'</th><th>'+t("Width")+'</th></tr></thead><tbody>';
+      for(const b of dg.boards) h += "<tr><td>"+b.j+"</td><td>"+LD(b.long)+"</td><td>"+LD(b.short)+"</td><td>"+fmtIn(b.w)+(b.triangle?' <span class="pill">'+t("triangle")+'</span>':"")+"</td></tr>";
       h += "</tbody></table></div>";
     }
     h += "</div></div>";
@@ -3797,6 +4220,126 @@ function runTests(){
       assert("every level tag and stringer id is drawn on top, none painted over",
         hidden===0 && seen>0, hidden+" hidden of "+seen);
       S.method=savedM;
+    }
+
+    /* ---- tapered corner -------------------------------------------------
+       The whole thing is one parameter, dc. Square is dc = 0, and every
+       formula is written once, so the first thing to prove is that turning the
+       taper OFF reproduces the square corner exactly. */
+    {
+      const savedSh=S.cornerShape, savedTm=S.taperMode, savedTg=S.taperGrow, savedM=S.method, savedCs=S.cornerStyle;
+      S.cornerShape="square"; S.cornerStyle="miter";
+      const mSq=computeModel();
+      assert("square corner: no clip, 45° joint, no diagonal face",
+        !mSq.taper.on && mSq.clip(3)===0 && mSq.taper.m===1 && Math.abs(mSq.taper.sawDeg-45)<1e-9,
+        JSON.stringify({m:mSq.taper.m, saw:mSq.taper.sawDeg}));
+      const sqF=treadLegBoards("front",2,mSq,"miter").boards;
+      assert("square corner tread boards are the old x = Wx + (y − Wy) miter",
+        sqF.every(b=>Math.abs(b.long-(mSq.Wx+mSq.R+b.o+b.w))<1e-9 && Math.abs(b.short-(mSq.Wx+mSq.R+b.o))<1e-9),
+        sqF.map(b=>b.long.toFixed(2)).join(","));
+      assert("square corner has no diagonal boards and keeps its hip",
+        treadDiagBoards(2,mSq)===null && cornerStringers(mSq)===null && boxesForLevel(mSq,2).diag===null);
+
+      S.cornerShape="taper"; S.taperMode="match";
+      const m1=computeModel(), tp=m1.taper;
+      /* the defining property the user asked for */
+      assert("matching the legs' going makes the corner exactly as deep as the legs",
+        Math.abs(tp.g-m1.R)<1e-9, tp.g+" vs "+m1.R);
+      assert("that fixes the clip growth at R(2−√2)",
+        Math.abs(tp.dc-m1.R*(2-Math.SQRT2))<1e-9, tp.dc);
+      assert("and puts the joint on the bisector of the 135° corner — a 22.5° cut",
+        Math.abs(tp.sawDeg-22.5)<1e-6, tp.sawDeg);
+      assert("the going formula holds for any clip growth: g = (2R − dc)/√2",
+        Math.abs(tp.g-(2*m1.R-tp.dc)/Math.SQRT2)<1e-9);
+      /* platform stays square — the clip is zero at k=0, which IS the platform */
+      assert("the platform keeps its 90° corner whatever the taper",
+        m1.clip(0)===0 && riserBoards(m1).rows[0].diag===null &&
+        Math.abs(riserBoards(m1).rows[0].front.long-m1.Wx)<1e-9,
+        m1.clip(0)+" / "+riserBoards(m1).rows[0].front.long);
+      /* the corner face grows by exactly one clip step each level */
+      const faces=m1.levels.map(l=>m1.clip(l.k)*Math.SQRT2);
+      assert("the corner face widens by the same amount every step",
+        faces.every((f,i)=>i===0 || Math.abs((f-faces[i-1])-tp.dc*Math.SQRT2)<1e-9),
+        faces.map(f=>f.toFixed(2)).join(" → "));
+      assert("the top step's face is one clip wide, so the taper starts from a point",
+        Math.abs(faces[0]-tp.dc*Math.SQRT2)<1e-9, faces[0]);
+      /* the diagonal band's boards must span the face at both its edges */
+      const dg=treadDiagBoards(2,m1);
+      assert("corner boards run face-inner to face-outer, mitered both ends",
+        Math.abs(Math.min(...dg.boards.map(b=>b.short))-dg.faceInner)<0.02 &&
+        Math.max(...dg.boards.map(b=>b.long))>dg.faceOuter-0.02,
+        dg.faceInner.toFixed(2)+" → "+dg.faceOuter.toFixed(2));
+      assert("with the going matched, the corner face uses the SAME board layout as the legs",
+        Math.abs(m1.TbDiag-m1.Tb)<1e-9 && dg.boards.length===treadLegBoards("front",2,m1,"miter").boards.length,
+        m1.TbDiag+" vs "+m1.Tb);
+      /* ring 1's corner is a triangle: its inner edge is the platform's point */
+      const dg1=treadDiagBoards(1,m1);
+      assert("the top step's corner is a triangle — its inner edge is the platform point",
+        dg1.faceInner===0 && dg1.boards.some(b=>b.triangle),
+        dg1.boards.map(b=>b.short.toFixed(1)+"/"+b.long.toFixed(1)).join(" "));
+      /* legs get shorter, and by exactly the clip */
+      /* leg boards: the joint starts one clip back and leans at m, not 45° */
+      const tapF=treadLegBoards("front",2,m1,"miter").boards;
+      assert("leg boards start one clip back and lean at the taper's angle, not 45°",
+        tapF.every(b=>Math.abs(b.long-((m1.Wx+m1.R-m1.clip(1))+(b.o+b.w)*tp.m))<1e-9) &&
+        Math.max(...tapF.map(b=>b.long)) < Math.max(...sqF.map(b=>b.long)),
+        tapF.map(b=>b.long.toFixed(2)).join(","));
+      /* framing */
+      const cs=cornerStringers(m1);
+      assert("the hip is gone, replaced by corner stringers across the face",
+        !!cs && cs.list.length>0 && cs.sameAsLegs, cs?cs.list.length+" of them":"none");
+      assert("and they are the same board as a common leg stringer",
+        Math.abs(cs.notchDepth-stringersForLeg("front",m1).notchDepth)<1e-9 &&
+        Math.abs(cs.throat-stringersForLeg("front",m1).throat)<1e-9,
+        cs.notchDepth+" / "+cs.throat);
+      /* THE APEX MUST BE CARRIED. Spacing across the face gives an even count on
+         some widths and leaves the centreline — the only line that reaches the
+         top step — with nothing under it. */
+      assert("there is always a stringer on the centreline, carrying every level",
+        cs.list.some(x=>Math.abs(x.lateral)<1e-9 && x.kmin===1),
+        cs.list.map(x=>x.id+":lat"+x.lateral.toFixed(1)+":k"+x.kmin).join(" "));
+      assert("that holds at every face width, not just this one", (()=>{
+        const keepN=S.risers, keepT=S.treadStock;
+        let ok=true, why="";
+        for(const n of [2,3,4,5,6,7,9]) for(const ts of ["5/4x6 PT","2x6","2x10"]){
+          S.risers=n; S.treadStock=ts;
+          const cc=cornerStringers(computeModel());
+          if(cc && !cc.list.some(x=>Math.abs(x.lateral)<1e-9 && x.kmin===1)){ ok=false; why="N"+n+"/"+ts; }
+        }
+        S.risers=keepN; S.treadStock=keepT; return ok||why;
+      })()===true, "");
+      assert("corner tread spans between supports are checked and reported",
+        typeof cs.worstSpan==="number" && cs.worstSpan>0 && typeof cs.spansOK==="boolean",
+        cs.worstSpan.toFixed(2)+" vs limit "+cs.spanLimit);
+      S.method="boxes";
+      const bxT=boxesForLevel(computeModel(),2);
+      assert("the box gets a third band of rims and joists on the 45° face",
+        !!bxT.diag && bxT.diag.outer>bxT.diag.inner && bxT.diag.joistCount>=2,
+        JSON.stringify({inner:bxT.diag.inner.toFixed(2), outer:bxT.diag.outer.toFixed(2)}));
+      assert("the box's leg rims are shortened by the clip too",
+        Math.abs(bxT.legs[0].outer-(computeModel().Wx+2*computeModel().R-computeModel().clip(2)))<1e-9);
+      /* every piece the corner needs must reach the cut list */
+      S.method="stringers"; S.riserStyle="closed";
+      const roles=collectPieces(computeModel()).map(p=>p.role).join(" | ");
+      assert("corner treads, corner risers and corner stringers all reach the cut list",
+        /corner bd|coin pl/.test(roles) && /Riser \d+ corner|Contremarche \d+ coin/.test(roles) &&
+        /C\d+ — corner stringer/.test(roles) && !/hip stringer|limon d'arête/.test(roles),
+        roles.replace(/^.*(C\d+ — corner stringer[^|]*)/,"$1").slice(0,160));
+      /* a custom clip of 0 is the constant-width chamfer, and it must trip code */
+      S.taperMode="custom"; S.taperGrow=0;
+      const m0=computeModel();
+      assert("a clip that does not grow gives a diagonal R√2 deep",
+        Math.abs(m0.taper.g-m0.R*Math.SQRT2)<1e-9, m0.taper.g);
+      assert("and that is reported as outside the code's run range",
+        validate(m0).some(w=>w.level==="error" && /diagonal|diagonale/.test(w.msg)),
+        validate(m0).filter(w=>w.level==="error").map(w=>w.msg.slice(0,50)).join(" | "));
+      /* the clip can never be allowed to run away past the unit run */
+      S.taperGrow=999;
+      assert("the clip growth is capped below the unit run, so the legs survive",
+        computeModel().taper.dc < computeModel().R && computeModel().taper.m > 0,
+        computeModel().taper.dc);
+      S.cornerShape=savedSh; S.taperMode=savedTm; S.taperGrow=savedTg;
+      S.method=savedM; S.cornerStyle=savedCs;
     }
 
     /* ---- legs are their own stock --------------------------------------- */
