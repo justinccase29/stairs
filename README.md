@@ -316,7 +316,11 @@ the corner carry fewer notches**, which is what makes the pyramid work. Three ki
 | **Common** | `F1…`, `S1…` | reaches the platform, runs the whole flight | the connection type you picked (below) |
 | **Jack** | `F6`, `S3`… | the 45° miter cuts it short, so it starts partway down | plain plumb cut against the framing of the step above — needs a cleat, hanger or blocking there; the connection type does **not** apply to it |
 | **Hip** | `H` | the diagonal at a **square** corner, run `R√2` | same as a common |
-| **Corner** | `C1…` | perpendicular to a **tapered** corner's face, run `g`. Replaces the hip — there is no 90° point to hip | same as a common |
+| **Corner hip** | `H1`, `H2` | a **tapered** corner's two joint lines, run `hyp(R−dc, R)`. Each is one board from the platform corner to the deck | same as a common |
+| **Corner face** | `C1…` | perpendicular to a tapered corner's face, run `g`, breaking up the span between the two hips | same as a common |
+
+IDs are numbered **after** the ones that carry nothing are dropped, so they always read `1…n` with no
+gaps — a `C2` with no `C1` is just confusing.
 
 **Every stringer is identified.** `F1…Fn` on the front leg, `S1…Sn` on the side leg, numbered outward
 from the house wall, `H` for the hip. The same ID is tagged on the **plan view**, heads its **sheet and
@@ -439,29 +443,44 @@ A tapered corner has no 90° point to hip, so the hip simply **does not exist**.
   piece tapers to nothing and is flagged as a triangle rather than listed as a board.
 * **Both legs get shorter.** A leg's outer end now advances `R − dc` per step, not `R`, which also means
   a leg stringer at a given position starts one level later than it used to.
-* **Corner stringers** (`C1…`) run perpendicular to the face — along the old hip direction — spaced out
-  **from the centreline**, never across the face. That matters: the centreline is the only line that
-  reaches the top step, and spacing across the face gives an even count on some widths and leaves the
-  apex carrying nothing. A test checks a stringer sits on the centreline at every face width.
-* The tool reports the **worst clear span** the corner treads cross and warns if it exceeds the tread
-  stock's span.
+* **Two hips** (`H1`, `H2`) on the joint lines — see below — plus **face stringers** (`C1…`) running
+  perpendicular to the face to break up the span between them. Interior only: the face's edges *are* the
+  hips. The tool reports the worst clear span the corner treads cross and warns past the tread stock's.
 * Code is re-checked on the diagonal: `g` against the run min/max, and `g + nosing` against the tread
   depth minimum. It also warns if the clip has eaten so far into the legs that little straight run is
   left, and errors if it has eaten them entirely.
 * `Corner tread joint` (miter / through / compare) is hidden — a tapered corner has no square butt to
   run a board through, so the joint is always the mitered one, at the taper's own angle.
 
-### Joint nailers — two per step, not optional
+### A tapered corner has TWO hips
 
-A tapered corner has **two joint lines per ring**, where the leg tread boards meet the corner ones, and
-nothing runs along either of them: the leg rims stop at the joint, the corner rims run along the face,
-and the corner joists cross it at 90°. Without a nailer under each miter, both boards' mitered points
-land on air. Every mitered deck corner needs one, and the square corner had it (its "corner block").
+Ring `k`'s joint line — where the leg tread boards meet the corner ones — runs from
+`(Wx+(k−1)R−c_{k−1}, Wy+(k−1)R)` to `(Wx+kR−c_k, Wy+kR)`. Its direction is `(R−dc, R)` for **every** `k`,
+and ring 1's starts at the platform corner itself. So all of them are segments of **one straight line**
+from that corner down to the deck. There are two, mirrored.
 
-The joint line across one ring is `hyp(R − dc, R)` — 11-15/16" at 7/11. In box mode the nailer fits
-*between* the inner and outer rims, so it is shorter by those two thicknesses measured along the line
-(8-11/16"); with stringers nothing is in its way and it runs the full joint. Both ends cut at the
-taper's angle, top flush with the framing. They are in the cut list and drawn on the framing plan.
+That makes them hips, and they get a real notched stringer rather than blocking — a member on the hip
+carries the mitered ends of the leg boards *and* of the corner boards at once, which is exactly what
+those miters need. `H1` and `H2`:
+
+| | Taper's two hips | Square corner's one hip |
+|---|---|---|
+| Run per step | `hyp(R−dc, R)` = **11-15/16"** | `R√2` = 15-9/16" |
+| Notch depth | 6-1/16" | 6-3/4" |
+| Throat left in a 2x12 | 5-3/16" | 4-1/2" |
+| Minimum board | **11-1/16"** — a 2x12 works | 11-3/8" — a 2x12 does **not** |
+| Plan bevel | 22.5° each side of the 45° line | 45° |
+
+`Rj < R√2` always, so a taper hip always needs less board than a square corner's hip. At 7/11 out of a
+2x12 that difference is pass versus fail, and a test pins exactly that.
+
+The corner **face** between the hips is then broken up by the `C` stringers — one on the centreline in
+the common case — so the tread boards never cross more than `faceMax ÷ segments`. On a 4-riser stair
+that is 13-11/16", inside what a 5/4x6 can span.
+
+> An earlier version framed the joints with two nailers per step instead. That was a workaround for a
+> member that should have been there: the nailers had nothing to bear on at either end, because the
+> joint line crosses neither a leg stringer nor the centre corner stringer. Replaced by the hips.
 
 ## Stair connection at the top — do I need a ledger?
 

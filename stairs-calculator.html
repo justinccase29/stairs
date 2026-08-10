@@ -599,9 +599,30 @@ const FR = {
   "Box {0} corner outer rim":"Caisson {0} bordure extérieure du coin",
   "Box {0} corner inner rim":"Caisson {0} bordure intérieure du coin",
   "Box {0} corner joist":"Caisson {0} solive du coin",
-  "Joint nailer {0} (under the corner miters)":"Fourrure de joint {0} (sous les onglets du coin)",
-  "cut to fit between the rims":"coupée pour s'ajuster entre les bordures",
-  "along the joint line, top flush with the framing":"le long de la ligne de joint, dessus au niveau de l'ossature",
+  /* --- the two corner hips --- */
+  "The two corner hips — H1 and H2":"Les deux arêtes du coin — H1 et H2",
+  "Ring k's joint line, where the leg tread boards meet the corner ones, runs from (Wx+(k−1)R−c, Wy+(k−1)R) to (Wx+kR−c′, Wy+kR). Its direction is (R−dc, R) for EVERY k, and ring 1's starts at the platform corner itself — so all of them are segments of ONE straight line from that corner down to the deck. There are two, mirrored. That makes them hips, and they get a real notched stringer: a member on the hip carries the mitered ends of the leg boards and of the corner boards at once, which is exactly what those miters need.":
+    "La ligne de joint de l'anneau k, là où les planches des ailes rejoignent celles du coin, va de (Wx+(k−1)R−c, Wy+(k−1)R) à (Wx+kR−c′, Wy+kR). Sa direction est (R−dc, R) pour CHAQUE k, et celle de l'anneau 1 part du coin même de la plateforme — toutes sont donc des segments d'UNE seule droite allant de ce coin jusqu'à la terrasse. Il y en a deux, en miroir. Ce sont donc des arêtes, et elles méritent un vrai limon entaillé : une pièce sur l'arête porte à la fois les bouts à onglet des planches des ailes et ceux des planches du coin, exactement ce qu'il faut à ces onglets.",
+  "Plan angle":"Angle en plan",
+  "{0}° each side of where a square corner's single 45° hip would be":
+    "{0}° de chaque côté de l'emplacement de l'unique arête à 45° d'un coin carré",
+  " — they run the whole flight":" — elles parcourent toute la volée",
+  "Minimum board":"Planche minimale",
+  "2 × {0}":"2 × {0}",
+  "This is what ties the corner together.":"C'est ce qui solidarise le coin.",
+  "H1 and H2 carry both edges of the corner face and both mitered joints. Between them the face is broken up by the C stringers, so the tread boards never cross more than {0} — the {1} treads are good for {2}. Compare the square corner, whose single hip has a run of R×√2 = {3} and needs an {4} board.":
+    "H1 et H2 portent les deux bords du pan du coin et les deux joints à onglet. Entre elles, le pan est découpé par les limons C : les planches ne franchissent jamais plus de {0} — les marches en {1} tiennent {2}. À comparer au coin carré, dont l'unique arête a un giron de R×√2 = {3} et exige une planche de {4}.",
+  "Corner face stringers — between the hips":"Limons du pan du coin — entre les arêtes",
+  "H1, H2 — corner hips, {0}":"H1, H2 — arêtes du coin, {0}",
+  "{0}° plan bevel":"biseau de {0}° en plan",
+  "on the joint lines, from the platform corner down":"sur les lignes de joint, du coin de la plateforme vers le bas",
+  "{0} — corner face stringer, {1}":"{0} — limon du pan du coin, {1}",
+  "corner hips H1 H2 + face stringers C…":"arêtes du coin H1 H2 + limons de pan C…",
+  "H1, H2 · corner hips · run {0} = hyp(R−dc, R) · {1} · marks every {2} · board ≥ {3} · throat {4}":
+    "H1, H2 · arêtes du coin · giron {0} = hyp(R−dc, R) · {1} · repère chaque {2} · planche ≥ {3} · âme {4}",
+  "H1, H2 — on the board: 2 needed, {0} per board, {1} board(s)":
+    "H1, H2 — sur la planche : 2 requises, {0} par planche, {1} planche(s)",
+  "H1, H2 · corner hips":"H1, H2 · arêtes du coin",
   "Framing only — the same view with the decking stripped off":
     "Ossature seule — la même vue, platelage retiré",
   "Same scale and orientation as the plan above, with every tread board and the platform decking taken away, so you can see what to build and what lands on what. Real stock thicknesses, not single lines.":
@@ -1723,8 +1744,10 @@ function stringersForLeg(legName, model){
     const topLift = topRun>0 ? conn.lift : 0;
     const reqLen = c>0 ? projectStringerLength(c,r,R,Ls,drop,topRun,topLift) : 0;
     const boardLen = c>0 ? pickStockLen(reqLen, stockLens) : null;
-    return {id:tag+(i+1), pos:p, kmin, c, reqLen, boardLen, topRun, topLift};
+    return {pos:p, kmin, c, reqLen, boardLen, topRun, topLift};
   }).filter(s=>s.c>0);
+  /* ids assigned after filtering, so they read 1..n with no gaps */
+  list.forEach((s,i)=>{ s.id=tag+(i+1); });
   const groups = {};
   for(const s of list) (groups[s.c] = groups[s.c] || []).push(s);
   return {legName, Wb, R, N, r, Ls, notchDepth, throat, positions, list, groups, stock,
@@ -1777,14 +1800,13 @@ function cornerStringers(model){
   const faceMax=model.clip(N-1)*Math.SQRT2;            // the bottom step's face
   const stockLens=parseStockLens();
   const half=faceMax/2;
-  /* SPACE THEM OUT FROM THE CENTRELINE, not across the face. The apex of the
-     corner sits on the centreline and it is the ONLY place a stringer can reach
-     the top step, so there has to be one there — laying positions across the
-     face the way the legs do gives an even count on some widths and leaves that
-     apex carrying nothing. */
-  const perSide=Math.max(1, Math.ceil(half/spanLimit));
-  const step=half/perSide;
-  const laterals=[]; for(let i=-perSide;i<=perSide;i++) laterals.push(i*step);
+  /* INTERIOR ONLY. The face's two EDGES are the joint lines, and those now carry
+     a hip stringer each, so these only have to break up the span between them.
+     One at the centreline is the common case, and it is the only line that
+     reaches the top step. */
+  const segs=Math.max(1, Math.ceil(faceMax/spanLimit));
+  const laterals=[]; for(let i=1;i<segs;i++) laterals.push(-half+i*(faceMax/segs));
+  const step=faceMax/segs;
   const list=laterals.map((lat,i)=>{
     const p=Math.abs(lat);
     /* full depth at p needs ring k−1's face to reach p too */
@@ -1796,15 +1818,16 @@ function cornerStringers(model){
     const topRun=(kmin===1) ? cn.tab*Math.SQRT2 : 0;
     const topLift=topRun>0 ? cn.lift : 0;
     const reqLen=c>0 ? projectStringerLength(c,r,g,Ls,drop,topRun,topLift) : 0;
-    return {id:"C"+(i+1), pos:lat+half, lateral:lat, kmin, c, reqLen,
+    return {lateral:lat, pos:lat+half, kmin, c, reqLen,
             boardLen: c>0 ? pickStockLen(reqLen, stockLens) : null, topRun, topLift};
   }).filter(s=>s.c>0);
-  /* Worst clear span the corner treads have to cross on the WIDEST face: the
-     outermost pair land right on the face's edge, where the leg framing takes
-     over, so they carry nothing and drop out — leaving the treads to span from
-     the last surviving stringer out to that joint. */
-  const lats=list.map(s=>s.lateral).sort((a,b)=>a-b);
-  let worst = lats.length ? Math.max(half-lats[lats.length-1], half+lats[0]) : faceMax;
+  /* Number them AFTER filtering, so the ids you read are 1..n with no gaps —
+     the ones that drop out never existed as boards. */
+  list.forEach((s,i)=>{ s.id="C"+(i+1); });
+  /* Worst clear span across the WIDEST face, edge to edge: the edges are hips,
+     so it is just the interior spacing. */
+  const lats=[-half, ...list.map(s=>s.lateral), half].sort((a,b)=>a-b);
+  let worst=0;
   for(let i=1;i<lats.length;i++) worst=Math.max(worst, lats[i]-lats[i-1]);
   return {run:g, rise:r, Ls, notchDepth, throat, minWidth, stock, drop, list,
           faceMax, spanLimit, sameAsLegs: Math.abs(g-R)<1e-9,
@@ -1852,25 +1875,37 @@ function boxesForLevel(model,k){
   return {k, rimH, isBottom, legs, diag:dg, rimFit: fitBoards(rimH, rimStock.w, 0),
           rimStockOK: rimStock.w >= rimH - 1e-9};
 }
-/* ---------- 14b. backing under the corner joints -------------------------
-   A tapered corner has TWO joint lines per ring — where the leg tread boards
-   meet the corner ones — and nothing runs along either of them: the leg rims
-   stop at the joint, the corner rims run along the face, and the corner joists
-   cross the joint at 90°. So both boards' mitered points land on air.
+/* ---------- 14b. the two hips of a tapered corner -------------------------
+   Ring k's joint line — where the leg tread boards meet the corner ones — runs
+   from (Wx+(k-1)R-c_(k-1), Wy+(k-1)R) to (Wx+kR-c_k, Wy+kR). Its direction is
+   (R-dc, R) for EVERY k, and ring 1's starts at the platform corner itself, so
+   all of them are segments of ONE STRAIGHT LINE from that corner down to the
+   deck. There are two, mirrored.
 
-   Every mitered deck corner needs a nailer under the miter, and the square
-   corner had one (its "corner block"). The taper needs two per step. */
-function cornerJointBlocks(model){
+   That makes them hips, and they want a real notched stringer, not blocking: a
+   member on the hip carries the mitered ends of the leg boards AND of the corner
+   boards, which is exactly what those miters need. So a tapered corner has TWO
+   hips at 22.5 degrees either side of where the square corner's single 45 degree
+   hip was — and each has run hyp(R-dc, R), only a little more than R, where the
+   square hip's R*sqrt2 is what refuses to come out of a 2x12. */
+function cornerHipStringers(model){
   if(!model.taper.on) return null;
-  const R=model.R, dc=model.taper.dc;
-  const full=hyp(R-dc,R);                    // the joint line across one whole ring
-  const rimT=sk(S.frameStock).t;
-  /* In box mode it fits BETWEEN the inner and outer rims, so it is shorter by
-     those two thicknesses measured along the line. With stringers there are no
-     rims in its way and it runs the full joint. */
-  const len = S.method==="boxes" ? Math.max(1, (R-2*rimT))*full/R : full;
-  return {len, full, perLevel:2, total:2*Math.max(0,model.N-1),
-          angleDeg:model.taper.sawDeg, betweenRims:S.method==="boxes"};
+  const {R,r,N}=model, dc=model.taper.dc;
+  const Rj=hyp(R-dc,R);                       // run per step along the joint line
+  const Ls=hyp(r,Rj), notchDepth=r*Rj/Ls;
+  const stock=sk(S.stringerStock), throat=stock.w-notchDepth;
+  const minWidth=notchDepth+S.throatMin;
+  const drop=Math.max(0, r-sk(S.treadStock).t)+model.base;
+  const cn=connectionInfo(model);
+  /* It starts AT the platform corner, so it gets the tab — travelling Rj/R along
+     its own axis for every R of bearing measured square to the platform face. */
+  const topRun=cn.tab*Rj/R, topLift=cn.lift;
+  const c=N-1;
+  const reqLen=projectStringerLength(c,r,Rj,Ls,drop,topRun,topLift);
+  return {run:Rj, rise:r, c, Ls, notchDepth, throat, minWidth, stock, drop,
+          reqLen, boardLen:pickStockLen(reqLen, parseStockLens()), topRun, topLift,
+          angleDeg:model.taper.sawDeg, qty:2, ids:["H1","H2"],
+          fitsStock: stock.w >= minWidth - 1e-9};
 }
 /* The inner rim runs the whole length of BOTH legs, so it needs a block at
    every joist position — not one per level. Level 1 fastens to the platform
@@ -2003,11 +2038,14 @@ function collectPieces(model){
           angle:t("layout marks"), note:t("at {0}", fmtIn(s.pos))+(s.boardLen?"":t(" — needs splice"))});
       }
     }
-    const cs = cornerStringers(model);
-    if(cs){
-      /* no 90° point to hip — the flat face gets its own stringers instead */
+    const cs = cornerStringers(model), ch = cornerHipStringers(model);
+    if(ch){
+      /* two hips instead of one, on the joint lines */
+      pieces.push({role:t("H1, H2 — corner hips, {0}", notchCount(ch.c)), stock:S.stringerStock,
+        len:ch.reqLen, qty:2, angle:t("{0}° plan bevel", dec(ch.angleDeg.toFixed(1))),
+        note:t("on the joint lines, from the platform corner down")+(ch.boardLen?"":t(" — needs splice"))});
       for(const s of cs.list)
-        pieces.push({role:t("{0} — corner stringer, {1}", s.id, notchCount(s.c)), stock:S.stringerStock,
+        pieces.push({role:t("{0} — corner face stringer, {1}", s.id, notchCount(s.c)), stock:S.stringerStock,
           len:s.reqLen, qty:1, angle:t("45° plan bevel"),
           note:t("{0} off the centreline", fmtIn(Math.abs(s.lateral)))+(s.boardLen?"":t(" — needs splice"))});
     } else {
@@ -2040,13 +2078,6 @@ function collectPieces(model){
         note:t("under level {0}'s {1} inner rim, down to the deck", blk.k, t(blk.legName))});
     }
   }
-  /* The corner miters need a nailer under them in BOTH framing methods — the
-     tread boards' mitered points have nothing else to land on. */
-  const jb = cornerJointBlocks(model);
-  if(jb) for(const lvl of model.levels)
-    pieces.push({role:t("Joint nailer {0} (under the corner miters)", levelTag(model,lvl.k)),
-      stock:S.frameStock, len:jb.len, qty:jb.perLevel, angle:cornerAng,
-      note:jb.betweenRims ? t("cut to fit between the rims") : t("along the joint line, top flush with the framing")});
   /* Skirts. Only the X=0 side face is ever exposed — the wall closes Y=0, and
      the other two faces are the stairs themselves. */
   if(S.faceX0==="open"){
@@ -2392,7 +2423,10 @@ function renderPlanSVG(model){
   const style = (tp.on || S.cornerStyle!=="through") ? "miter" : "through";
   const capBottom=t("front leg — steps descend this way (+Y)");
   const jointLbl = tp.on ? t("{0}° joint line", dec(tp.sawDeg.toFixed(1))) : t("45° miter line");
-  const rightLabels=[t("side leg (+X)"), jointLbl, tp.on?t("corner stringers"):t("hip stringer")];
+  /* the corner caption is the widest label on the right — size the gutter from
+     the string actually drawn, not a shorter stand-in */
+  const cornerCap = tp.on ? t("corner hips H1 H2 + face stringers C…") : t("hip stringer (H)");
+  const rightLabels=[t("side leg (+X)"), jointLbl, cornerCap];
   const mL=52, mT=40, mB=52;
   const mR=Math.max(76, Math.max(...rightLabels.map(s=>estTextW(s,9)))+24);
   const scale=Math.min(7.5, 690/Math.max(footX+5,1));
@@ -2524,12 +2558,16 @@ function renderPlanSVG(model){
         }
       }
     }
-    const cs=cornerStringers(model);
-    if(cs){
-      /* No 90° point, so no hip. Each corner stringer runs along the old hip
-         DIRECTION, offset sideways across the face, starting where the face has
-         grown wide enough to reach it. */
-      const reach=(model.N-1)*R+model.riserT+nose;
+    const cs=cornerStringers(model), chp=cornerHipStringers(model);
+    if(chp){
+      /* Two hips on the joint lines, plus whatever face stringers break up the
+         span between them. */
+      const cN=model.clip(N-1), reach=(N-1)*R+model.riserT+nose;
+      const HIP='stroke="#4c6076" stroke-width="1.8" stroke-dasharray="7 3"';
+      s+=svgLine(X(Wx),Y(Wy),X(Wx+reach-cN),Y(Wy+reach),HIP);
+      s+=svgLine(X(Wx),Y(Wy),X(Wx+reach),Y(Wy+reach-cN),HIP);
+      topLayer+=svgText(X(Wx+(reach-cN)*0.62)+4,Y(Wy+reach*0.62)-4,"H1",STRTAG);
+      topLayer+=svgText(X(Wx+reach*0.62)+4,Y(Wy+(reach-cN)*0.62)-4,"H2",STRTAG);
       for(const g of cs.list){
         const h=g.lateral/Math.SQRT2;                       // sideways offset in x,y
         const u0=(g.kmin-1)*R;
@@ -2537,7 +2575,7 @@ function renderPlanSVG(model){
           'stroke="#4c6076" stroke-width="1.4" stroke-dasharray="6 3"');
         topLayer+=svgText(X(Wx+(u0+reach)/2+h)+4,Y(Wy+(u0+reach)/2-h)-4,g.id,STRTAG);
       }
-      s+=svgText(X(footX)+6,Y(footY)+12,t("corner stringers (C…)"),'font-size="9" fill="#4c6076"');
+      s+=svgText(X(footX)+6,Y(footY)+12,cornerCap,'font-size="9" fill="#4c6076"');
     } else {
       s+=svgLine(X(Wx),Y(Wy),X(footX),Y(footY),'stroke="#4c6076" stroke-width="1.6" stroke-dasharray="6 3"');
       topLayer+=svgText(X((Wx+footX)/2)+4,Y((Wy+footY)/2)-4,"H",STRTAG);
@@ -2702,17 +2740,19 @@ function renderFramingPlanSVG(model){
       topLayer+=svgText(X(1),Y(Wy+(lvl.k-0.45)*R),levelTag(model,lvl.k),TAGSTYLE);
   }
 
-  /* ---- the nailers under the corner miters, both methods ---- */
-  const jb=cornerJointBlocks(model);
-  if(jb) for(const lvl of model.levels){
-    const k=lvl.k, cI=model.clip(k-1), cO=model.clip(k), d=tk/2;
-    const dirs=[[[Wx+(k-1)*R-cI, Wy+(k-1)*R],[Wx+k*R-cO, Wy+k*R]],
-                [[Wx+(k-1)*R, Wy+(k-1)*R-cI],[Wx+k*R, Wy+k*R-cO]]];
-    for(const [a,b] of dirs){
+  /* ---- the two hips, on the joint lines, in BOTH framing methods ----
+     One straight run each from the platform corner to the deck. */
+  const ch=cornerHipStringers(model);
+  if(ch){
+    const d=(S.method==="boxes"?tk:sT)/2, cN=model.clip(N-1);
+    for(const [a,b] of [[[Wx,Wy],[Wx+(N-1)*R-cN, Wy+(N-1)*R]],
+                        [[Wx,Wy],[Wx+(N-1)*R, Wy+(N-1)*R-cN]]]){
       const vx=b[0]-a[0], vy=b[1]-a[1], ln=hyp(vx,vy)||1;
       const nx=-vy/ln*d, ny=vx/ln*d;
-      s+=poly([[a[0]+nx,a[1]+ny],[b[0]+nx,b[1]+ny],[b[0]-nx,b[1]-ny],[a[0]-nx,a[1]-ny]],MAT.block);
+      s+=poly([[a[0]+nx,a[1]+ny],[b[0]+nx,b[1]+ny],[b[0]-nx,b[1]-ny],[a[0]-nx,a[1]-ny]],MAT.rim);
     }
+    topLayer+=svgText(X(Wx+((N-1)*R-cN)*0.62)+4,Y(Wy+(N-1)*R*0.62)-4,"H1",STRTAG);
+    topLayer+=svgText(X(Wx+(N-1)*R*0.62)+4,Y(Wy+((N-1)*R-cN)*0.62)-4,"H2",STRTAG);
   }
   s+=svgText(mL,Y(footY)+34,cap,'font-size="9" fill="#667"');
   s+=svgText(X(footX)+16,Y(footY*0.22),t("side leg (+X)"),'font-size="9" fill="#667"');
@@ -3339,9 +3379,24 @@ function renderStringerSheets(model){
         +"</div>";
     }
   }
-  const cs=cornerStringers(model);
-  if(cs){
-    /* one sheet per distinct corner stringer, exactly like the legs */
+  const cs=cornerStringers(model), chS=cornerHipStringers(model);
+  if(chS){
+    /* the two hips first — they are the corner's main members */
+    const hTitle=t("H1, H2 · corner hips · run {0} = hyp(R−dc, R) · {1} · marks every {2} · board ≥ {3} · throat {4}",
+      L(chS.run), notchCount(chS.c), L(chS.Ls), L(chS.reqLen), fmtIn(chS.throat));
+    const perB=chS.boardLen ? Math.max(1, Math.floor((chS.boardLen+S.kerf)/(chS.reqLen+S.kerf))) : 1;
+    h+='<div class="sheet"><h4>'+t("H1, H2 — on the board: 2 needed, {0} per board, {1} board(s)", Math.min(perB,2), Math.ceil(2/perB))+"</h4>"
+      +'<div class="svgwrap">'+stringerStockSVG(chS.c,model.r,chS.run,chS.drop,bw,chS.boardLen,hTitle,Math.min(perB,2),chS.topRun,chS.topLift)+"</div>"
+      +'<h4>'+t("Finished profile")+"</h4>"
+      +'<div class="svgwrap">'+stringerProfileSVG(chS.c,model.r,chS.run,chS.drop,bw,hTitle,chS.topRun,chS.topLift)+"</div>"
+      +cutScheduleHTML(model, {c:chS.c, r:model.r, R:chS.run, Ls:chS.Ls, drop:chS.drop, bw,
+          topRun:chS.topRun, topLift:chS.topLift, reqLen:chS.reqLen, boardLen:chS.boardLen,
+          notchDepth:chS.notchDepth, throat:chS.throat, minWidth:chS.minWidth, qty:2,
+          kmin:1, name:t("H1, H2 · corner hips"), hip:true})
+      +"</div>";
+  }
+  if(cs && cs.list.length){
+    /* one sheet per distinct face stringer, exactly like the legs */
     const seen=new Set();
     for(const g of cs.list){
       if(seen.has(g.c)) continue;
@@ -3576,8 +3631,28 @@ function renderFramingPanel(model){
       for(const s2 of st.list) h += "<tr><td><b>"+s2.id+"</b></td><td>"+LD(s2.pos)+"</td><td>"+(s2.kmin===1?t("common"):t("jack"))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
       h += "</tbody></table>";
     }
-    if(cs0){
-      h += "<h3>"+t("Corner stringers (tapered face)")+"</h3>";
+    const ch0 = cornerHipStringers(model);
+    if(ch0){
+      h += "<h3>"+t("The two corner hips — H1 and H2")+"</h3>"
+        + '<div class="note">'
+        + t("Ring k's joint line, where the leg tread boards meet the corner ones, runs from (Wx+(k−1)R−c, Wy+(k−1)R) to (Wx+kR−c′, Wy+kR). Its direction is (R−dc, R) for EVERY k, and ring 1's starts at the platform corner itself — so all of them are segments of ONE straight line from that corner down to the deck. There are two, mirrored. That makes them hips, and they get a real notched stringer: a member on the hip carries the mitered ends of the leg boards and of the corner boards at once, which is exactly what those miters need.")
+        + '</div>'
+        + '<div class="kv"><dt>'+t("Run per step")+"</dt><dd>"+LD(ch0.run)+" = hyp(R−dc, R)</dd>"
+        + "<dt>"+t("Plan angle")+"</dt><dd>"+t("{0}° each side of where a square corner's single 45° hip would be", dec(ch0.angleDeg.toFixed(1)))+"</dd>"
+        + "<dt>"+t("Notches")+"</dt><dd>"+ch0.c+t(" — they run the whole flight")+"</dd>"
+        + "<dt>"+t("Notch depth")+"</dt><dd>"+fmtIn(ch0.notchDepth)+"</dd>"
+        + "<dt>"+t("Throat")+"</dt><dd>"+fmtIn(ch0.throat)+(ch0.throat<S.throatMin?' <span class="pill rip">'+t("below min {0}", fmtIn(S.throatMin))+'</span>':' <span class="pill ok">'+t("ok")+'</span>')+"</dd>"
+        + "<dt>"+t("Minimum board")+"</dt><dd>"+fmtIn(ch0.minWidth)
+          +(ch0.fitsStock?' <span class="pill ok">'+t("a {0} is wide enough", S.stringerStock)+'</span>':' <span class="pill rip">'+t("a {0} is TOO NARROW", S.stringerStock)+'</span>')+"</dd>"
+        + "<dt>"+t("Required length")+"</dt><dd>"+LD(ch0.reqLen)+"</dd>"
+        + "<dt>"+t("Buy length")+"</dt><dd>"+(ch0.boardLen?t("2 × {0}", L(ch0.boardLen)):t("needs splice"))+"</dd></div>"
+        + '<div class="msg i"><b>'+t("This is what ties the corner together.")+'</b> '
+        + t("H1 and H2 carry both edges of the corner face and both mitered joints. Between them the face is broken up by the C stringers, so the tread boards never cross more than {0} — the {1} treads are good for {2}. Compare the square corner, whose single hip has a run of R×√2 = {3} and needs an {4} board.",
+            LD(cs0.worstSpan), S.treadStock, fmtIn(cs0.spanLimit), L(model.R*Math.SQRT2), fmtIn(hipStringer(model).minWidth))
+        + '</div>';
+    }
+    if(cs0 && cs0.list.length){
+      h += "<h3>"+t("Corner face stringers — between the hips")+"</h3>";
       h += '<table><thead><tr><th>'+t("ID")+'</th><th>'+t("Off the centreline")+'</th><th>'+t("Notches (levels)")+'</th><th>'+t("Required length")+'</th><th>'+t("Buy length")+'</th></tr></thead><tbody>';
       for(const s2 of cs0.list) h += "<tr><td><b>"+s2.id+"</b></td><td>"+LD(Math.abs(s2.lateral))+"</td><td>"+s2.c+" (k="+s2.kmin+"–"+model.N+")</td><td>"+LD(s2.reqLen)+"</td><td>"+(s2.boardLen?L(s2.boardLen):'<span class="pill rip">'+t("needs splice")+'</span>')+"</td></tr>";
       h += "</tbody></table>";
@@ -3624,18 +3699,6 @@ function renderFramingPanel(model){
     h += "<h3>"+t("Box frames — one drawing per level")+"</h3>"
       + '<div class="note">'+t("Each box drawn as the boards it is made of, not as a hidden line under the finished stair: outer rim, inner rim, the joists between them, and the 45° miters where the two legs meet at the outside and the inside corner.")+"</div>"
       + renderBoxSheets(model);
-  }
-  const jbp = cornerJointBlocks(model);
-  if(jbp){
-    h += "<h3>"+t("Corner joint nailers")+"</h3>"
-      + '<div class="msg w"><b>'+t("Two per step, and they are not optional.")+'</b> '
-      + t("Nothing else runs along the joint lines where the leg tread boards meet the corner ones: the leg rims stop at the joint, the corner rims run along the face, and the corner joists cross it at 90°. Without a nailer under each miter both boards' points land on air.")
-      + '</div>'
-      + '<div class="kv"><dt>'+t("Length each")+"</dt><dd>"+LD(jbp.len)
-        +(jbp.betweenRims?" — "+t("cut to fit between the rims"):" — "+t("the full joint line"))+"</dd>"
-        +"<dt>"+t("Ends cut at")+"</dt><dd>"+dec(jbp.angleDeg.toFixed(1))+"°</dd>"
-        +"<dt>"+t("How many")+"</dt><dd>"+t("{0} — two per step, one each side of the corner", jbp.total)+"</dd>"
-        +"<dt>"+t("Joint line across one ring")+"</dt><dd>"+LD(jbp.full)+"</dd></div>";
   }
   if(S.faceX0==="open"){
     const si = skirtInfo(model);
@@ -4533,19 +4596,22 @@ function runTests(){
         Math.abs(cs.notchDepth-stringersForLeg("front",m1).notchDepth)<1e-9 &&
         Math.abs(cs.throat-stringersForLeg("front",m1).throat)<1e-9,
         cs.notchDepth+" / "+cs.throat);
-      /* THE APEX MUST BE CARRIED. Spacing across the face gives an even count on
-         some widths and leaves the centreline — the only line that reaches the
-         top step — with nothing under it. */
-      assert("there is always a stringer on the centreline, carrying every level",
-        cs.list.some(x=>Math.abs(x.lateral)<1e-9 && x.kmin===1),
-        cs.list.map(x=>x.id+":lat"+x.lateral.toFixed(1)+":k"+x.kmin).join(" "));
-      assert("that holds at every face width, not just this one", (()=>{
+      /* ids must read 1..n with no gaps — "C2 but no C1" is just confusing */
+      assert("corner face stringer ids are contiguous from 1",
+        cs.list.every((x,i)=>x.id==="C"+(i+1)),
+        cs.list.map(x=>x.id).join(","));
+      assert("leg stringer ids are contiguous from 1 too", (()=>{
+        const f=stringersForLeg("front",m1).list, sd=stringersForLeg("side",m1).list;
+        return f.every((x,i)=>x.id==="F"+(i+1)) && sd.every((x,i)=>x.id==="S"+(i+1));
+      })(), stringersForLeg("front",m1).list.map(x=>x.id).join(","));
+      assert("face spans stay within the tread limit at every width", (()=>{
         const keepN=S.risers, keepT=S.treadStock;
         let ok=true, why="";
         for(const n of [2,3,4,5,6,7,9]) for(const ts of ["5/4x6 PT","2x6","2x10"]){
           S.risers=n; S.treadStock=ts;
           const cc=cornerStringers(computeModel());
-          if(cc && !cc.list.some(x=>Math.abs(x.lateral)<1e-9 && x.kmin===1)){ ok=false; why="N"+n+"/"+ts; }
+          if(cc && !cc.spansOK){ ok=false; why="N"+n+"/"+ts+" span "+cc.worstSpan.toFixed(1); }
+          if(cc && cc.list.some((x,i)=>x.id!=="C"+(i+1))){ ok=false; why="ids N"+n+"/"+ts; }
         }
         S.risers=keepN; S.treadStock=keepT; return ok||why;
       })()===true, "");
@@ -4562,10 +4628,11 @@ function runTests(){
       /* every piece the corner needs must reach the cut list */
       S.method="stringers"; S.riserStyle="closed";
       const roles=collectPieces(computeModel()).map(p=>p.role).join(" | ");
-      assert("corner treads, corner risers and corner stringers all reach the cut list",
+      assert("corner treads, corner risers, the two hips and the face stringers all reach the cut list",
         /corner bd|coin pl/.test(roles) && /Riser \d+ corner|Contremarche \d+ coin/.test(roles) &&
-        /C\d+ — corner stringer/.test(roles) && !/hip stringer|limon d'arête/.test(roles),
-        roles.replace(/^.*(C\d+ — corner stringer[^|]*)/,"$1").slice(0,160));
+        /H1, H2 — corner hips/.test(roles) && /C\d+ — corner face stringer/.test(roles) &&
+        !/— hip stringer|— limon d'arête/.test(roles),
+        roles.replace(/^.*(H1, H2[^|]*)/,"$1").slice(0,160));
       /* a custom clip of 0 is the constant-width chamfer, and it must trip code */
       S.taperMode="custom"; S.taperGrow=0;
       const m0=computeModel();
@@ -4579,31 +4646,59 @@ function runTests(){
       assert("the clip growth is capped below the unit run, so the legs survive",
         computeModel().taper.dc < computeModel().R && computeModel().taper.m > 0,
         computeModel().taper.dc);
-      /* THE CORNER MITERS NEED BACKING. Nothing runs along the joint lines, so
-         without a nailer under each one the mitered tread points land on air. */
-      S.taperMode="match"; S.taperGrow=0;
-      for(const meth of ["boxes","stringers"]){
-        S.method=meth;
-        const mj=computeModel(), jb=cornerJointBlocks(mj);
-        assert(meth+": two joint nailers per step, at the corner's own angle",
-          !!jb && jb.perLevel===2 && jb.total===2*(mj.N-1) && Math.abs(jb.angleDeg-mj.taper.sawDeg)<1e-9,
-          jb?jb.total+" of "+fmtIn(jb.len):"none");
-        assert(meth+": the nailer spans the joint line, hyp(R−dc, R)",
-          Math.abs(jb.full-hyp(mj.R-mj.taper.dc, mj.R))<1e-9, jb.full);
-        assert(meth+": box mode fits them between the rims, stringer mode does not",
-          meth==="boxes" ? jb.len<jb.full-0.5 : Math.abs(jb.len-jb.full)<1e-9,
-          jb.len+" vs "+jb.full);
-        assert(meth+": they reach the cut list, two per level",
-          collectPieces(mj).filter(p=>/Joint nailer|Fourrure de joint/.test(p.role))
-            .every(p=>p.qty===2) &&
-          collectPieces(mj).filter(p=>/Joint nailer|Fourrure de joint/.test(p.role)).length===mj.N-1,
-          collectPieces(mj).filter(p=>/Joint nailer/.test(p.role)).length+" rows");
+      /* THE JOINT LINES ARE ONE STRAIGHT LINE, so they are hips and they get a
+         real stringer. Every ring's joint line must be collinear with the next
+         and the first must start at the platform corner — that is what makes a
+         single member possible instead of per-step blocking. */
+      S.taperMode="match"; S.taperGrow=0; S.method="stringers";
+      {
+        const mj=computeModel(), dcj=mj.taper.dc;
+        const segs=mj.levels.map(l=>({
+          a:[mj.Wx+(l.k-1)*mj.R-mj.clip(l.k-1), mj.Wy+(l.k-1)*mj.R],
+          b:[mj.Wx+l.k*mj.R-mj.clip(l.k),       mj.Wy+l.k*mj.R]}));
+        assert("ring 1's joint line starts at the platform corner",
+          Math.abs(segs[0].a[0]-mj.Wx)<1e-9 && Math.abs(segs[0].a[1]-mj.Wy)<1e-9,
+          JSON.stringify(segs[0].a));
+        assert("every ring's joint line has the same direction, (R−dc, R)",
+          segs.every(sg=>Math.abs((sg.b[0]-sg.a[0])-(mj.R-dcj))<1e-9 && Math.abs((sg.b[1]-sg.a[1])-mj.R)<1e-9),
+          segs.map(sg=>(sg.b[0]-sg.a[0]).toFixed(3)+","+(sg.b[1]-sg.a[1]).toFixed(3)).join(" "));
+        assert("and they join end to end, so the two hips are each ONE board",
+          segs.every((sg,i)=>i===0 || (Math.abs(sg.a[0]-segs[i-1].b[0])<1e-9 && Math.abs(sg.a[1]-segs[i-1].b[1])<1e-9)));
+        const ch=cornerHipStringers(mj);
+        assert("the hip's run is hyp(R−dc, R), a little over R — not R√2",
+          Math.abs(ch.run-hyp(mj.R-dcj,mj.R))<1e-9 && ch.run>mj.R && ch.run<mj.R*Math.SQRT2,
+          ch.run);
+        assert("it carries every notch, because it runs the whole flight",
+          ch.c===mj.N-1 && ch.qty===2, ch.c+" × "+ch.qty);
+        /* The invariant, whatever the geometry: Rj < R√2, so the taper's hips
+           always need a narrower board than the square corner's single hip. */
+        assert("a taper hip always needs less board than the square corner's hip",
+          ch.minWidth < hipStringer(mj).minWidth-1e-9 && ch.run < mj.R*Math.SQRT2,
+          fmtIn(ch.minWidth)+" vs hip "+fmtIn(hipStringer(mj).minWidth));
+        /* and at 7/11 out of a 2x12 that difference is pass vs fail */
+        const kR=S.run, kH=S.totalRise, kN=S.risers, kS=S.stringerStock, kT=S.throatMin;
+        S.run=11; S.totalRise=28; S.risers=4; S.stringerStock="2x12"; S.throatMin=5;
+        const m711=computeModel();
+        assert("at 7/11 from a 2x12 the taper hip fits and the square hip does not",
+          cornerHipStringers(m711).minWidth<=sk("2x12").w+1e-9 &&
+          hipStringer(m711).minWidth>sk("2x12").w,
+          fmtIn(cornerHipStringers(m711).minWidth)+" vs "+fmtIn(hipStringer(m711).minWidth));
+        S.run=kR; S.totalRise=kH; S.risers=kN; S.stringerStock=kS; S.throatMin=kT;
+        assert("both hips reach the cut list as a pair",
+          collectPieces(mj).some(p=>/H1, H2/.test(p.role) && p.qty===2),
+          collectPieces(mj).filter(p=>/H1/.test(p.role)).map(p=>p.role).join("|"));
+        /* with the edges carried, the face spans are just the interior spacing */
+        const cs2=cornerStringers(mj);
+        assert("the face's edges are the hips, so its spans are within the tread limit",
+          cs2.spansOK && cs2.worstSpan<=cs2.spanLimit+1e-9,
+          fmtIn(cs2.worstSpan)+" vs "+fmtIn(cs2.spanLimit));
+        assert("no nailers are needed any more — a stringer does the job",
+          !collectPieces(mj).some(p=>/Joint nailer|Fourrure de joint/.test(p.role)));
       }
       S.cornerShape="square"; S.method="boxes";
-      assert("a square corner keeps its corner block and needs no joint nailers",
-        cornerJointBlocks(computeModel())===null &&
-        collectPieces(computeModel()).some(p=>/corner block|bloc de coin/.test(p.role)) &&
-        !collectPieces(computeModel()).some(p=>/Joint nailer|Fourrure de joint/.test(p.role)));
+      assert("a square corner keeps its single hip and its corner block",
+        cornerHipStringers(computeModel())===null &&
+        collectPieces(computeModel()).some(p=>/corner block|bloc de coin/.test(p.role)));
 
       /* ---- the framing-only plan ---- */
       for(const sh of ["square","taper"]) for(const meth of ["boxes","stringers"]){
@@ -4617,9 +4712,13 @@ function runTests(){
           !fp.includes("#e6bd8c"), "tread fill present");
         /* and it must be the same frame as the plan it copies */
         const pv=renderPlanSVG(mf,"miter");
+        /* Same SCALE, which is what matters — the right gutters legitimately
+           differ because the two drawings carry different captions. Height is
+           mT + (footY+5)*scale + mB with identical margins, so equal heights
+           means equal scale. */
         const vb=x=>(x.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)||[]).slice(1).map(Number);
-        assert("framing plan is the same size and scale as the plan view ("+sh+"/"+meth+")",
-          Math.abs(vb(fp)[1]-vb(pv)[1])<1 && Math.abs(vb(fp)[0]-vb(pv)[0])<80,
+        assert("framing plan is drawn at the same scale as the plan view ("+sh+"/"+meth+")",
+          Math.abs(vb(fp)[1]-vb(pv)[1])<1,
           vb(fp).join("×")+" vs "+vb(pv).join("×"));
       }
       S.cornerShape=savedSh; S.taperMode=savedTm; S.taperGrow=savedTg;
