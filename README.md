@@ -477,6 +477,42 @@ same two formulas at zero clip growth — which is the whole argument for the ta
 Notch depth for any of them is `r × run ÷ hyp(r, run)`, which is why a longer run bites deeper and is
 what decides whether the board comes out of a 2x12. The Framing tab shows this table with your numbers.
 
+### Plan cuts on an angled stringer — and a top view
+
+A leg stringer is square to its face, so **every** cut on it is square in plan. A corner or hip stringer
+sits at an angle, and exactly one thing about it stops being square — and only for one connection type.
+
+**The notches stay square.** A seat is a horizontal cut and a riser face is a vertical one, both straight
+across the board. It makes no difference that the tread landing on the seat arrives at 45°. Same for the
+bottom level cut: it bears flat on the deck, square across. That is the part people expect to be
+complicated, so the tool says it outright.
+
+What is not square is the **top end**, and only when it butts:
+
+| Connection | Top end | Why |
+|---|---|---|
+| **Flush half / full** | **90°, square** | the tab rides *over* the rim, like a rafter over a plate, and ends in free air inside the platform — nothing butts anything |
+| **Top tread down** | a **90° vee** | the end butts the platform's outside corner from outside, so the vee's two faces *are* the two platform faces |
+
+For the vee, the apex lands on the platform's corner point at mid-thickness, and the two saw settings
+come out as **φ and 90 − φ**, where φ is the board's plan angle:
+
+| Member | φ | Saw settings | Horns past the apex |
+|---|---|---|---|
+| Square corner hip `H` | 45° | 45° / 45° — symmetric | 3/4" / 3/4" |
+| Taper face stringers `C…` | 45° | 45° / 45° — symmetric | 3/4" / 3/4" |
+| Taper hips `H1 H2` | 22.5° | **22.5° / 67.5°** — lopsided | 5/16" / 1-13/16" |
+
+67.5° is past a mitre saw's range, so the tool says to cut the 22.5° face on the saw and the other by
+hand, or notch the end — it only has to clear the rim.
+
+Each corner and hip stringer sheet carries a **plan-cut schedule** (what, where, what angle, why) and a
+**top view**: the board seen from above so an angled end shows as a line across the thickness, full
+length with the layout marks, plus the top end enlarged against the platform corner it has to fit.
+
+The cut list's angle column now reflects the connection type too — it used to claim a "45° plan bevel"
+on the hip regardless, which was wrong for two of the three connections.
+
 ### Long point vs short point — the joint angle is in the length
 
 Every length the tool reports is the **long point**, the longest corner of the board, and that is what

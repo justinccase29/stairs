@@ -604,6 +604,50 @@ const FR = {
   "Ring k's joint line, where the leg tread boards meet the corner ones, runs from (Wx+(k−1)R−c, Wy+(k−1)R) to (Wx+kR−c′, Wy+kR). Its direction is (R−dc, R) for EVERY k, and ring 1's starts at the platform corner itself — so all of them are segments of ONE straight line from that corner down to the deck. There are two, mirrored. That makes them hips, and they get a real notched stringer: a member on the hip carries the mitered ends of the leg boards and of the corner boards at once, which is exactly what those miters need.":
     "La ligne de joint de l'anneau k, là où les planches des ailes rejoignent celles du coin, va de (Wx+(k−1)R−c, Wy+(k−1)R) à (Wx+kR−c′, Wy+kR). Sa direction est (R−dc, R) pour CHAQUE k, et celle de l'anneau 1 part du coin même de la plateforme — toutes sont donc des segments d'UNE seule droite allant de ce coin jusqu'à la terrasse. Il y en a deux, en miroir. Ce sont donc des arêtes, et elles méritent un vrai limon entaillé : une pièce sur l'arête porte à la fois les bouts à onglet des planches des ailes et ceux des planches du coin, exactement ce qu'il faut à ces onglets.",
   "Plan angle":"Angle en plan",
+  /* --- plan cuts / top view --- */
+  "Plan cuts — what is NOT square, and where":"Coupes en plan — ce qui n'est PAS d'équerre, et où",
+  "Where":"Où", "Why":"Pourquoi",
+  "Top end, side-rim face":"Bout supérieur, face contre la bordure latérale",
+  "Top end, front-rim face":"Bout supérieur, face contre la bordure avant",
+  "at the very end, {0} from the foot":"tout au bout, à {0} du pied",
+  "meets the first at the apex, {0} back":"rejoint la première au sommet, {0} en retrait",
+  "lies flat on the platform's SIDE rim; this edge runs {0} past the apex":
+    "repose à plat sur la bordure LATÉRALE de la plateforme ; ce chant dépasse le sommet de {0}",
+  "lies flat on the platform's FRONT rim; this edge runs {0} past the apex":
+    "repose à plat sur la bordure AVANT de la plateforme ; ce chant dépasse le sommet de {0}",
+  "Top end (back of the tab)":"Bout supérieur (arrière du talon)",
+  "free end, inside the platform footprint — nothing to fit, so square is right":
+    "bout libre, à l'intérieur de l'emprise de la plateforme — rien à ajuster, l'équerre est donc correcte",
+  "Every notch — seats and riser faces":"Chaque entaille — assises et faces de contremarche",
+  "at each layout mark":"à chaque repère",
+  "a seat is horizontal and a riser face is vertical, both straight across. That the tread lands on it at {0}° changes nothing.":
+    "une assise est horizontale et une face de contremarche est verticale, toutes deux droites en travers. Que la marche y arrive à {0}° ne change rien.",
+  "Bottom level cut":"Coupe de niveau du bas",
+  "at the foot":"au pied", "bears flat on the deck, square across":"repose à plat sur la terrasse, d'équerre en travers",
+  "{0}° is past the range of a mitre saw (about 60°). Cut the {1}° face on the saw and the other by hand, or notch the end instead — it only has to clear the rim, not look pretty.":
+    "{0}° dépasse la plage d'une scie à onglets (environ 60°). Coupez la face à {1}° à la scie et l'autre à la main, ou entaillez le bout — il doit seulement dégager la bordure, pas être joli.",
+  "{0} — top view, the board seen from above ({1} thick)":"{0} — vue de dessus, la planche vue d'en haut ({1} d'épaisseur)",
+  "The top end butts the platform's outside corner, so it is a 90° vee — and the two saw settings come out {0}° and {1}°. Everything else on this board is square across.":
+    "Le bout supérieur bute contre le coin extérieur de la plateforme : c'est donc un vé à 90°, et les deux réglages de scie donnent {0}° et {1}°. Tout le reste de cette planche est d'équerre en travers.",
+  "A flush tab rides OVER the platform rim, like a rafter over a plate, so nothing butts anything — every cut on this board is square across, exactly like a leg stringer.":
+    "Un talon affleurant passe PAR-DESSUS la bordure de la plateforme, comme un chevron sur une sablière : rien ne bute contre rien — chaque coupe de cette planche est d'équerre en travers, exactement comme un limon d'aile.",
+  "every notch is square across the board — the {0}° is only in plan":
+    "chaque entaille est d'équerre en travers de la planche — les {0}° ne sont qu'en plan",
+  "foot":"pied",
+  "the vee, {0} deep":"le vé, {0} de profondeur",
+  "top end enlarged — the apex lands on the platform's corner point, at mid-thickness":
+    "bout supérieur agrandi — le sommet tombe sur la pointe du coin de la plateforme, à mi-épaisseur",
+  "top end enlarged — square across; it simply lies on top of the rim":
+    "bout supérieur agrandi — d'équerre en travers ; il repose simplement sur la bordure",
+  "platform frame — its corner is the vee":"ossature de plateforme — son coin EST le vé",
+  "{0}° — this face lies on the side rim":"{0}° — cette face repose sur la bordure latérale",
+  "{0}° — this face lies on the front rim":"{0}° — cette face repose sur la bordure avant",
+  "apex":"sommet", "90° — square across":"90° — d'équerre en travers",
+  "{0}° is past a mitre saw — cut that face by hand or notch it":
+    "{0}° dépasse la scie à onglets — coupez cette face à la main ou entaillez-la",
+  "layout marks — square in plan":"repères — d'équerre en plan",
+  "{0}° vee at the top end":"vé à {0}° au bout supérieur",
+  "corner face stringer":"limon du pan du coin",
   /* --- runs at the corner --- */
   "Runs at the corner — where each number comes from":"Girons au coin — d'où vient chaque nombre",
   "Three different runs live at a corner, measured along three different directions, and all of them come out of the same ring growth: the ring advances R square to the leg face, and R − dc along it once the clip is eating in. Set the clip growth to 0 and every one of them collapses to R×√2 — the square corner's single hip. That is exactly what a taper is for.":
@@ -2068,19 +2112,25 @@ function collectPieces(model){
       }
     }
     const cs = cornerStringers(model), ch = cornerHipStringers(model);
+    /* A flush tab rides OVER the rim, so an angled member needs no plan bevel at
+       all; only a top-tread-down butt does. Saying "45° plan bevel" regardless
+       was wrong for two of the three connection types. */
+    const planAng = d => connectionInfo(model).bears
+      ? t("layout marks — square in plan")
+      : t("{0}° vee at the top end", dec(d.toFixed(1)))+" / "+dec((90-d).toFixed(1))+"°";
     if(ch){
       /* two hips instead of one, on the joint lines */
       pieces.push({role:t("H1, H2 — corner hips, {0}", notchCount(ch.c)), stock:S.stringerStock,
-        len:ch.reqLen, qty:2, angle:t("{0}° plan bevel", dec(ch.angleDeg.toFixed(1))),
+        len:ch.reqLen, qty:2, angle:planAng(ch.angleDeg),
         note:t("on the joint lines, from the platform corner down")+(ch.boardLen?"":t(" — needs splice"))});
       for(const s of cs.list)
         pieces.push({role:t("{0} — corner face stringer, {1}", s.id, notchCount(s.c)), stock:S.stringerStock,
-          len:s.reqLen, qty:1, angle:t("45° plan bevel"),
+          len:s.reqLen, qty:1, angle:planAng(45),
           note:t("{0} off the centreline", fmtIn(Math.abs(s.lateral)))+(s.boardLen?"":t(" — needs splice"))});
     } else {
       const hip = hipStringer(model);
       pieces.push({role:t("H — hip stringer, {0}", notchCount(hip.c)), stock:S.stringerStock, len:hip.reqLen, qty:1,
-        angle:t("45° plan bevel"), note: hip.boardLen?"":t("needs splice")});
+        angle:planAng(45), note: hip.boardLen?"":t("needs splice")});
     }
   } else {
     for(const lvl of model.levels){
@@ -3217,6 +3267,153 @@ function cornerRunsHTML(model){
   return h+"</tbody></table>";
 }
 
+/* ---------- 18h. plan cuts on a stringer that sits at an angle -------------
+   A leg stringer is square to its face, so every cut on it is square in plan:
+   the seats, the riser faces, the bottom, all of it. A corner or hip stringer
+   sits at an angle, and exactly ONE thing about it stops being square — and
+   only for some connection types.
+
+   THE NOTCHES ARE STILL SQUARE. A seat is a horizontal cut and a riser face is
+   a vertical one, both straight across the board. It makes no difference that
+   the tread landing on the seat arrives at 45 degrees. Same for the bottom
+   level cut: it bears flat on the deck, square across. That is worth saying out
+   loud, because it is the part people expect to be complicated.
+
+   What is NOT square is where the board meets the PLATFORM, and even that
+   depends on how it gets there:
+
+     top tread down : the board butts the platform's outside corner from
+                      outside. Its end has to be cut to that corner, which is a
+                      90 degree vee — the two faces of the vee ARE the two
+                      platform faces. Its apex sits at the corner point, at
+                      mid-thickness, and the two saw settings come out as
+                      phi and 90 - phi where phi is the board's plan angle.
+     flush half/full: the board rides OVER the rim, like a rafter over a plate,
+                      and its tab ends in free air inside the platform. Nothing
+                      butts anything, so nothing needs a plan bevel at all. */
+function stringerPlanCuts(model, planDeg, lay, topRun){
+  const th=sk(S.stringerStock).t, phi=planDeg*Math.PI/180;
+  const bevels = !(topRun>0);          // a flush tab rides over — no bevel
+  return {
+    planDeg, th, bevels,
+    sawFront: planDeg,                 // the face lying along the platform's front
+    sawSide: 90-planDeg,               // the face lying along its side
+    hornFront: th/2*Math.tan(phi),     // how far that edge reaches past the apex
+    hornSide:  Math.tan(phi)>1e-9 ? th/2/Math.tan(phi) : 0,
+    sawReach: Math.max(planDeg, 90-planDeg) <= 60,
+    /* where it is: the board's very top end when it butts, measured from the
+       bottom end along the board */
+    at: lay.req, atMark: lay.startOff + (lay.req-lay.startOff)
+  };
+}
+/* The board seen FROM ABOVE: a strip length × thickness, so an angled end cut
+   shows as a line across the thickness. Full length on top, then the end
+   enlarged with the platform corner it has to fit. */
+function stringerTopViewSVG(model, g){
+  const th=sk(S.stringerStock).t;
+  const lay=stringerBoardLayout(g.c,g.r,g.R,g.drop,g.bw,g.topRun,g.topLift);
+  const pc=stringerPlanCuts(model, g.planDeg, lay, g.topRun);
+  const BL=lay.req;                                   // board length; L() is the formatter
+  /* The end profile. The apex sits ON the platform's corner point at
+     mid-thickness; each edge reaches past it by its own horn, so the profile is
+        (0,0) → (A+hornSide, 0) → (A, th/2) → (A+hornFront, th) → (0, th)
+     with A = BL − the longer horn. At 45° both horns are th/2 and it is the
+     symmetric vee everyone expects; at 22.5° it is lopsided. */
+  const A = BL - Math.max(pc.hornSide, pc.hornFront);
+  const endProfile = pc.bevels
+    ? [[0,0],[A+pc.hornSide,0],[A,th/2],[A+pc.hornFront,th],[0,th]]
+    : [[0,0],[BL,0],[BL,th],[0,th]];
+  /* never let a missing label print "undefined" into a drawing */
+  const title=t("{0} — top view, the board seen from above ({1} thick)", g.name||t("stringer"), fmtIn(th));
+  const foot=pc.bevels
+    ? t("The top end butts the platform's outside corner, so it is a 90° vee — and the two saw settings come out {0}° and {1}°. Everything else on this board is square across.",
+        dec(pc.sawSide.toFixed(1)), dec(pc.sawFront.toFixed(1)))
+    : t("A flush tab rides OVER the platform rim, like a rafter over a plate, so nothing butts anything — every cut on this board is square across, exactly like a leg stringer.");
+  const mL=58, mR=54, mT=36, gap=52, mB=66;
+  const sc=Math.min(6.5, 620/Math.max(BL,1));
+  const stripH=Math.max(th*sc, 10);
+  const ext=Math.max(pc.hornSide,pc.hornFront)+th*1.6;   // how much of the end to enlarge
+  const dsc=Math.min(30, 260/Math.max(ext+th*1.4,1));
+  const detTop=mT+stripH+gap, detH=th*dsc*2.6;
+  const W=Math.max(mL+BL*sc+mR, mL+estTextW(title,10)+24, mL+estTextW(foot,8.5)+24, 460);
+  const H=detTop+detH+mB;
+  const X=x=>mL+x*sc, Y=y=>mT+y*sc;
+  let s=svgOpen(W,H);
+  s+=svgText(mL,16,title,'font-size="10" fill="#333"');
+  /* ---- the whole board, from above ---- */
+  s+=svgPoly(endProfile.map(p=>[X(p[0]),Y(p[1])]),MAT.string);
+  for(let i=0;i<=g.c;i++){
+    const xm=lay.startOff+i*lay.Ls;
+    if(xm>BL+0.01) continue;
+    s+=svgLine(X(xm),Y(0),X(xm),Y(0)-7,'stroke="#0f6fbf" stroke-width="1.1"');
+  }
+  s+=svgText(X(0),Y(0)-11,t("every notch is square across the board — the {0}° is only in plan", dec(g.planDeg.toFixed(1))),'font-size="8.5" fill="#0f6fbf"');
+  s+=svgText(X(0)-4,Y(th/2)+3,t("foot"),'font-size="8.5" fill="#78838f" text-anchor="end"');
+  s+=svgText(X(BL)+6,Y(th/2)+3,t("platform"),'font-size="8.5" fill="#78838f"');
+  s+=dimLineH(X(0),X(BL),Y(th)+20,t("cut length {0}", L(BL)));
+  if(pc.bevels) s+=dimLineH(X(A),X(BL),Y(th)+38,t("the vee, {0} deep", L(BL-A)));
+  /* ---- the top end, enlarged ---- */
+  const DX=x=>mL+30+x*dsc, DY=y=>detTop+th*dsc*0.8+y*dsc;
+  s+=svgText(mL,detTop-8,pc.bevels
+      ? t("top end enlarged — the apex lands on the platform's corner point, at mid-thickness")
+      : t("top end enlarged — square across; it simply lies on top of the rim"),'font-size="9" fill="#667"');
+  if(pc.bevels){
+    // the platform's 90° corner, which IS the shape of the vee
+    s+=svgPoly([[DX(ext),DY(th/2)],[DX(ext+th*1.3),DY(th/2)],[DX(ext+th*1.3),DY(th*1.9)],
+                [DX(ext-pc.hornFront+pc.hornFront),DY(th*1.9)]].map(p=>p),MAT.plat);
+    s+=svgText(DX(ext+4),DY(th*1.9)+13,t("platform frame — its corner is the vee"),'font-size="8.5" fill="#33556e"');
+    s+=svgPoly([[DX(0),DY(0)],[DX(ext-Math.max(pc.hornSide,pc.hornFront)+pc.hornSide),DY(0)],
+                [DX(ext-Math.max(pc.hornSide,pc.hornFront)),DY(th/2)],
+                [DX(ext-Math.max(pc.hornSide,pc.hornFront)+pc.hornFront),DY(th)],
+                [DX(0),DY(th)]],MAT.string);
+    const ax=ext-Math.max(pc.hornSide,pc.hornFront);
+    s+=svgLine(DX(ax+pc.hornSide),DY(0),DX(ax),DY(th/2),'stroke="#a55" stroke-width="2.2"');
+    s+=svgLine(DX(ax),DY(th/2),DX(ax+pc.hornFront),DY(th),'stroke="#a55" stroke-width="2.2"');
+    s+=svgLead(DX(ax+pc.hornSide/2),DY(th/4),DX(ext+th*1.5),DY(-th*0.5),
+      t("{0}° — this face lies on the side rim", dec(pc.sawSide.toFixed(1))));
+    s+=svgLead(DX(ax+pc.hornFront/2),DY(th*0.75),DX(ext+th*1.5),DY(th*1.3),
+      t("{0}° — this face lies on the front rim", dec(pc.sawFront.toFixed(1))));
+    s+=svgText(DX(ax)-5,DY(th/2)+3,t("apex"),'font-size="8.5" fill="#a55" text-anchor="end"');
+    if(!pc.sawReach) s+=svgText(DX(0),DY(th)+22,
+      t("{0}° is past a mitre saw — cut that face by hand or notch it", dec(Math.max(pc.sawSide,pc.sawFront).toFixed(1))),
+      'font-size="8.5" fill="#b45309"');
+  } else {
+    s+=svgPoly([[DX(0),DY(0)],[DX(ext),DY(0)],[DX(ext),DY(th)],[DX(0),DY(th)]],MAT.string);
+    s+=svgLine(DX(ext),DY(0),DX(ext),DY(th),'stroke="#a55" stroke-width="2.2"');
+    s+=svgLead(DX(ext),DY(th/2),DX(ext)+22,DY(-th*0.4),t("90° — square across"));
+  }
+  s+=svgText(mL,H-24,foot,'font-size="8.5" fill="#78838f"');
+  s+=scaleBarSVG(mL,H-8,sc);
+  s+="</svg>";
+  return declutterSVG(s);
+}
+/* The plan cuts as a table: where, at what angle, against what. */
+function planCutsHTML(model, g){
+  const lay=stringerBoardLayout(g.c,g.r,g.R,g.drop,g.bw,g.topRun,g.topLift);
+  const pc=stringerPlanCuts(model, g.planDeg, lay, g.topRun);
+  const rows=[];
+  if(pc.bevels){
+    rows.push([t("Top end, side-rim face"), t("at the very end, {0} from the foot", L(lay.req)),
+      dec(pc.sawSide.toFixed(1))+"°", t("lies flat on the platform's SIDE rim; this edge runs {0} past the apex", fmtIn(pc.hornSide))]);
+    rows.push([t("Top end, front-rim face"), t("meets the first at the apex, {0} back", L(Math.max(pc.hornSide,pc.hornFront))),
+      dec(pc.sawFront.toFixed(1))+"°", t("lies flat on the platform's FRONT rim; this edge runs {0} past the apex", fmtIn(pc.hornFront))]);
+  } else {
+    rows.push([t("Top end (back of the tab)"), t("at the very end, {0} from the foot", L(lay.req)),
+      "90°", t("free end, inside the platform footprint — nothing to fit, so square is right")]);
+  }
+  rows.push([t("Every notch — seats and riser faces"), t("at each layout mark"), "90°",
+    t("a seat is horizontal and a riser face is vertical, both straight across. That the tread lands on it at {0}° changes nothing.", dec(g.planDeg.toFixed(1)))]);
+  rows.push([t("Bottom level cut"), t("at the foot"), "90°", t("bears flat on the deck, square across")]);
+  let h='<h5>'+t("Plan cuts — what is NOT square, and where")+'</h5>'
+    +'<table class="cuts"><thead><tr><th>'+t("Cut")+'</th><th>'+t("Where")+'</th><th>'+t("Plan angle")+'</th><th>'+t("Why")+'</th></tr></thead><tbody>';
+  rows.forEach(rw=>{ h+="<tr><td>"+rw[0]+"</td><td>"+rw[1]+"</td><td><b>"+rw[2]+"</b></td><td>"+rw[3]+"</td></tr>"; });
+  h+="</tbody></table>";
+  if(pc.bevels && !pc.sawReach)
+    h+='<div class="msg w">'+t("{0}° is past the range of a mitre saw (about 60°). Cut the {1}° face on the saw and the other by hand, or notch the end instead — it only has to clear the rim, not look pretty.",
+        dec(Math.max(pc.sawSide,pc.sawFront).toFixed(1)), dec(Math.min(pc.sawSide,pc.sawFront).toFixed(1)))+'</div>';
+  return h+'<div class="svgwrap">'+stringerTopViewSVG(model,g)+"</div>";
+}
+
 /* Trade names, and why a corner stair has three kinds: the stringers that reach
    the platform run the whole flight (COMMON); the miter cuts the ones nearer
    the corner short, so they carry fewer notches (JACK); the diagonal at the
@@ -3485,6 +3682,9 @@ function renderStringerSheets(model){
           topRun:chS.topRun, topLift:chS.topLift, reqLen:chS.reqLen, boardLen:chS.boardLen,
           notchDepth:chS.notchDepth, throat:chS.throat, minWidth:chS.minWidth, qty:2,
           kmin:1, name:t("H1, H2 · corner hips"), hip:true})
+      +planCutsHTML(model, {c:chS.c, r:model.r, R:chS.run, drop:chS.drop, bw,
+          topRun:chS.topRun, topLift:chS.topLift, planDeg:model.taper.sawDeg,
+          name:t("H1, H2 · corner hips")})
       +"</div>";
   }
   if(cs && cs.list.length){
@@ -3505,7 +3705,9 @@ function renderStringerSheets(model){
         +cutScheduleHTML(model, {c:g.c, r:model.r, R:cs.run, Ls:cs.Ls, drop:cs.drop, bw,
             topRun:g.topRun, topLift:g.topLift, reqLen:g.reqLen, boardLen:g.boardLen,
             notchDepth:cs.notchDepth, throat:cs.throat, minWidth:cs.minWidth, qty,
-            kmin:g.kmin, name:ids+" · "+t("corner stringer, 45° plan bevels")})
+            kmin:g.kmin, name:ids+" · "+t("corner face stringer")})
+        +planCutsHTML(model, {c:g.c, r:model.r, R:cs.run, drop:cs.drop, bw,
+            topRun:g.topRun, topLift:g.topLift, planDeg:45, name:ids})
         +"</div>";
     }
     return h;
@@ -3521,6 +3723,8 @@ function renderStringerSheets(model){
         topRun:hip.topRun, topLift:hip.topLift, reqLen:hip.reqLen, boardLen:hip.boardLen,
         notchDepth:hip.notchDepth, throat:hip.throat, minWidth:hip.minWidth, qty:1,
         kmin:1, name:t("H · hip stringer"), hip:true})
+    +planCutsHTML(model, {c:hip.c, r:model.r, R:hip.run, drop:hip.drop, bw,
+        topRun:hip.topRun, topLift:hip.topLift, planDeg:45, name:t("H · hip stringer")})
     +"</div>";
   return h;
 }
@@ -4726,6 +4930,70 @@ function runTests(){
         assert("on a 45° miter the two points differ by the full board width",
           Math.abs((lq.long-lq.short)-w)<1e-9 && mq.taper.m===1, lq.long-lq.short);
         S.cornerShape=keepSh;
+      }
+
+      /* ---- plan cuts: what is NOT square on an angled stringer ---- */
+      {
+        const th=sk(S.stringerStock).t, keepC=S.stairConnection;
+        const mkLay=(gg)=>stringerBoardLayout(gg.c,gg.r,gg.R,gg.drop,gg.bw,gg.topRun,gg.topLift);
+        /* TOP TREAD DOWN: the end butts the platform's 90° corner, so it is a vee
+           whose two saw settings are phi and 90-phi. */
+        S.stairConnection="topTreadDown";
+        const mt=computeModel(), cht=cornerHipStringers(mt), cst=cornerStringers(mt);
+        const gh={c:cht.c,r:mt.r,R:cht.run,drop:cht.drop,bw:sk(S.stringerStock).w,
+                  topRun:cht.topRun,topLift:cht.topLift,planDeg:mt.taper.sawDeg};
+        const pcH=stringerPlanCuts(mt, gh.planDeg, mkLay(gh), gh.topRun);
+        assert("top tread down: the angled end needs a bevel, and the two settings are φ and 90−φ",
+          pcH.bevels && Math.abs(pcH.sawFront-mt.taper.sawDeg)<1e-9 &&
+          Math.abs(pcH.sawSide-(90-mt.taper.sawDeg))<1e-9,
+          pcH.sawFront.toFixed(2)+"° / "+pcH.sawSide.toFixed(2)+"°");
+        assert("the horns are (t/2)·tanφ and (t/2)/tanφ, so they are equal only at 45°",
+          Math.abs(pcH.hornFront-th/2*Math.tan(gh.planDeg*Math.PI/180))<1e-9 &&
+          Math.abs(pcH.hornSide-th/2/Math.tan(gh.planDeg*Math.PI/180))<1e-9 &&
+          Math.abs(pcH.hornFront-pcH.hornSide)>0.5,
+          fmtIn(pcH.hornFront)+" / "+fmtIn(pcH.hornSide));
+        /* the 45° members must come out symmetric — the classic vee */
+        const g45={c:cst.list[0].c,r:mt.r,R:cst.run,drop:cst.drop,bw:sk(S.stringerStock).w,
+                   topRun:cst.list[0].topRun,topLift:cst.list[0].topLift,planDeg:45};
+        const pc45=stringerPlanCuts(mt,45,mkLay(g45),g45.topRun);
+        assert("a 45° member gives the symmetric 45/45 vee with equal horns",
+          Math.abs(pc45.sawFront-45)<1e-9 && Math.abs(pc45.sawSide-45)<1e-9 &&
+          Math.abs(pc45.hornFront-pc45.hornSide)<1e-9 && Math.abs(pc45.hornFront-th/2)<1e-9,
+          fmtIn(pc45.hornFront));
+        assert("22.5° is reachable on a mitre saw but its 67.5° partner is not",
+          !pcH.sawReach && pc45.sawReach, pcH.sawReach+"/"+pc45.sawReach);
+        /* FLUSH: the board rides over the rim, so nothing is beveled at all */
+        for(const cn of ["flushHalf","flushFull"]){
+          S.stairConnection=cn;
+          const mf=computeModel(), cf=cornerHipStringers(mf);
+          const gf={c:cf.c,r:mf.r,R:cf.run,drop:cf.drop,bw:sk(S.stringerStock).w,
+                    topRun:cf.topRun,topLift:cf.topLift,planDeg:mf.taper.sawDeg,name:"H1, H2"};
+          assert(cn+": a tab rides over the rim, so no plan bevel anywhere",
+            !stringerPlanCuts(mf,gf.planDeg,mkLay(gf),gf.topRun).bevels);
+          assert(cn+": and the cut list stops claiming a plan bevel",
+            collectPieces(mf).filter(p=>/H1, H2/.test(p.role))
+              .every(p=>/square in plan|d'équerre en plan/.test(p.angle)),
+            collectPieces(mf).filter(p=>/H1, H2/.test(p.role)).map(p=>p.angle).join("|"));
+          const html=planCutsHTML(mf,gf);
+          assert(cn+": the top view renders and says every cut is square",
+            /<svg/.test(html) && !/NaN|undefined/.test(html) && /90°/.test(html));
+        }
+        S.stairConnection="topTreadDown";
+        const mv=computeModel(), cv=cornerHipStringers(mv);
+        const gv={c:cv.c,r:mv.r,R:cv.run,drop:cv.drop,bw:sk(S.stringerStock).w,
+                  topRun:cv.topRun,topLift:cv.topLift,planDeg:mv.taper.sawDeg,name:"H1, H2"};
+        const vhtml=planCutsHTML(mv,gv);
+        assert("top tread down: the top view renders the vee and both angles",
+          /<svg/.test(vhtml) && !/NaN|undefined/.test(vhtml) &&
+          vhtml.includes(dec(mv.taper.sawDeg.toFixed(1))+"°") &&
+          vhtml.includes(dec((90-mv.taper.sawDeg).toFixed(1))+"°"),
+          vhtml.slice(0,120));
+        assert("the schedule always states the notches and the bottom are square",
+          /90°/.test(vhtml) && /seats and riser faces|assises et faces/.test(vhtml));
+        /* a caller that forgets the label must never print "undefined" */
+        assert("a missing label falls back instead of printing undefined",
+          !/undefined/.test(stringerTopViewSVG(mv, Object.assign({}, gv, {name:undefined}))));
+        S.stairConnection=keepC;
       }
 
       /* ---- every run at the corner, from the same ring growth ---- */
